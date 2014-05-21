@@ -91,6 +91,7 @@ def topdownsegment(sequence, create_segment, compute_error, max_error, seq_range
     bestidx = None
 
     for idx in range(seq_range[0]+1,seq_range[1]):
+        print idx
         segment_left = create_segment(sequence,(seq_range[0],idx))
         error_left = compute_error(sequence,segment_left)
         segment_right = create_segment(sequence,(idx,seq_range[1]))

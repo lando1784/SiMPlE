@@ -6,6 +6,7 @@ import pla
 import fit
 
 import platest
+import pla as segment
 
 from matplotlib.pylab import gca, figure, plot, subplot, title, xlabel, ylabel, xlim,show, savefig
 from matplotlib.lines import Line2D
@@ -149,6 +150,7 @@ def draw_plot(data,plot_title):
     xlim((0,len(data)-1))
 
 def draw_segments(segments):
+    print 'drawing'
     ax = gca()
     for segment in segments:
         line = Line2D((segment[0],segment[2]),(segment[1],segment[3]))
