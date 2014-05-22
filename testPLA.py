@@ -1,8 +1,14 @@
+import matplotlib
+
+matplotlib.interactive( True )
+matplotlib.use('WXAgg')
+
 import pla
 import experiment
 import curve
 import segment
 from platest_conPolyfit import *
+import myPla
 
 import os #di sistema
 import sys # di sistema
@@ -13,6 +19,9 @@ import platform
 from os import listdir
 from os import walk
 from os.path import isfile, join
+import matplotlib.pyplot as plt
+
+
 
 
 
@@ -31,10 +40,28 @@ class MainFrame(wx.Frame):
         
         self.curve = curve.curve(self.curvePath)
         self.curve.look()
+        self.segments = []
+        print np.shape(self.curve.segments[0].z)
+        print np.shape(self.curve.segments[1].z)
+        print np.shape(self.curve.segments[2].z)
         
         for s in self.curve.segments:
-            process(s.f)
-      
+            data = np.array([s.z,s.f])
+            seg,p = myPla.mySlidingWindow(data,500)
+            self.segments.append(seg)
+        
+        print self.segments
+        print np.shape(self.segments[0])
+        print np.shape(self.segments[1])
+        print np.shape(self.segments[2])
+        fig1 = plt.figure()
+        ax1 = fig1.add_subplot(111)
+        
+        ax1.plot(self.curve.segments[2].z[0:3700:100],self.curve.segments[2].f[0:3700:100],self.curve.segments[2].z[0:3700:100],self.segments[2][0:3700:100])
+        
+        fig1.show()
+            
+        
             
     def createMenu(self):
 
