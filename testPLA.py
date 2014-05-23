@@ -22,10 +22,6 @@ from os.path import isfile, join
 import matplotlib.pyplot as plt
 
 
-
-
-
-
 class MainFrame(wx.Frame):
 
     def onOpen(self, event=None, altDir = None):
@@ -41,27 +37,27 @@ class MainFrame(wx.Frame):
         self.curve = curve.curve(self.curvePath)
         self.curve.look()
         self.segments = []
-        print np.shape(self.curve.segments[0].z)
-        print np.shape(self.curve.segments[1].z)
-        print np.shape(self.curve.segments[2].z)
+        self.p0 = []
+        self.p1 = []
+        self.dSeg = []
         
         for s in self.curve.segments:
             data = np.array([s.z,s.f])
-            seg,p = myPla.mySlidingWindow(data,500)
+            seg,p,dSeg = myPla.mySlidingWindow(data,7500)
             self.segments.append(seg)
-        
-        print self.segments
-        print np.shape(self.segments[0])
-        print np.shape(self.segments[1])
-        print np.shape(self.segments[2])
+            self.p0.append(p[:,0]*1000)
+            self.p1.append(p[:,1])
+            self.dSeg.append(dSeg)
+
         fig1 = plt.figure()
         ax1 = fig1.add_subplot(111)
-        
-        ax1.plot(self.curve.segments[2].z[0:3700:100],self.curve.segments[2].f[0:3700:100],self.curve.segments[2].z[0:3700:100],self.segments[2][0:3700:100])
-        
+        ax1.plot(self.curve.segments[-1].z[0::2],self.curve.segments[-1].f[0::2],self.segments[-1][0][0::2],self.segments[-1][1][0::2],'r.')
         fig1.show()
-            
         
+        fig2 = plt.figure()
+        ax2 = fig2.add_subplot(111)
+        ax2.plot(self.segments[-1][0][0::2],self.dSeg[-1][0::2])
+        fig2.show()
             
     def createMenu(self):
 
