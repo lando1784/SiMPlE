@@ -49,4 +49,4 @@ def mySlidingWindow(data,maxErr = 0.3):
     
     allP = array(allP)
     print shape(allP)
-    return (segZ,segments),allP,dSeg
+    return (segZ,segments),allP[:,0],dSeg

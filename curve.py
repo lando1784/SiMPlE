@@ -105,7 +105,7 @@ class curve(mvobject.mvobject):
 
         fragments = self[-1].getPLA()
         if(len(fragments)>=2):
-            pylab.plot((fragments[0][0],fragments[0][2]),(fragments[0][1],fragments[0][3]),'k--',label='Lin')
+            pylab.plot((fragments[0][0],fragments[0][2]),(fragments[0][1],fragments[0][3]),'kx',label='Lin')
             pylab.plot((fragments[-1][0],fragments[-1][2]),(fragments[-1][1],fragments[-1][3]),'k--',label='Flat')
         else:
             print "No PLA available"

@@ -9,6 +9,7 @@ import curve
 import segment
 from platest_conPolyfit import *
 import myPla
+import myPeakDet as mpd
 
 import os #di sistema
 import sys # di sistema
@@ -35,7 +36,11 @@ class MainFrame(wx.Frame):
         self.curvePath = openFileDialog.GetPath()
         
         self.curve = curve.curve(self.curvePath)
-        self.curve.look()
+        #self.curve.look()
+        plaS = self.curve[-1].getPLA()
+        self.CP = [plaS[-1][0],plaS[-1][1]]
+        startS = np.where(self.curve[-1].z == self.CP[0])
+        startS = 0#startS[0][0]
         self.segments = []
         self.p0 = []
         self.p1 = []
@@ -43,15 +48,25 @@ class MainFrame(wx.Frame):
         
         for s in self.curve.segments:
             data = np.array([s.z,s.f])
-            seg,p,dSeg = myPla.mySlidingWindow(data,7500)
+            if np.shape(data)[1] < startS:
+                pStart = 0
+            else:
+                pStart = startS
+                #pStart = 0
+            seg,p,dSeg = myPla.mySlidingWindow(data[:,pStart:],5000)
             self.segments.append(seg)
-            self.p0.append(p[:,0]*1000)
-            self.p1.append(p[:,1])
+            self.p0.append(p)
             self.dSeg.append(dSeg)
 
+        self.peaks,self.peakInd = mpd.findPeak_Triangle(self.p0[-1],self.dSeg[-1])
+        self.peaks2, self.peakInd2 = mpd.findPeak_Greater(self.p0[-1],self.dSeg[-1])
+        print self.peakInd
         fig1 = plt.figure()
         ax1 = fig1.add_subplot(111)
-        ax1.plot(self.curve.segments[-1].z[0::2],self.curve.segments[-1].f[0::2],self.segments[-1][0][0::2],self.segments[-1][1][0::2],'r.')
+        if len(self.peakInd)>0:
+            ax1.plot(self.curve.segments[-1].z[0::2],self.curve.segments[-1].f[0::2],self.segments[-1][0][0::2],self.segments[-1][1][0::2],'r.',(plaS[0][0],plaS[0][2]),(plaS[0][1],plaS[0][3]),'k--',self.curve.segments[-1].z[self.peakInd],self.curve.segments[-1].f[self.peakInd],'k+',self.curve.segments[-1].z[self.peakInd2],self.curve.segments[-1].f[self.peakInd2],'gx')
+        else:
+            ax1.plot(self.curve.segments[-1].z[0::2],self.curve.segments[-1].f[0::2],self.segments[-1][0][0::2],self.segments[-1][1][0::2],'r.',(plaS[0][0],plaS[0][2]),(plaS[0][1],plaS[0][3]),'k--')
         fig1.show()
         
         fig2 = plt.figure()
