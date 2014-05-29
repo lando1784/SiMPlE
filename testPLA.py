@@ -46,6 +46,8 @@ class MainFrame(wx.Frame):
         self.p1 = []
         self.dSeg = []
         
+        self.PLAobj = []
+        
         for s in self.curve.segments:
             data = np.array([s.z,s.f])
             if np.shape(data)[1] < startS:
@@ -57,6 +59,11 @@ class MainFrame(wx.Frame):
             self.segments.append(seg)
             self.p0.append(p)
             self.dSeg.append(dSeg)
+            self.PLAobj.append(myPla.PLA(myPla.mySlidingWindow_2,data,5000))
+            
+        for i in range(len(self.PLAobj[-1].ACs)):
+            print self.PLAobj[-1].getSeg(i)['start']
+            print self.PLAobj[-1].getSeg(i)['end']
 
         self.peaks,self.peakInd = mpd.findPeak_Triangle(self.p0[-1],self.dSeg[-1])
         self.peaks2, self.peakInd2 = mpd.findPeak_Greater(self.p0[-1],self.dSeg[-1])
