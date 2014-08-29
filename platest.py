@@ -11,6 +11,37 @@ from matplotlib.lines import Line2D
 #c = experiment.experiment()
 #c.addDirectory('./datas/')
 
+def getPLA(self,error=10000, Force=False):
+    """
+    NB: PLA is calculated over nm/nm data !!
+    
+    """
+    if self.PLA != None and Force == False:
+        return self.PLA
+    PLA = pla.topdownsegment(self.f/self.k, pla.fit.interpolate, pla.fit.sumsquared_error, error)
+    
+    PLA = np.array(PLA)
+    if len(PLA)>=2:
+        PLA=[PLA[0],PLA[-1]]
+    
+    PLA[0][0] = self.z[PLA[0][0]]
+    PLA[0][1] = self.k * PLA[0][1]
+    PLA[0][2] = self.z[PLA[0][2]]
+    PLA[0][3] = self.k * PLA[0][3]
+    PLA[1][0] = self.z[PLA[1][0]]
+    PLA[1][1] = self.k * PLA[1][1]
+    PLA[1][2] = self.z[PLA[1][2]]
+    PLA[1][3] = self.k * PLA[1][3]
+             
+    self.PLA = PLA 
+    return self.PLA
+def getmq(seg):
+    dy = seg[3]-seg[1]
+    dx = seg[2]-seg[0]
+    m = dy/dx
+    q = seg[3]-m*seg[2]
+    return m,q
+
 def draw_plot(data,plot_title):
     plot(range(len(data)),data,alpha=0.8,color='red')
     title(plot_title)

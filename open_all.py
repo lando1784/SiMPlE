@@ -140,10 +140,6 @@ class jpktxt(openWorker):
                             self.parameters['sensitivity'] = 1.0e9*float(val) #internally in nm/V
                         elif name == 'speed':
                             speed = 1.0e9*float(val) #internally in nm/s 
-                        
-            if x[len(x)-1]<x[0]:
-                x.reverse()
-                y.reverse()
         except:
             #if logging.getDEBUG :
             #    logging.error('File cannot be interpreted as JPK FD curve')
@@ -364,3 +360,5 @@ class nanoscopetxt(openWorker):
         self.segments[1].speed = bspeed
             
         return True
+if __name__ == "__main__":
+    print 'not for direct use'

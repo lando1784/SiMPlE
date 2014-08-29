@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import logging
 import curve
@@ -83,18 +82,6 @@ class experiment(mvobject.mvobject):
         for fname in fnames:
             if os.path.isfile(fname):
                 self.append(fname)
-
-    #functional function - to be eliminated
-    def setAll(self):
-        i=0
-        pmax = len(self.curves)
-        step = max(pmax/100,10)
-        for c in self.curves:
-            if i % step == 0:
-                logging.debug( "{0}% {1}/{2}".format(100*i/pmax,i,pmax))
-            if len(c)>=2:
-                c[2].setCurve()
-            i+=1
 
     def addDirectory(self,dirname=None):
         if dirname == None:

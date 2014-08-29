@@ -7,13 +7,13 @@ import glob
 
 class curve(mvobject.mvobject):
     def __init__(self,  fname = None):
-        defaults = {'fzfd':False,'k':1.0, 'relevant':True, 'sensitivity': 50.0}
         #internal units
         #  sensitivity nm/V
         #  k pN/nm
         #  speed nm/s
         #  Z nm
         #  F pN
+        defaults = {'fzfd':False,'k':1.0, 'relevant':True, 'sensitivity': 50.0}
         self.parseConfig(defaults,'Curve')
 
         self.filename = ''
@@ -68,56 +68,40 @@ class curve(mvobject.mvobject):
         for s in segments:
             self.append(s)
 
-    def save(self,fname=None,driver='jpktxt'):
+    def save(self,fname=None):
+        """
+        Save the curve in a TXT format compatible with the text export format of JPK IP and DP programs
+        """
         if fname == None:
             return False
 
-        try:
-            iname = 'save_{0}'.format(driver)
-            sv = importlib.import_module(iname)
-        except ImportError:
-            logging.error("Save Driver {0} NOT found".format(driver))
-            return False
-        return sv.mvSave(self)
-
-
-    def look(self):
-        import pylab
-        pylab.figure()
+        out_file = open(str(fname),"w")
+        out_file.write("# TEXT EXPORT\n")
+        out_file.write("# springConstant: {0}\n".format(self.k))
+        out_file.write("# units: m N\n")    
+        if self.fzfd:
+            out_file.write("# fzfd: 1\n")
+        else:
+            out_file.write("# fzfd: 0\n")
+        out_file.write("#\n")
         i=0
-        for p in self.segments:
+        for p in self.pieces:
+            if i != 0:
+                out_file.write("\n")
+            out_file.write("#\n")
+            out_file.write("# segmentIndex: {0}\n".format(i))
+            ts = 'extend'
+            if p.direction == 'B':
+                ts = 'retract'
+            out_file.write("# segment: {0}\n".format(ts))
+            out_file.write("# columns: distance force\n")
+            out_file.write("# speed: {0}\n".format(p.speed))
+            for i in range(len(p.x)):
+                out_file.write("{0} {1}\n".format(p.x[i]*1e-9, -1.0*p.y[i]*1e-12))
             i+=1
-            if p.show:
-                pylab.plot(p.z,p.f,label='{0}.{1}'.format(i,p.direction))
-
-        fragments = self[-1].getPLA()
-        if(len(fragments)>=2):
-            pylab.plot((fragments[0][0],fragments[0][2]),(fragments[0][1],fragments[0][3]),'k--',label='Lin')
-            pylab.plot((fragments[-1][0],fragments[-1][2]),(fragments[-1][1],fragments[-1][3]),'k--',label='Flat')
-        else:
-            print "No PLA available"
-
-        pylab.legend(loc=4)
-        pylab.title(self.basename)
-        pylab.xlabel('Displacement [nm]')
-        pylab.ylabel('Force [pN]')
-        pylab.show()
-
-    def preLook(self):        
-        import pylab
-        pylab.figure()
-        
-        pylab.plot(self[-1].z,self[-1].f,label='Data')
-        
-        fragments = self[0].getPLA()
-        if(len(fragments)>=2):
-            pylab.plot((fragments[0][0],fragments[0][2]),(fragments[0][1],fragments[0][3]),'g--',label='Lin')
-            pylab.plot((fragments[-1][0],fragments[-1][2]),(fragments[-1][1],fragments[-1][3]),'r--',label='Flat')
-        else:
-            print "No PLA available"
-        pylab.title(self.basename)          
-        pylab.legend(loc=4)
-        pylab.xlabel('Displacement [nm]')
-        pylab.ylabel('Force [pN]')
-        pylab.show()
+        out_file.close()
+        return True
+    
+if __name__ == "__main__":
+    print 'not for direct use'
         
