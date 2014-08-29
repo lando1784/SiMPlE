@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import mvobject
 import segment
 import logging
@@ -45,36 +44,24 @@ class curve(mvobject.mvobject):
             self.segments.append(seg)
         else:
             logging.error('You need to append a full instance of segment')
-
-
+        
     def open(self,fname,driver=None):
         if not os.path.isfile(fname):
             logging.error("The file {0} does not exist".format(fname))
             return False
 
         #search for the specific driver
-        if driver==None:
-            modlist = glob.glob('open_*.py')
-            extension = os.path.splitext(fname)[1][1:].lower()
-
-            for mod in modlist:
-                try:
-                    iname = format(mod[:-3])
-                    op = importlib.import_module(iname)
-                    if op.EXT == extension:
-                        driver = format(mod[5:-3])
-                        break
-                except ImportError:
-                    logging.warn("Driver {0} is compromised".format(mod[:-3]))
-                    return False
+        import open_all as opa
+        op = opa.opener(fname)
         try:
-            iname = 'open_{0}'.format(driver)
-            op = importlib.import_module(iname)
-        except ImportError:
-            logging.error("Open Driver {0} NOT found".format(driver))
-            return False
+            parameters,info,segments=op.getOpener(driver)
+        except:
+            raise
 
-        parameters,info,segments=op.mvOpen(fname)
+        if len(segments)==0:
+            logging.error("Empty File {0} not appended".format(fname))
+            return False
+            
         for k,v in parameters.items():
             setattr(self,k,v)
         self.info = info
