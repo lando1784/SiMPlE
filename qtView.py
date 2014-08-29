@@ -86,6 +86,8 @@ class curveWindow ( QtGui.QMainWindow ):
         N = len(self.exp)
         self.ui.slide1.setMaximum(N)
         self.ui.slide2.setMaximum(N)
+        self.ui.slide3.setMaximum(N)
+
         gNx = np.sqrt(N*width/height)
         Nx = int(np.ceil(gNx))
         if int(gNx) == Nx:
@@ -106,6 +108,7 @@ class curveWindow ( QtGui.QMainWindow ):
 
         scena.wheelEvent = self.scorri
         self.ui.griglia.setScene(scena)
+        self.ui.slide1.setValue(1)
 #        og = self.ui.griglia.items()
 #        for i in range(len(og)):
 #            if self.curves[-i-1].inconsistency:
@@ -125,7 +128,6 @@ class curveWindow ( QtGui.QMainWindow ):
             c = og[-i].brush().color()
         og[-i].setPen(c)
     def goToCurve(self,dove):
-        self.ui.labelNumber.setText('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n<html><head><meta name="qrichtext" content="1" /></head><body style=" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;">\n<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt;">{0}</span></p></body></html>'.format(dove))
         self.ui.labFilename.setText(htmlpre + self.exp[dove-1].basename + htmlpost)
         if self.prev != 0:
             self.sqSwitch(self.prev,False)
@@ -149,7 +151,11 @@ class curveWindow ( QtGui.QMainWindow ):
 
 #        QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("actionTriggered(int)")), self.moveJumping)
         QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide2.setValue)
+        QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide3.setValue)
+        
         QtCore.QObject.connect(self.ui.slide2, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide1.setValue)
+        QtCore.QObject.connect(self.ui.slide3, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide1.setValue)
+        
         QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.goToCurve )
 #        QtCore.QObject.connect(self.ui.slide2, QtCore.SIGNAL(_fromUtf8("actionTriggered(int)")), self.moveJumping)
 #        QtCore.QObject.connect(self.ui.slide2, QtCore.SIGNAL(_fromUtf8("sliderReleased()")), self.moveJumping)

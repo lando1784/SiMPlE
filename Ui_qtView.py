@@ -1,6 +1,8 @@
-# Form implementation generated from reading ui file
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'qtView.ui'
 #
-# Created: Tue Aug 26 22:37:27 2014
+# Created: Sat Aug 30 00:24:59 2014
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -24,7 +26,7 @@ except AttributeError:
 class Ui_facewindow(object):
     def setupUi(self, facewindow):
         facewindow.setObjectName(_fromUtf8("facewindow"))
-        facewindow.resize(897, 664)
+        facewindow.resize(897, 655)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8("../smfsmanager/D_mica.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         facewindow.setWindowIcon(icon)
@@ -46,48 +48,30 @@ class Ui_facewindow(object):
         self.slide1.setObjectName(_fromUtf8("slide1"))
         self.slide2 = QtGui.QDial(self.centralwidget)
         self.slide2.setEnabled(True)
-        self.slide2.setGeometry(QtCore.QRect(800, 560, 71, 71))
+        self.slide2.setGeometry(QtCore.QRect(790, 555, 71, 71))
         self.slide2.setMinimum(1)
         self.slide2.setMaximum(1)
         self.slide2.setTracking(True)
         self.slide2.setObjectName(_fromUtf8("slide2"))
-        self.gridLayoutWidget_2 = QtGui.QWidget(self.centralwidget)
-        self.gridLayoutWidget_2.setGeometry(QtCore.QRect(100, 560, 171, 61))
-        self.gridLayoutWidget_2.setObjectName(_fromUtf8("gridLayoutWidget_2"))
-        self.gridLayout_2 = QtGui.QGridLayout(self.gridLayoutWidget_2)
-        self.gridLayout_2.setMargin(0)
-        self.gridLayout_2.setObjectName(_fromUtf8("gridLayout_2"))
-        self.label_2 = QtGui.QLabel(self.gridLayoutWidget_2)
-        self.label_2.setObjectName(_fromUtf8("label_2"))
-        self.gridLayout_2.addWidget(self.label_2, 1, 0, 1, 1)
-        self.label_3 = QtGui.QLabel(self.gridLayoutWidget_2)
-        self.label_3.setObjectName(_fromUtf8("label_3"))
-        self.gridLayout_2.addWidget(self.label_3, 2, 0, 1, 1)
-        self.labFilename = QtGui.QLabel(self.gridLayoutWidget_2)
-        self.labFilename.setObjectName(_fromUtf8("labFilename"))
-        self.gridLayout_2.addWidget(self.labFilename, 1, 1, 1, 1)
-        self.labelNumber = QtGui.QLabel(self.gridLayoutWidget_2)
-        self.labelNumber.setObjectName(_fromUtf8("labelNumber"))
-        self.gridLayout_2.addWidget(self.labelNumber, 2, 1, 1, 1)
-        self.label = QtGui.QLabel(self.gridLayoutWidget_2)
-        self.label.setObjectName(_fromUtf8("label"))
-        self.gridLayout_2.addWidget(self.label, 0, 0, 1, 2)
-        self.layoutWidget = QtGui.QWidget(self.centralwidget)
-        self.layoutWidget.setGeometry(QtCore.QRect(0, 560, 91, 62))
-        self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
-        self.gridLayout_3 = QtGui.QGridLayout(self.layoutWidget)
-        self.gridLayout_3.setMargin(0)
-        self.gridLayout_3.setObjectName(_fromUtf8("gridLayout_3"))
-        self.bAddDir = QtGui.QPushButton(self.layoutWidget)
-        self.bAddDir.setObjectName(_fromUtf8("bAddDir"))
-        self.gridLayout_3.addWidget(self.bAddDir, 0, 0, 1, 1)
-        self.bAddFiles = QtGui.QPushButton(self.layoutWidget)
-        self.bAddFiles.setObjectName(_fromUtf8("bAddFiles"))
-        self.gridLayout_3.addWidget(self.bAddFiles, 1, 0, 1, 1)
         self.griglia = QtGui.QGraphicsView(self.centralwidget)
         self.griglia.setEnabled(True)
-        self.griglia.setGeometry(QtCore.QRect(770, 10, 121, 541))
+        self.griglia.setGeometry(QtCore.QRect(770, 10, 121, 511))
         self.griglia.setObjectName(_fromUtf8("griglia"))
+        self.labFilename = QtGui.QLabel(self.centralwidget)
+        self.labFilename.setGeometry(QtCore.QRect(480, 10, 261, 16))
+        self.labFilename.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.labFilename.setObjectName(_fromUtf8("labFilename"))
+        self.slide3 = QtGui.QSpinBox(self.centralwidget)
+        self.slide3.setGeometry(QtCore.QRect(770, 524, 121, 27))
+        self.slide3.setMinimum(1)
+        self.slide3.setMaximum(1)
+        self.slide3.setObjectName(_fromUtf8("slide3"))
+        self.bAddFiles = QtGui.QPushButton(self.centralwidget)
+        self.bAddFiles.setGeometry(QtCore.QRect(650, 560, 89, 27))
+        self.bAddFiles.setObjectName(_fromUtf8("bAddFiles"))
+        self.bAddDir = QtGui.QPushButton(self.centralwidget)
+        self.bAddDir.setGeometry(QtCore.QRect(540, 560, 89, 27))
+        self.bAddDir.setObjectName(_fromUtf8("bAddDir"))
         facewindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(facewindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 897, 25))
@@ -99,41 +83,12 @@ class Ui_facewindow(object):
 
     def retranslateUi(self, facewindow):
         facewindow.setWindowTitle(_translate("facewindow", "MainWindow", None))
-        self.label_2.setText(_translate("facewindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">Name</span></p></body></html>", None))
-        self.label_3.setText(_translate("facewindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">Number</span></p></body></html>", None))
         self.labFilename.setText(_translate("facewindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">//</span></p></body></html>", None))
-        self.labelNumber.setText(_translate("facewindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">0</span></p></body></html>", None))
-        self.label.setText(_translate("facewindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<p align=\"center\" style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt; font-weight:600;\">Current curve</span></p></body></html>", None))
-        self.bAddDir.setText(_translate("facewindow", "Add DIR", None))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">FILENAME</span></p></body></html>", None))
         self.bAddFiles.setText(_translate("facewindow", "Add Files", None))
+        self.bAddDir.setText(_translate("facewindow", "Add DIR", None))
 
 from pyqtgraph import PlotWidget
-
-if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    facewindow = QtGui.QMainWindow()
-    ui = Ui_facewindow()
-    ui.setupUi(facewindow)
-    facewindow.show()
-    sys.exit(app.exec_())
