@@ -11,7 +11,7 @@ import pyqtgraph as pg
 import numpy as np
 import Ui_qtView as qtView_face
 
-import experiment
+from SiMPlE import experiment
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -37,14 +37,14 @@ class curveWindow ( QtGui.QMainWindow ):
     def addFiles(self, fnames = None):
         if fnames == None:
             fnames = QtGui.QFileDialog.getOpenFileNames(self, 'Select files', './')
-        app.processEvents()
+        QtCore.QCoreApplication.processEvents()
         pmax = len(fnames)
 
         QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         progress = QtGui.QProgressDialog("Opening files...", "Cancel opening", 0, pmax);
         i=0
         for fname in fnames:
-            app.processEvents()
+            QtCore.QCoreApplication.processEvents()
             self.exp.addFiles([str(fname)])
             progress.setValue(i)
             i=i+1
@@ -60,7 +60,7 @@ class curveWindow ( QtGui.QMainWindow ):
             dirname = QtGui.QFileDialog.getExistingDirectory(self, 'Select a directory', './')
             if not os.path.isdir(dirname):
                 return
-        app.processEvents()
+        QtCore.QCoreApplication.processEvents()
         pmax = len(os.listdir(dirname))
 
         QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
@@ -68,7 +68,7 @@ class curveWindow ( QtGui.QMainWindow ):
         i=0
         for fnamealone in os.listdir(dirname):
             #if i % 100 == 0:
-            app.processEvents()
+            QtCore.QCoreApplication.processEvents()
             fname = os.path.join(str(dirname), fnamealone)
             self.exp.addFiles([str(fname)])
             progress.setValue(i)
@@ -135,7 +135,12 @@ class curveWindow ( QtGui.QMainWindow ):
         self.prev = dove
         self.viewCurve(dove)
 
-    def viewCurve(self,dove = 1):
+    def updateCurve(self):
+        self.viewCurve(self.ui.slide1.value(),autorange=False)
+    def refreshCurve(self):
+        self.viewCurve(self.ui.slide1.value(),autorange=True)
+
+    def viewCurve(self,dove = 1,autorange=True):
         dove -= 1
         self.ui.grafo.clear()
         for p in self.exp[dove]:
@@ -143,7 +148,7 @@ class curveWindow ( QtGui.QMainWindow ):
                 self.ui.grafo.plot(p.z,p.f,pen='b')
             else:
                 self.ui.grafo.plot(p.z,p.f)
-
+        if autorange:
             self.ui.grafo.autoRange()
 
     def setConnections(self):
