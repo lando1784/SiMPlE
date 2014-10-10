@@ -125,7 +125,7 @@ class jpktxt(openWorker):
     # columns: height vDeflection smoothedCapacitiveSensorHeight capacitiveSensorHeight seriesTime time
     # fancyNames: "Height" "Vertical deflection" "Height (measured & smoothed)" "Height (measured)" "Series Time" "Segment Time"                       
                             zs = ['smoothedCapacitiveSensorHeight','height','capacitiveSensorHeight','strainGaugeHeight']
-                            for s in zs:
+                            for s in zs[::-1]:
                                 if s in val:
                                     chZ = val.index(s)
                             if 'vDeflection' in val:
@@ -153,6 +153,7 @@ class jpktxt(openWorker):
             self.segments[-1].k = k
             if direction != None:
                 self.segments[-1].direction = direction
+        
         return True
 
 class igoritx(openWorker):
