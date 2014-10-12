@@ -19,6 +19,8 @@ pg.setConfigOption('foreground', 'k')
 htmlpre = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n<html><head><meta name="qrichtext" content="1" /><style type="text/css">\np, li { white-space: pre-wrap; }\n</style></head><body style=" font-family:"Ubuntu"; font-size:11pt; font-weight:400; font-style:normal;">\n<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt;">'
 htmlpost = '</span></p></body></html>'
 
+
+
 class curveWindow ( QtGui.QMainWindow ):
     iter = 0
     prev = 0
@@ -95,13 +97,17 @@ class curveWindow ( QtGui.QMainWindow ):
         L = int(width/Nx)
         i = 0
         j = 0
+        k=0
         if L<=3:
             L=3
         while i*Nx+j<N:
             h = L-2
             w = L-2
-            scena.addRect(QtCore.QRectF(j*(L)+1, i*(L)+1, h, w), pen = QtGui.QPen(self. cVerde,0) ,brush = self. cVerde )
+            
+            rect = QtCore.QRectF(j*(L)+1, i*(L)+1, h, w)
+            idrect = scena.addRect(rect, pen = QtGui.QPen(self. cVerde,0) ,brush = self. cVerde )
             j+=1
+            k+=1
             if j == Nx:
                 j=0
                 i+=1
@@ -117,6 +123,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.griglia.invalidateScene()
 
         return True
+    
     def scorri(self,ev=None):
         delta = ev.delta()/120
         self.ui.slide2.setSliderPosition(self.ui.slide2.sliderPosition()-delta)
