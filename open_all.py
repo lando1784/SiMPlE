@@ -81,11 +81,12 @@ class jpktxt(openWorker):
         chZ = 0
         chF = 1
         k = 1.0
+        parse = True
         
         try:
             speed = 0.0
             for rigo in righe:
-                if rigo[0] != '#' and len(rigo) > len(self.newline):
+                if rigo[0] != '#' and len(rigo) > len(self.newline) and parse:
                     separator = ' '
                     if rigo.find(separator)==-1:
                         separator='\t'
@@ -119,8 +120,12 @@ class jpktxt(openWorker):
                             direction = val
                             if val == 'extend':
                                 direction='near'
+                                parse = True
                             elif val == 'retract':
                                 direction = 'far'
+                                parse = True
+                            elif val=='pause':
+                                parse = False
                         elif name == 'columns':
     # columns: height vDeflection smoothedCapacitiveSensorHeight capacitiveSensorHeight seriesTime time
     # fancyNames: "Height" "Vertical deflection" "Height (measured & smoothed)" "Height (measured)" "Series Time" "Segment Time"                       
