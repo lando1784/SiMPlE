@@ -46,8 +46,8 @@ class openWorker():
         return False
     
 class opener:
-    EXT = ['txt','itx','dat','nano']
-    OPN = ['jpktxt','igoritx','igortxt','nanoscopetxt']
+    EXT = ['txt','itx','dat','nano','r9c']
+    OPN = ['jpktxt','igoritx','igortxt','nanoscopetxt','r9Curves']
     
     def __init__(self,fname):
         self.fname = fname

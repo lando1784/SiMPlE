@@ -11,7 +11,10 @@ import pyqtgraph as pg
 import numpy as np
 import Ui_qtView as qtView_face
 
-from SiMPlE import experiment
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
+
+#from SiMPlE import experiment
+import experiment
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -163,10 +166,10 @@ class curveWindow ( QtGui.QMainWindow ):
 
 #        QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("actionTriggered(int)")), self.moveJumping)
         QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide2.setValue)
-        QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide3.setValue)
+        #QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide3.setValue)
         
         QtCore.QObject.connect(self.ui.slide2, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide1.setValue)
-        QtCore.QObject.connect(self.ui.slide3, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide1.setValue)
+        #QtCore.QObject.connect(self.ui.slide3, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide1.setValue)
         
         QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.goToCurve )
 #        QtCore.QObject.connect(self.ui.slide2, QtCore.SIGNAL(_fromUtf8("actionTriggered(int)")), self.moveJumping)
