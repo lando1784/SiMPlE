@@ -10,11 +10,14 @@ import sys
 import pyqtgraph as pg
 import numpy as np
 import Ui_qtView as qtView_face
+from os.path import split, join
+from shutil import rmtree
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
 
 #from SiMPlE import experiment
 import experiment
+import convertR9module as r9
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -91,7 +94,7 @@ class curveWindow ( QtGui.QMainWindow ):
         N = len(self.exp)
         self.ui.slide1.setMaximum(N)
         self.ui.slide2.setMaximum(N)
-        self.ui.slide3.setMaximum(N)
+        #self.ui.slide3.setMaximum(N)
 
         gNx = np.sqrt(N*width/height)
         Nx = int(np.ceil(gNx))
@@ -160,6 +163,16 @@ class curveWindow ( QtGui.QMainWindow ):
                 self.ui.grafo.plot(p.z,p.f)
         if autorange:
             self.ui.grafo.autoRange()
+            
+    
+    def batchConv(self):
+        
+        dirIn = str(QtGui.QFileDialog.getExistingDirectory(self, 'Select a directory', './'))
+        dirOut = join(split(dirIn)[0],'jpk')
+        r9.batchR9conversion(dirIn,dirOut)
+        rmtree(dirIn)
+        self.addDirectory()
+
 
     def setConnections(self):
 
@@ -183,7 +196,9 @@ class curveWindow ( QtGui.QMainWindow ):
         #QtCore.QObject.connect(self.ui.pushButton_2, QtCore.SIGNAL(_fromUtf8("clicked()")), self.processNext)
         #QtCore.QObject.connect(self.ui.spButton, QtCore.SIGNAL(_fromUtf8("clicked()")), facewindow.savePeaks)
         #QtCore.QObject.connect(self.ui.pThreshold, QtCore.SIGNAL(_fromUtf8("editingFinished()")), self.refreshCurve)
-
+        
+        QtCore.QObject.connect(self.ui.convr9Btn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.batchConv)
+        
         QtCore.QMetaObject.connectSlotsByName(self)
 
 if __name__ == "__main__":
