@@ -102,6 +102,29 @@ class curve(mvobject.mvobject):
         out_file.close()
         return True
     
+    def changeK(self,newK):
+        
+        for s in self.segments:
+            s.f /= s.k
+            s.f *= newK
+            s.k = newK
+        self.k = newK
+        
+    
+    def changeSens(self,newSens):
+        
+        for s in self.segments:
+            s.f /= self.sensitivity
+            s.f *= newSens
+        self.sensitivity = newSens
+        
+        
+    def changeSpeed(self,newSpeed):
+        
+        for s in self.segments:
+            s.speed = newSpeed
+        
+    
 if __name__ == "__main__":
     print 'not for direct use'
         

@@ -65,6 +65,9 @@ def chopR9file(filePath):
     h = True
     header = ''
     data = []
+    k = 1
+    nmV = 1
+    speed = 1
     for l in temp:
         cols = []
         if h:
@@ -83,7 +86,7 @@ def chopR9file(filePath):
         if l.find('Y_pixel')!=-1:
             ys = np.array([float(d) for d in l.split('\t')[2:]])
             h = False
-    params = [k,nmV]
+    params = [k,nmV*1e-9]
     columns = data[0].shape[0]
     rows = len(data)
     data = np.array(data)
@@ -98,7 +101,7 @@ def chopR9file(filePath):
     for i in xrange((columns-1)/2):
         tempApp = np.array([Z,Dapps[:,i]*toNewton])
         tempRec = np.array([Z[::-1],Drets[::-1,i]*toNewton])
-        tempH1,tempH2 = headerWriter(k,nmV,xs[i],ys[i],1)
+        tempH1,tempH2 = headerWriter(k,nmV,xs[i],ys[i],speed)
         tempAppT = tabulate2Darray(tempApp.transpose())
         tempRecT = tabulate2Darray(tempRec.transpose())
         tempCurve = tempH1 + tempAppT + tempH2 + tempRecT

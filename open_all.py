@@ -87,11 +87,9 @@ class jpktxt(openWorker):
             speed = 0.0
             for rigo in righe:
                 if rigo[0] != '#' and len(rigo) > len(self.newline) and parse and rigo[0] != ' ':
-                    print 'nuovo rigo:\t'+rigo
                     separator = ' '
                     if rigo.find(separator)==-1:
                         separator='\t'
-                    print rigo[0]
                     datas = rigo[:-len(self.newline)].split(separator)
                     xi = datas[chZ]
                     yi = datas[chF]        

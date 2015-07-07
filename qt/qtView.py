@@ -147,6 +147,9 @@ class curveWindow ( QtGui.QMainWindow ):
         self.sqSwitch(dove,True)
         self.prev = dove
         self.viewCurve(dove)
+        self.ui.kNumDbl.setValue(self.exp[dove-1].k/1000)
+        self.ui.nmVNumDbl.setValue(self.exp[dove-1].sensitivity)
+        self.ui.speedNumDbl.setValue(self.exp[dove-1][0].speed)
 
     def updateCurve(self):
         self.viewCurve(self.ui.slide1.value(),autorange=False)
@@ -174,6 +177,42 @@ class curveWindow ( QtGui.QMainWindow ):
         self.addDirectory()
 
 
+    def updateK(self):
+        
+        culprit = self.sender()
+        currIndex = self.ui.slide1.value()
+        k = self.ui.kNumDbl.value()*1000
+        if culprit is self.ui.updateKBtn:
+            self.exp[currIndex].changeK(k)
+        else:
+            for c in self.exp:
+                c.changeK(k)
+            
+
+    def updateSens(self):
+        
+        culprit = self.sender()
+        currIndex = self.ui.slide1.value()
+        nmV = self.ui.nmVNumDbl.value()
+        if culprit is self.ui.updateNmVBtn:
+            self.exp[currIndex].changeSens(nmV)
+        else:
+            for c in self.exp:
+                c.changeSens(nmV)
+                
+    
+    def updateSpeed(self):
+        
+        culprit = self.sender()
+        currIndex = self.ui.slide1.value()
+        speed = self.ui.speedNumDbl.value()
+        if culprit is self.ui.updateSpeedBtn:
+            self.exp[currIndex].changeSpeed(speed)
+        else:
+            for c in self.exp:
+                c.changeSens(speed)
+
+
     def setConnections(self):
 
 
@@ -198,6 +237,13 @@ class curveWindow ( QtGui.QMainWindow ):
         #QtCore.QObject.connect(self.ui.pThreshold, QtCore.SIGNAL(_fromUtf8("editingFinished()")), self.refreshCurve)
         
         QtCore.QObject.connect(self.ui.convr9Btn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.batchConv)
+        
+        QtCore.QObject.connect(self.ui.updateKBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateK)
+        QtCore.QObject.connect(self.ui.updateAllKBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateK)
+        QtCore.QObject.connect(self.ui.updateNmVBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSens)
+        QtCore.QObject.connect(self.ui.updateAllNmVBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSens)
+        QtCore.QObject.connect(self.ui.updateSpeedBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSpeed)
+        QtCore.QObject.connect(self.ui.updateAllSpeedBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSpeed)
         
         QtCore.QMetaObject.connectSlotsByName(self)
 
