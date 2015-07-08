@@ -122,10 +122,9 @@ def batchR9conversion(dirIn,dirOut=''):
         fileTexts = chopR9file(join(dirIn,f))
         counter = 1
         for t in fileTexts: 
-            newf = 'jpkEquiv_'+str(counter)+'_'+f
-            if not exists(join(dirOut,splitext(f)[0])):
-                makedirs(join(dirOut,splitext(f)[0]))
-            w = open(join(join(dirOut,splitext(f)[0]),newf),'w')
+            F = splitext(f)
+            newf = F[0]+'_jpkEquiv_'+str(counter)+F[1]
+            w = open(join(dirOut,newf),'w')
             w.write(t)
             w.close()
             counter+=1
