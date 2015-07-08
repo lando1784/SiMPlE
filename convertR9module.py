@@ -77,10 +77,13 @@ def chopR9file(filePath):
             if chopped.shape[0]>0:
                 data.append(chopped)
         if l.find(';')!=-1:
-            chopped1 = l.replace(';','')
-            chopped2 = chopped1.split('involts=')
-            k = float(chopped2[0].replace('kappa=',''))
-            nmV = float(chopped2[1])
+            try:
+                chopped1 = l.replace(';','')
+                chopped2 = chopped1.split('involts=')
+                k = float(chopped2[0].replace('kappa=',''))
+                nmV = float(chopped2[1])
+            except:
+                pass
         if l.find('X_pixel')!=-1:
             xs = np.array([float(d) for d in l.split('\t')[2:]])
         if l.find('Y_pixel')!=-1:

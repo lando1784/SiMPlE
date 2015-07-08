@@ -74,7 +74,8 @@ class curveWindow ( QtGui.QMainWindow ):
         QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
         progress = QtGui.QProgressDialog("Opening files...", "Cancel opening", 0, pmax);
         i=0
-        for fnamealone in os.listdir(dirname):
+        loadedFiles = sorted(os.listdir(dirname))
+        for fnamealone in loadedFiles:
             #if i % 100 == 0:
             QtCore.QCoreApplication.processEvents()
             fname = os.path.join(str(dirname), fnamealone)
@@ -171,7 +172,8 @@ class curveWindow ( QtGui.QMainWindow ):
     def batchConv(self):
         
         dirIn = str(QtGui.QFileDialog.getExistingDirectory(self, 'Select a directory', './'))
-        dirOut = join(split(dirIn)[0],'jpk')
+        DirIn = split(dirIn)
+        dirOut = join(DirIn[0],'jpk_'+DirIn[1])
         r9.batchR9conversion(dirIn,dirOut)
         rmtree(dirIn)
         self.addDirectory()
