@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>897</width>
+    <width>1027</width>
     <height>696</height>
    </rect>
   </property>
@@ -75,8 +75,25 @@
      </widget>
     </item>
     <item row="1" column="0" colspan="2">
-     <layout class="QGridLayout" name="gridLayout_3">
-      <item row="2" column="4">
+     <layout class="QGridLayout" name="gridLayout_3" columnstretch="2,2,1,1,1,1,2,3,2,2,1,1,1,4">
+      <item row="0" column="5" rowspan="3">
+       <widget class="Line" name="line_3">
+        <property name="lineWidth">
+         <number>6</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="7">
+       <widget class="QDoubleSpinBox" name="kNumDbl">
+        <property name="maximum">
+         <double>1000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="7">
        <widget class="QDoubleSpinBox" name="speedNumDbl">
         <property name="maximum">
          <double>1000.000000000000000</double>
@@ -104,7 +121,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="3">
+      <item row="0" column="6">
        <widget class="QLabel" name="label_4">
         <property name="text">
          <string>k [N/nm]</string>
@@ -166,75 +183,167 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </item>
-      <item row="1" column="4">
+      <item row="1" column="7">
        <widget class="QDoubleSpinBox" name="nmVNumDbl">
         <property name="maximum">
          <double>1000.000000000000000</double>
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
+      <item row="1" column="6">
        <widget class="QLabel" name="label_5">
         <property name="text">
          <string>Sensitivity [nm/V]</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="4">
-       <widget class="QDoubleSpinBox" name="kNumDbl">
-        <property name="maximum">
-         <double>1000.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
+      <item row="2" column="6">
        <widget class="QLabel" name="label_6">
         <property name="text">
          <string>Speed [nm/s]</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="5">
+      <item row="0" column="8">
        <widget class="QPushButton" name="updateKBtn">
         <property name="text">
          <string>UPDATE</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="5">
+      <item row="1" column="8">
        <widget class="QPushButton" name="updateNmVBtn">
         <property name="text">
          <string>UPDATE</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="5">
+      <item row="2" column="8">
        <widget class="QPushButton" name="updateSpeedBtn">
         <property name="text">
          <string>UPDATE</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="6">
+      <item row="0" column="9">
        <widget class="QPushButton" name="updateAllKBtn">
         <property name="text">
          <string>UPDATE ALL</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="6">
+      <item row="1" column="9">
        <widget class="QPushButton" name="updateAllNmVBtn">
         <property name="text">
          <string>UPDATE ALL</string>
         </property>
        </widget>
       </item>
-      <item row="2" column="6">
+      <item row="2" column="9">
        <widget class="QPushButton" name="updateAllSpeedBtn">
         <property name="text">
          <string>UPDATE ALL</string>
         </property>
        </widget>
+      </item>
+      <item row="0" column="13">
+       <widget class="QPushButton" name="autoFitBtn">
+        <property name="text">
+         <string>Automatic fit</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="13">
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QPushButton" name="alignBtn">
+          <property name="text">
+           <string>Align</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="rejectBtn">
+          <property name="text">
+           <string>Reject</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item row="0" column="11" rowspan="3">
+       <widget class="Line" name="line_2">
+        <property name="lineWidth">
+         <number>6</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="10" rowspan="3">
+       <widget class="Line" name="line_4">
+        <property name="lineWidth">
+         <number>6</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4" rowspan="3">
+       <widget class="Line" name="line">
+        <property name="lineWidth">
+         <number>6</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="12">
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="13">
+       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="3,1">
+        <item>
+         <widget class="QPushButton" name="manSelBtn">
+          <property name="text">
+           <string>Manual selection</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>Cancel</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
@@ -245,7 +354,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>897</width>
+     <width>1027</width>
      <height>25</height>
     </rect>
    </property>
