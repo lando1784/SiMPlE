@@ -1,5 +1,5 @@
 import numpy as np
-
+from scipy.signal import savgol_filter as sgf
 
 def movingAvg(data,window):
     
@@ -57,19 +57,18 @@ def movingComp(a,b,sym = '<',window = 10, oneOrdata = True):
     return filtered
 
 
-def WAThBRIF(binaryData):
-    value1 = binaryData[0]
-    value2 = binaryData[np.where(binaryData!=value1)[0]][0]
+def binaryDataOrganizer(binaryData,val1 = None, val2 = None):
+    value1 = binaryData[0] if val1 == None else val1
+    value2 = binaryData[np.where(binaryData!=value1)[0]][0] if val2 == None else val2
     ranges = []
     limits = []
     bMask = np.zeros(binaryData.shape[0])
-    arrow = 122
     count = 1
     start = 0
     for i in xrange(binaryData.shape[0]-1):
-        bMask[i] = int(binaryData[i]!=binaryData[i+1])*arrow
+        bMask[i] = int(binaryData[i]!=binaryData[i+1])
         if bMask[i]:
-            arrow = 122 if binaryData[i] == value2 else 221
+            #arrow = 122 if binaryData[i] == value2 else 221
             ranges.append(count)
             count = 1
             end = i
@@ -78,31 +77,67 @@ def WAThBRIF(binaryData):
             start = end+1
         else:
             count += 1
+    val1ISvalue1 = value1 == binaryData[0]
     limits.append([start,binaryData.shape[0]-1])
     ranges.append(count)
-    resistance = zip(limits,ranges)
-    print ranges[::2]
+    v1A = {'r': ranges[int(not val1ISvalue1)::2],'l':limits[int(not val1ISvalue1)::2]}
+    v2A = {'r': ranges[int(val1ISvalue1)::2],'l':limits[int(val1ISvalue1)::2]}
+    
+    archive = {value1: v1A,value2: v2A}
                 
-    return bMask,resistance
+    return archive
 
 
-def contactIntruder(realData,binaryData,sym = '<'):
-    
-    resistance = WAThBRIF(binaryData)[1]
-    
-    apparentlyNC = resistance[1::2]
+def fitCnNC(displ,force,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,winged = True,wingPc = 10):
     
     
-                
-        
+    sgfWin = force.shape[0]/100*sgfWinPc
+    sgfWin += int(sgfWin%2==0)
+    compWin = force.shape[0]/100*compWinPc
+    compWin += int(compWin%2==0)
+    sForce = sgf(force,sgfWin,sgfDeg)
+    gForce = np.gradient(sForce)
+    ggForce = np.gradient(gForce)
+    gForceBi = movingComp(gForce,ggForce,sym,compWin)
+    forceArchive = binaryDataOrganizer(gForceBi, 1.0, 0.0)
+    
+    #contGoodL = forceArchive[1.0]['l'][np.where(np.array(forceArchive[1.0]['r'])==max(forceArchive[1.0]['r']))[0][0]]
+    contGoodL = forceArchive[1.0]['l'][0]
+    contGoodRcutWing = (forceArchive[1.0]['r'][0]/100*wingPc)/2 if winged else 0
+    #freeGoodL = forceArchive[0.0]['l'][np.where(np.array(forceArchive[0.0]['r'])==max(forceArchive[0.0]['r']))[0][0]]
+    freeGoodL = forceArchive[0.0]['l'][-1]
+    freeGoodRcutWing = (forceArchive[0.0]['r'][0]/100*wingPc)/2 if winged else 0
+
+    contFit = np.polyfit(displ[(contGoodL[0]+contGoodRcutWing):(contGoodL[1]+1-contGoodRcutWing)], force[(contGoodL[0]+contGoodRcutWing):(contGoodL[1]+1-contGoodRcutWing)], 1)
+    freeFit = [0.0,np.average(force[(freeGoodL[0]+freeGoodRcutWing):(freeGoodL[1]+1-freeGoodRcutWing)])]
+    
+    interPt = (freeFit[1]-contFit[1])/(contFit[0]-freeFit[0])
+    
+    contEnd = np.where(displ<=interPt)[0][-1]+1
+    freeStart = contEnd
+    
+    contZ = displ[:contEnd]
+    freeZ = displ[freeStart:]
+    contF = contZ*contFit[0]+contFit[1]
+    freeF = freeZ*freeFit[0]+freeFit[1]
+    
+    allFit = np.concatenate((contF,freeF))
+    
+    return allFit, [interPt,freeFit[1]]
+    
         
         
 if __name__ == '__main__':
     
     p = np.array([1,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2])
-    print WAThBRIF(p)
-              
-        
-        
-        
-        
+    z = np.arange(300)
+    f = np.concatenate((np.arange(100)-100,np.zeros(200)))
+    pRes = binaryDataOrganizer(p)
+    keys = pRes.keys()
+    keys.sort()
+    for k in keys:
+        print k
+        print pRes[k]
+    
+    fitCnNC(z,f)
+    

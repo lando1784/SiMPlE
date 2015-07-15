@@ -1,5 +1,6 @@
 from PyQt4 import QtCore, QtGui
 from scipy.signal._savitzky_golay import savgol_filter
+from copy import copy,deepcopy
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -20,7 +21,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
 import experiment
 import convertR9module as r9
 from calc_utilities import *
-from scipy.signal import savgol_filter as sgf
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -28,8 +28,8 @@ pg.setConfigOption('foreground', 'k')
 htmlpre = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n<html><head><meta name="qrichtext" content="1" /><style type="text/css">\np, li { white-space: pre-wrap; }\n</style></head><body style=" font-family:"Ubuntu"; font-size:11pt; font-weight:400; font-style:normal;">\n<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt;">'
 htmlpost = '</span></p></body></html>'
 
-compWin = 50
-sgfWin = 101
+compWinPc = 10
+sgfWinPc = 10
 sgfDeg = 3
 
 class curveWindow ( QtGui.QMainWindow ):
@@ -46,6 +46,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.setConnections()
         
         self.fitFlag = False
+        self.alignFlags = []
 
         self.exp = experiment.experiment()
 
@@ -64,6 +65,7 @@ class curveWindow ( QtGui.QMainWindow ):
             self.exp.addFiles([str(fname)])
             progress.setValue(i)
             i=i+1
+            self.alignFlags.append(False)
             if (progress.wasCanceled()):
                 break
         progress.setValue(pmax)
@@ -89,6 +91,7 @@ class curveWindow ( QtGui.QMainWindow ):
             QtCore.QCoreApplication.processEvents()
             fname = os.path.join(str(dirname), fnamealone)
             self.exp.addFiles([str(fname)])
+            self.alignFlags.append(False)
             progress.setValue(i)
             i=i+1
             if (progress.wasCanceled()):
@@ -179,13 +182,17 @@ class curveWindow ( QtGui.QMainWindow ):
     def viewCurve(self,dove = 1,autorange=True):
         dove -= 1
         self.ui.grafo.clear()
-        for p in self.exp[dove]:
+        start = 1 if self.alignFlags[dove] else 0
+        for p in self.exp[dove][start:]:
             if p == self.exp[dove][-1]:
                 self.ui.grafo.plot(p.z,p.f,pen='b')
             else:
                 self.ui.grafo.plot(p.z,p.f)
         if self.fitFlag:
             self.plotDeriv(-1)
+        if self.alignFlags[dove]:
+            self.ui.grafo.plotItem.addLine(x=0)
+            self.ui.grafo.plotItem.addLine(y=0)
         if autorange:
             self.ui.grafo.autoRange()
             
@@ -239,31 +246,6 @@ class curveWindow ( QtGui.QMainWindow ):
     def startAutoFit(self):
         
         self.plotDeriv(-1)
-             
-        
-        
-    def startManualSel(self):
-        
-        culprit = self.sender()
-        if culprit.text() == 'Manual selection':
-            try:
-                att = dir(self.ui.grafo.plotItem.curves[0])
-                for a in att:
-                    print a
-                culprit.setText('Select First NC point')
-            except:
-                return False
-        elif culprit.text() == 'Select First NC point':
-            culprit.setText('Select Second NC point')
-        elif culprit.text() == 'Select Second NC point':
-            culprit.setText('Select First C point')
-        elif culprit.text() == 'Select First C point':
-            culprit.setText('Select Second C point')
-        elif culprit.text() == 'Select Second C point':
-            culprit.setText('Apply All')
-        else:
-            culprit.setText('Manual selection')
-        print 'Manual'
 
 
     def setPointC(self):
@@ -273,27 +255,83 @@ class curveWindow ( QtGui.QMainWindow ):
     def rejectAlign(self):
         
         self.fitFlag = False
-        self.goToCurve(0)
+        self.goToCurve(self.ui.slide1.value())
         
     
     def plotDeriv(self,segInd):
         try:
-            sig = sgf(self.ui.grafo.plotItem.curves[segInd].yData,sgfWin,sgfDeg)
-            gradSig = np.gradient(sig)
-            gradSqSig = np.gradient(gradSig)
-            conf = movingComp(gradSig,0.0,'>',compWin)
-            bMask,ranges = WAThBRIF(conf)
-            print bMask
-            print ranges
-            conf2 = conf*(sig[-1]-sig[0])
-            dataMasked = conf*sig
-            dataMasked[np.where(dataMasked == 0.0)] = sig[-1]
-            conf-=np.max(conf)
-            conf2-=np.max(conf2)
-            self.ui.grafo.plot(self.ui.grafo.plotItem.curves[segInd].xData,dataMasked,pen='r')
+            sig = self.ui.grafo.plotItem.curves[segInd].yData
+            displ = self.ui.grafo.plotItem.curves[segInd].xData
+            fit, _ = fitCnNC(displ,sig,'>',sgfWinPc,sgfDeg,compWinPc,winged = bool(self.ui.wingPcNum.value()),wingPc = self.ui.wingPcNum.value())
+            self.ui.grafo.plot(self.ui.grafo.plotItem.curves[segInd].xData,fit,pen='r')
             self.fitFlag = True
         except Exception as e:
             print e.message
+            
+    
+    def align(self):
+        
+        culprit = self.sender()
+        self.fitFlag = False
+        if culprit is self.ui.alignBtn:
+            try:
+                _,contactPt = fitCnNC(self.exp[self.ui.slide1.value()-1][-1].z,self.exp[self.ui.slide1.value()-1][-1].f,
+                                      '>',sgfWinPc,sgfDeg,compWinPc,winged = bool(self.ui.wingPcNum.value()),wingPc = self.ui.wingPcNum.value())
+                for s in self.exp[self.ui.slide1.value()-1][1:]:
+                    s.f = s.f[np.where(s.z>=contactPt[0])]-contactPt[1]
+                    s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
+                self.alignFlags[self.ui.slide1.value()-1] = True
+                self.goToCurve(self.ui.slide1.value())
+                self.ui.slide1.setValue(self.ui.slide1.value())
+                self.ui.slide2.setValue(self.ui.slide1.value())
+            except Exception as e:
+                print e.message
+        else:
+            pmax = len(self.exp)
+            QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
+            progress = QtGui.QProgressDialog("Aligning curves...", "Cancel aligning", 0, pmax);
+            i=0
+            for c in self.exp:
+                progress.setValue(i)
+                self.alignFlags[i] = True
+                i=i+1
+                if (progress.wasCanceled()):
+                    break
+                try:
+                    _,contactPt = fitCnNC(c[-1].z,c[-1].f,'>',sgfWinPc,sgfDeg,compWinPc,winged = bool(self.ui.wingPcNum.value()),
+                                          wingPc = self.ui.wingPcNum.value())
+                    for s in c[1:]:
+                        s.f = s.f[np.where(s.z>=contactPt[0])]-contactPt[1]
+                        s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
+                except Exception as e:
+                    print e.message
+            progress.setValue(pmax)
+            QtGui.QApplication.restoreOverrideCursor()
+            self.goToCurve(1)
+            self.ui.slide1.setValue(0)
+            self.ui.slide2.setValue(0)
+
+
+    def reload(self):
+        pmax = len(self.exp)
+        QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
+        progress = QtGui.QProgressDialog("Reloading curves...", "Cancel reloading", 0, pmax);
+        i=0
+        tempExp = deepcopy(self.exp)
+        self.exp = None
+        self.exp = experiment.experiment()
+        for c in tempExp:
+            self.alignFlags[i]=False
+            i+=1
+            progress.setValue(i)
+            self.exp.addFiles([c.filename])
+        progress.setValue(pmax)
+        QtGui.QApplication.restoreOverrideCursor()
+        tempExp = None
+        self.fitFlag = False
+        self.goToCurve(1)
+        self.ui.slide1.setValue(0)
+        self.ui.slide2.setValue(0)
 
 
     def setConnections(self):
@@ -317,8 +355,12 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.updateAllSpeedBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSpeed)
         
         QtCore.QObject.connect(self.ui.autoFitBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.startAutoFit)
-        QtCore.QObject.connect(self.ui.manSelBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.startManualSel)
         QtCore.QObject.connect(self.ui.rejectBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.rejectAlign)
+        QtCore.QObject.connect(self.ui.alignBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.align)
+        QtCore.QObject.connect(self.ui.alignAllBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.align)
+        QtCore.QObject.connect(self.ui.reloadBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.reload)
+        
+        
         
         QtCore.QMetaObject.connectSlotsByName(self)
 
