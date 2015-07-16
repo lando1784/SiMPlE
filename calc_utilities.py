@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.signal import savgol_filter as sgf
+from types import FunctionType
+from matplotlib.colors import NP_CLIP_OUT
 
 def movingAvg(data,window):
     
@@ -24,6 +26,9 @@ def movingAvg(data,window):
 
 def movingComp(a,b,sym = '<',window = 10, oneOrdata = True):
     
+    if type(sym) is not str and str(type(sym)) is not '<type \'builtin_function_or_method\'>':
+        return None
+    
     if type(a) is not np.ndarray:
         print '\'a\' must be an array'
         return None
@@ -37,24 +42,42 @@ def movingComp(a,b,sym = '<',window = 10, oneOrdata = True):
     for i in np.arange(a.shape[0]-hWin-hWinUp+1)+hWin:
         aClip = a[i-hWin:i+hWin]
         bClip = b[i-hWin:i+hWin] if bArray else b
-        temp = eval('aClip'+sym+'bClip')
+        temp = eval('aClip'+sym+'bClip') if type(sym) is str else sym(aClip,bClip)
         filtered[i]=int(temp.all()) if oneOrdata else int(temp.all())*a[i] 
         
     for i in xrange(hWin):
         aClip = a[0:i+hWin]
         bClip = b[0:i+hWin] if bArray else b
-        temp = eval('aClip'+sym+'bClip')
+        temp = eval('aClip'+sym+'bClip') if type(sym) is str else sym(aClip,bClip)
         filtered[i] = int(temp.all()) if oneOrdata else int(temp.all())*a[i]
         
     j=0
     for i in np.arange(hWin)+(a.shape[0]-hWin):
         aClip = a[i-hWin:i+hWin-j]
         bClip = b[i-hWin:i+hWin-j] if bArray else b
-        temp = eval('aClip'+sym+'bClip')
+        temp = eval('aClip'+sym+'bClip') if type(sym) is str else sym(aClip,bClip)
         filtered[i] = int(temp.all()) if oneOrdata else int(temp.all())*a[i]
         j += 1
         
     return filtered
+
+
+def almost(a,b,thrPc = 10):
+    if type(a)==type(b)==np.ndarray and a.shape == b.shape:
+        #thr = min(np.std(a), np.std(b), thrPc*np.mean(b)/100) if thrPc != None else min(np.std(a), np.std(b))
+        thr = thrPc*np.mean(b)/100
+        result = (b-thr<=a<=b+thr).all()
+    elif type(a) is np.ndarray and isinstance(b,(int,long,float,complex)):
+        #thr = min(np.std(a), thrPc*b/100) if thrPc != None else np.std(a)
+        thr = thrPc*b/100
+        result = (b-thr<=a<=b+thr).all()
+    elif isinstance(a,(int,float,long,complex)) and isinstance(b,(int,long,float,complex)):
+        thr = thrPc*b/100
+        result = b-thr<=a<=b+thr
+    else:
+        raise TypeError('You used a wrong set of types. The onyl available combinations are:\n- \'a\' scalar and \'b\' scalar\n- \'a\' array and \'b\' scalar\n- \'a\' array and \'b\' array\n')
+    
+    return result
 
 
 def binaryDataOrganizer(binaryData,val1 = None, val2 = None):
@@ -88,9 +111,11 @@ def binaryDataOrganizer(binaryData,val1 = None, val2 = None):
     return archive
 
 
-def fitCnNC(displ,force,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,winged = True,wingPc = 10):
+def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,winged = True,wingPc = 10,thPc = 15):
     
-    
+    force = seg.f
+    displ = seg.z
+    k = seg.k
     sgfWin = force.shape[0]/100*sgfWinPc
     sgfWin += int(sgfWin%2==0)
     compWin = force.shape[0]/100*compWinPc
@@ -109,7 +134,8 @@ def fitCnNC(displ,force,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,winged
     freeGoodRcutWing = (forceArchive[0.0]['r'][0]/100*wingPc)/2 if winged else 0
 
     contFit = np.polyfit(displ[(contGoodL[0]+contGoodRcutWing):(contGoodL[1]+1-contGoodRcutWing)], force[(contGoodL[0]+contGoodRcutWing):(contGoodL[1]+1-contGoodRcutWing)], 1)
-    freeFit = [0.0,np.average(force[(freeGoodL[0]+freeGoodRcutWing):(freeGoodL[1]+1-freeGoodRcutWing)])]
+    #freeFit = [0.0,np.average(force[(freeGoodL[0]+freeGoodRcutWing):(freeGoodL[1]+1-freeGoodRcutWing)])]
+    freeFit = np.polyfit(displ[(freeGoodL[0]+freeGoodRcutWing):(freeGoodL[1]+1-freeGoodRcutWing)], force[(freeGoodL[0]+freeGoodRcutWing):(freeGoodL[1]+1-freeGoodRcutWing)], 1)
     
     interPt = (freeFit[1]-contFit[1])/(contFit[0]-freeFit[0])
     
@@ -123,7 +149,9 @@ def fitCnNC(displ,force,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,winged
     
     allFit = np.concatenate((contF,freeF))
     
-    return allFit, [interPt,freeFit[1]]
+    valid = almost(contFit[0],k,thPc) and almost(freeFit[0]+k,k,thPc)
+    
+    return allFit, [interPt,freeFit[1]], valid
     
         
         

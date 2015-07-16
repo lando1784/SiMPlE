@@ -136,11 +136,11 @@ class curveWindow ( QtGui.QMainWindow ):
         scena.wheelEvent = self.scorri
         self.ui.griglia.setScene(scena)
         self.ui.slide1.setValue(1)
-#        og = self.ui.griglia.items()
-#        for i in range(len(og)):
-#            if self.curves[-i-1].inconsistency:
-#                og[i].setBrush(self.cRosso)
-#                og[i].setPen(self.cRosso)
+        og = self.ui.griglia.items()
+        for i in range(len(og)):
+            if not self.exp[-i-1].relevant:
+                og[i].setBrush(self.cRosso)
+                og[i].setPen(self.cRosso)
         self.ui.griglia.invalidateScene()
 
         return True
@@ -263,7 +263,9 @@ class curveWindow ( QtGui.QMainWindow ):
         try:
             sig = self.ui.grafo.plotItem.curves[segInd].yData
             displ = self.ui.grafo.plotItem.curves[segInd].xData
-            fit, _ = fitCnNC(displ,sig,'>',sgfWinPc,sgfDeg,compWinPc,winged = bool(self.ui.wingPcNum.value()),wingPc = self.ui.wingPcNum.value())
+            pippo=bool(self.ui.wingPcNum.value())
+            print pippo
+            fit, _,_ = fitCnNC(displ,sig,'>',sgfWinPc,sgfDeg,compWinPc,wingPc = self.ui.wingPcNum.value())
             self.ui.grafo.plot(self.ui.grafo.plotItem.curves[segInd].xData,fit,pen='r')
             self.fitFlag = True
         except Exception as e:
@@ -276,11 +278,12 @@ class curveWindow ( QtGui.QMainWindow ):
         self.fitFlag = False
         if culprit is self.ui.alignBtn:
             try:
-                _,contactPt = fitCnNC(self.exp[self.ui.slide1.value()-1][-1].z,self.exp[self.ui.slide1.value()-1][-1].f,
-                                      '>',sgfWinPc,sgfDeg,compWinPc,winged = bool(self.ui.wingPcNum.value()),wingPc = self.ui.wingPcNum.value())
+                _,contactPt, valid = fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',sgfWinPc,sgfDeg,compWinPc,
+                                      winged = bool(self.ui.wingPcNum.value()),wingPc = self.ui.wingPcNum.value())
                 for s in self.exp[self.ui.slide1.value()-1][1:]:
                     s.f = s.f[np.where(s.z>=contactPt[0])]-contactPt[1]
                     s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
+                self.exp[self.ui.slide1.value()-1].relevant = valid
                 self.alignFlags[self.ui.slide1.value()-1] = True
                 self.goToCurve(self.ui.slide1.value())
                 self.ui.slide1.setValue(self.ui.slide1.value())
@@ -299,8 +302,9 @@ class curveWindow ( QtGui.QMainWindow ):
                 if (progress.wasCanceled()):
                     break
                 try:
-                    _,contactPt = fitCnNC(c[-1].z,c[-1].f,'>',sgfWinPc,sgfDeg,compWinPc,winged = bool(self.ui.wingPcNum.value()),
+                    _,contactPt,valid = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,winged = bool(self.ui.wingPcNum.value()),
                                           wingPc = self.ui.wingPcNum.value())
+                    c.relevant = valid
                     for s in c[1:]:
                         s.f = s.f[np.where(s.z>=contactPt[0])]-contactPt[1]
                         s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
@@ -311,6 +315,7 @@ class curveWindow ( QtGui.QMainWindow ):
             self.goToCurve(1)
             self.ui.slide1.setValue(0)
             self.ui.slide2.setValue(0)
+            self.refillList()
 
 
     def reload(self):
