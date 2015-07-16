@@ -12,7 +12,8 @@ import sys
 import pyqtgraph as pg
 import numpy as np
 import Ui_qtView as qtView_face
-from os.path import split, join
+from os import makedirs
+from os.path import split, join, splitext, exists
 from shutil import rmtree
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
@@ -332,6 +333,43 @@ class curveWindow ( QtGui.QMainWindow ):
         self.goToCurve(1)
         self.ui.slide1.setValue(0)
         self.ui.slide2.setValue(0)
+        
+        
+    def saveAligned(self):
+        
+        if self.sender() is self.ui.saveBtn:
+            ind = self.ui.slide1.value()-1
+            c = self.exp[ind]
+            if not self.alignFlags[ind] or len(c)<1:
+                return None
+            cc = deepcopy(c)
+            dir = join(split(c.filename)[0],'aligned')
+            if not exists(dir):
+                makedirs(dir)
+            onlyFile,ext = splitext(c.basename)
+            if cc[0].direction == 'near':
+                del cc[0]
+            basename = onlyFile+'_aligned'+ext
+            filename = join(dir,basename)
+            cc.save(filename)
+            cc = None
+        else:
+            for i in xrange(len(self.exp)):
+                c = self.exp[i]
+                if not self.alignFlags[i] or len(c)<1:
+                    continue
+                cc = deepcopy(c)
+                dir = join(split(c.filename)[0],'aligned')
+                if not exists(dir):
+                    makedirs(dir)
+                onlyFile,ext = splitext(c.basename)
+                if cc[0].direction == 'near':
+                    del cc[0]
+                basename = onlyFile+'_aligned'+ext
+                filename = join(dir,basename)
+                cc.save(filename)
+                cc = None
+        
 
 
     def setConnections(self):
@@ -359,6 +397,9 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.alignBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.align)
         QtCore.QObject.connect(self.ui.alignAllBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.align)
         QtCore.QObject.connect(self.ui.reloadBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.reload)
+        QtCore.QObject.connect(self.ui.saveBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.saveAligned)
+        QtCore.QObject.connect(self.ui.saveAllBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.saveAligned)
+        
         
         
         

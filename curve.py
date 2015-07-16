@@ -38,6 +38,8 @@ class curve(mvobject.mvobject):
         if index == 'down':
             index = 0
         return self.segments[index]
+    def __delitem__(self,index):
+        self.segments = self.segments[:index]+self.segments[-1:index:-1][::-1]
 
     def append(self,seg):
         if isinstance(seg,segment.segment):
@@ -85,19 +87,19 @@ class curve(mvobject.mvobject):
             out_file.write("# fzfd: 0\n")
         out_file.write("#\n")
         i=0
-        for p in self.pieces:
+        for p in self.segments:
             if i != 0:
                 out_file.write("\n")
             out_file.write("#\n")
             out_file.write("# segmentIndex: {0}\n".format(i))
             ts = 'extend'
-            if p.direction == 'B':
+            if p.direction == 'far':
                 ts = 'retract'
             out_file.write("# segment: {0}\n".format(ts))
             out_file.write("# columns: distance force\n")
             out_file.write("# speed: {0}\n".format(p.speed))
-            for i in range(len(p.x)):
-                out_file.write("{0} {1}\n".format(p.x[i]*1e-9, -1.0*p.y[i]*1e-12))
+            for i in range(len(p.z)):
+                out_file.write("{0} {1}\n".format(p.z[i]*1e-9, -1.0*p.z[i]*1e-12))
             i+=1
         out_file.close()
         return True
