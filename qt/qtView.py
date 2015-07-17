@@ -15,6 +15,7 @@ import Ui_qtView as qtView_face
 from os import makedirs
 from os.path import split, join, splitext, exists
 from shutil import rmtree
+from time import strftime
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
 
@@ -39,6 +40,7 @@ class curveWindow ( QtGui.QMainWindow ):
     cRosso = QtGui.QColor(255,0,0)
     cVerde = QtGui.QColor(50,255,50)
     cNero = QtGui.QColor(0,0,0)
+    
     def __init__ ( self, parent = None ):
         QtGui.QMainWindow.__init__( self, parent )
         self.setWindowTitle( 'qtView' )
@@ -48,8 +50,13 @@ class curveWindow ( QtGui.QMainWindow ):
         
         self.fitFlag = False
         self.alignFlags = []
-
+        self.ctPoints = []
+        self.bad = []
+        
         self.exp = experiment.experiment()
+        
+        logString = 'Welcome!\n'
+        self.simpleLogger(logString)
 
 
     def addFiles(self, fnames = None):
@@ -62,6 +69,8 @@ class curveWindow ( QtGui.QMainWindow ):
         progress = QtGui.QProgressDialog("Opening files...", "Cancel opening", 0, pmax);
         i=0
         for fname in fnames:
+            logString = 'Loading file {0}\n'.format(fname)
+            self.simpleLogger(logString)
             QtCore.QCoreApplication.processEvents()
             self.exp.addFiles([str(fname)])
             progress.setValue(i)
@@ -69,10 +78,14 @@ class curveWindow ( QtGui.QMainWindow ):
             self.alignFlags.append(False)
             if (progress.wasCanceled()):
                 break
+            self.ctPoints.append(None)
         progress.setValue(pmax)
         QtGui.QApplication.restoreOverrideCursor()
 
+        self.curveRelatedEnabling(True)
+
         self.refillList()
+        self.goToCurve(1)
 
 
     def addDirectory(self,dirname=None):
@@ -87,19 +100,32 @@ class curveWindow ( QtGui.QMainWindow ):
         progress = QtGui.QProgressDialog("Opening files...", "Cancel opening", 0, pmax);
         i=0
         loadedFiles = sorted(os.listdir(dirname))
+        logString = 'Loading curves from {0}\n'.format(dirname)
+        self.simpleLogger(logString)
         for fnamealone in loadedFiles:
             #if i % 100 == 0:
             QtCore.QCoreApplication.processEvents()
             fname = os.path.join(str(dirname), fnamealone)
-            self.exp.addFiles([str(fname)])
-            self.alignFlags.append(False)
+            try:
+                self.exp.addFiles([str(fname)])
+                self.alignFlags.append(False)
+                self.ctPoints.append(None)
+            except Exception as e:
+                print e.message
+                
             progress.setValue(i)
             i=i+1
             if (progress.wasCanceled()):
                 break
         progress.setValue(pmax)
         QtGui.QApplication.restoreOverrideCursor()
+        logString = 'Curves Loaded\n'
+        self.simpleLogger(logString)
+        
+        self.curveRelatedEnabling(True)
+        
         self.refillList()
+        self.goToCurve(1)
 
 
     def refillList(self):
@@ -161,15 +187,20 @@ class curveWindow ( QtGui.QMainWindow ):
         
         
     def goToCurve(self,dove):
-        self.ui.labFilename.setText(htmlpre + self.exp[dove-1].basename + htmlpost)
-        if self.prev != 0:
-            self.sqSwitch(self.prev,False)
-        self.sqSwitch(dove,True)
-        self.prev = dove
-        self.viewCurve(dove)
-        self.ui.kNumDbl.setValue(self.exp[dove-1].k/1000)
-        self.ui.nmVNumDbl.setValue(self.exp[dove-1].sensitivity)
-        self.ui.speedNumDbl.setValue(self.exp[dove-1][0].speed)
+        print 'dove-1 ' + str(dove-1)
+        print 'len ' + str(len(self.exp)) 
+        if len(self.exp)<=dove-1 or dove-1<0:
+            return None
+        else:
+            self.ui.labFilename.setText(htmlpre + self.exp[dove-1].basename + htmlpost)
+            if self.prev != 0:
+                self.sqSwitch(self.prev,False)
+            self.sqSwitch(dove,True)
+            self.prev = dove
+            self.viewCurve(dove)
+            self.ui.kNumDbl.setValue(self.exp[dove-1].k/1000)
+            self.ui.nmVNumDbl.setValue(self.exp[dove-1].sensitivity)
+            self.ui.speedNumDbl.setValue(self.exp[dove-1][0].speed)
 
 
     def updateCurve(self):
@@ -184,6 +215,13 @@ class curveWindow ( QtGui.QMainWindow ):
         dove -= 1
         self.ui.grafo.clear()
         start = 1 if self.alignFlags[dove] else 0
+        self.ui.alignBtn.setEnabled(not self.alignFlags[dove])
+        self.ui.alignAllBtn.setEnabled(not np.array(self.alignFlags).all())
+        self.ui.autoFitBtn.setEnabled(not self.alignFlags[dove] and not self.fitFlag)
+        self.ui.rejectBtn.setEnabled(not self.alignFlags[dove] and self.fitFlag)
+        self.ui.removeBOBtn.setEnabled(len(self.bad)>=1)
+        self.ui.saveBtn.setEnabled(self.alignFlags[dove])
+        self.ui.saveAllBtn.setEnabled(self.alignFlags[dove])
         for p in self.exp[dove][start:]:
             if p == self.exp[dove][-1]:
                 self.ui.grafo.plot(p.z,p.f,pen='b')
@@ -205,6 +243,8 @@ class curveWindow ( QtGui.QMainWindow ):
         dirOut = join(DirIn[0],'jpk_'+DirIn[1])
         r9.batchR9conversion(dirIn,dirOut)
         rmtree(dirIn)
+        logString = 'Converted R9 files from {0} to JPK txt files in directory {1}\n'.format(dirIn,dirOut)
+        self.simpleLogger(logString)
         self.addDirectory()
 
 
@@ -214,9 +254,13 @@ class curveWindow ( QtGui.QMainWindow ):
         currIndex = self.ui.slide1.value()
         k = self.ui.kNumDbl.value()*1000
         if culprit is self.ui.updateKBtn:
+            logString = 'K value for {0} changed\n'.format(self.exp[currIndex].basename)
+            self.simpleLogger(logString)
             self.exp[currIndex].changeK(k)
         else:
             for c in self.exp:
+                logString = 'K value for {0} changed\n'.format(c.basename)
+                self.simpleLogger(logString)
                 c.changeK(k)
             
 
@@ -226,9 +270,13 @@ class curveWindow ( QtGui.QMainWindow ):
         currIndex = self.ui.slide1.value()
         nmV = self.ui.nmVNumDbl.value()
         if culprit is self.ui.updateNmVBtn:
+            logString = 'Nm/V value for {0} changed\n'.format(self.exp[currIndex].basename)
+            self.simpleLogger(logString)
             self.exp[currIndex].changeSens(nmV)
         else:
             for c in self.exp:
+                logString = 'Nm/V value for {0} changed\n'.format(c.basename)
+                self.simpleLogger(logString)
                 c.changeSens(nmV)
                 
     
@@ -238,52 +286,63 @@ class curveWindow ( QtGui.QMainWindow ):
         currIndex = self.ui.slide1.value()
         speed = self.ui.speedNumDbl.value()
         if culprit is self.ui.updateSpeedBtn:
+            logString = 'Speed value for {0} changed\n'.format(self.exp[currIndex].basename)
+            self.simpleLogger(logString)
             self.exp[currIndex].changeSpeed(speed)
         else:
             for c in self.exp:
+                logString = 'Speed value for {0} changed\n'.format(c.basename)
+                self.simpleLogger(logString)
                 c.changeSpeed(speed)
                 
     
     def startAutoFit(self):
         
         self.plotDeriv(-1)
-
-
-    def setPointC(self):
-        print 'ciao'
-        
+        self.ui.autoFitBtn.setEnabled(False)
+        self.ui.rejectBtn.setEnabled(True)
+       
     
     def rejectAlign(self):
         
         self.fitFlag = False
         self.goToCurve(self.ui.slide1.value())
+        for i in xrange(len(self.exp)):
+            self.ctPoints[i] = None
         
     
     def plotDeriv(self,segInd):
         try:
-            sig = self.ui.grafo.plotItem.curves[segInd].yData
-            displ = self.ui.grafo.plotItem.curves[segInd].xData
-            pippo=bool(self.ui.wingPcNum.value())
-            print pippo
-            fit, _,_ = fitCnNC(displ,sig,'>',sgfWinPc,sgfDeg,compWinPc,wingPc = self.ui.wingPcNum.value())
+            c = self.exp[self.ui.slide1.value()-1]
+            fit, ctPt,_ = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc,winged = False,wingPc = 0, thPc = self.ui.slopePcNum.value())
+            if self.ctPoints[self.ui.slide1.value()-1] == None:
+                self.ctPoints[self.ui.slide1.value()-1] = ctPt
             self.ui.grafo.plot(self.ui.grafo.plotItem.curves[segInd].xData,fit,pen='r')
+            self.ui.grafo.plot([ctPt[0]],[ctPt[1]], symbol = 'o',symbolPen = 'g',symbolBrush = 'g')
             self.fitFlag = True
         except Exception as e:
             print e.message
             
     
     def align(self):
-        
         culprit = self.sender()
         self.fitFlag = False
         if culprit is self.ui.alignBtn:
             try:
+                logString = 'Aligning {0}\n'.format(self.exp[self.ui.slide1.value()-1].basename)
+                self.simpleLogger(logString)
                 _,contactPt, valid = fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',sgfWinPc,sgfDeg,compWinPc,
-                                      winged = bool(self.ui.wingPcNum.value()),wingPc = self.ui.wingPcNum.value())
+                                             winged = False,wingPc = 0, thPc = self.ui.slopePcNum.value())
+                if self.ctPoints[self.ui.slide1.value()-1] != None:
+                    contactPt = self.ctPoints[self.ui.slide1.value()-1]
+                    self.ctPoints[self.ui.slide1.value()-1] = None
+                    
                 for s in self.exp[self.ui.slide1.value()-1][1:]:
                     s.f = s.f[np.where(s.z>=contactPt[0])]-contactPt[1]
                     s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
                 self.exp[self.ui.slide1.value()-1].relevant = valid
+                if not valid:
+                    self.bad.append(self.ui.slide1.value()-1)
                 self.alignFlags[self.ui.slide1.value()-1] = True
                 self.goToCurve(self.ui.slide1.value())
                 self.ui.slide1.setValue(self.ui.slide1.value())
@@ -292,35 +351,52 @@ class curveWindow ( QtGui.QMainWindow ):
                 print e.message
         else:
             pmax = len(self.exp)
+            logString = 'Aligning all curves...\n'
+            self.simpleLogger(logString)
             QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
             progress = QtGui.QProgressDialog("Aligning curves...", "Cancel aligning", 0, pmax);
             i=0
             for c in self.exp:
                 progress.setValue(i)
-                self.alignFlags[i] = True
-                i=i+1
                 if (progress.wasCanceled()):
                     break
+                if self.alignFlags[i]:
+                    i=i+1
+                    continue
                 try:
-                    _,contactPt,valid = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,winged = bool(self.ui.wingPcNum.value()),
-                                          wingPc = self.ui.wingPcNum.value())
+                    _,contactPt,valid = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,winged = False,wingPc = 0, 
+                                                thPc = self.ui.slopePcNum.value())
+                    if self.ctPoints[i] != None:
+                        contactPt = self.ctPoints[i]
+                        self.ctPoints[i] = None
                     c.relevant = valid
+                    if not valid:
+                        self.bad.append(i)
+                        
                     for s in c[1:]:
                         s.f = s.f[np.where(s.z>=contactPt[0])]-contactPt[1]
                         s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
                 except Exception as e:
                     print e.message
+                self.alignFlags[i] = True
+                i=i+1
             progress.setValue(pmax)
             QtGui.QApplication.restoreOverrideCursor()
+            logString = 'Curves aligned\n'
+            self.simpleLogger(logString)
             self.goToCurve(1)
             self.ui.slide1.setValue(0)
             self.ui.slide2.setValue(0)
-            self.refillList()
+        self.refillList()
 
 
     def reload(self):
         pmax = len(self.exp)
+        self.bad = []
+        self.ui.removeBOBtn.setEnabled(False)
         QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
+        logString = 'Reloading all the curves\n'
+        self.simpleLogger(logString)
         progress = QtGui.QProgressDialog("Reloading curves...", "Cancel reloading", 0, pmax);
         i=0
         tempExp = deepcopy(self.exp)
@@ -328,6 +404,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.exp = experiment.experiment()
         for c in tempExp:
             self.alignFlags[i]=False
+            self.ctPoints [i] = None
             i+=1
             progress.setValue(i)
             self.exp.addFiles([c.filename])
@@ -335,9 +412,12 @@ class curveWindow ( QtGui.QMainWindow ):
         QtGui.QApplication.restoreOverrideCursor()
         tempExp = None
         self.fitFlag = False
+        self.refillList()
         self.goToCurve(1)
         self.ui.slide1.setValue(0)
         self.ui.slide2.setValue(0)
+        logString = 'Curves reloaded\n'
+        self.simpleLogger(logString)
         
         
     def saveAligned(self):
@@ -349,6 +429,8 @@ class curveWindow ( QtGui.QMainWindow ):
                 return None
             cc = deepcopy(c)
             dir = join(split(c.filename)[0],'aligned')
+            logString = 'Saving {0} aligned version in {1}\n'.format(c.basename,dir)
+            self.simpleLogger(logString)
             if not exists(dir):
                 makedirs(dir)
             onlyFile,ext = splitext(c.basename)
@@ -365,6 +447,8 @@ class curveWindow ( QtGui.QMainWindow ):
                     continue
                 cc = deepcopy(c)
                 dir = join(split(c.filename)[0],'aligned')
+                logString = 'Saving {0} aligned version in {1}\n'.format(c.basename,dir)
+                self.simpleLogger(logString)
                 if not exists(dir):
                     makedirs(dir)
                 onlyFile,ext = splitext(c.basename)
@@ -375,6 +459,66 @@ class curveWindow ( QtGui.QMainWindow ):
                 cc.save(filename)
                 cc = None
         
+
+    def simpleLogger(self,entry):
+        completeEntry = strftime('%Y/%m/%d') + '-' + strftime('%H:%M:%S') + ' -- ' + entry
+        self.ui.logTxt.insertPlainText(completeEntry)
+        
+        
+    def removeCurve(self):
+        culprit = self.sender()
+        if culprit.text() == 'Remove Curve' or culprit.text() == 'Remove bad ones':
+            culprit.setText('REALLY?')
+            return None
+        elif culprit is self.ui.removeBtn:
+            ind = self.ui.slide1.value()-1
+            logString = '{0} Removed\n'.format(self.exp[ind].basename)
+            self.simpleLogger(logString)
+            del self.exp[ind]
+            del self.alignFlags[ind]
+            del self.ctPoints[ind]
+            culprit.setText('Remove Curve')
+            if len(self.exp)<1:
+                self.curveRelatedEnabling(False)
+                self.ui.grafo.clear()
+            else:
+                self.goToCurve(1)
+        else:
+            tempExp = [k for j, k in enumerate(self.exp) if j in self.bad]
+            for t in tempExp:
+                logString = '{0} Removed\n'.format(t.basename)
+                self.simpleLogger(logString)
+                del self.exp[t.basename]
+            self.alignFlags = [k for j, k in enumerate(self.alignFlags) if j not in self.bad]
+            self.ctPoints = [k for j, k in enumerate(self.ctPoints) if j not in self.bad]
+            culprit.setText('Remove bad ones')
+            self.bad = []
+            self.ui.removeBOBtn.setEnabled(False)
+            if len(self.exp)<1:
+                self.curveRelatedEnabling(False)
+                self.ui.grafo.clear()
+            else:
+                self.goToCurve(1)
+                
+        
+        self.refillList()
+        
+    
+    def curveRelatedEnabling(self,value):
+        
+        self.ui.kNumDbl.setEnabled(value)
+        self.ui.nmVNumDbl.setEnabled(value)
+        self.ui.speedNumDbl.setEnabled(value)
+        self.ui.updateKBtn.setEnabled(value)
+        self.ui.updateNmVBtn.setEnabled(value)
+        self.ui.updateSpeedBtn.setEnabled(value)
+        self.ui.updateAllKBtn.setEnabled(value)
+        self.ui.updateAllNmVBtn.setEnabled(value)
+        self.ui.updateAllSpeedBtn.setEnabled(value)
+        self.ui.reloadBtn.setEnabled(value)
+        self.ui.slopePcNum.setEnabled(value)
+        self.ui.alignAllBtn.setEnabled(value)
+        self.ui.removeBtn.setEnabled(value)
 
 
     def setConnections(self):
@@ -404,6 +548,9 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.reloadBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.reload)
         QtCore.QObject.connect(self.ui.saveBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.saveAligned)
         QtCore.QObject.connect(self.ui.saveAllBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.saveAligned)
+        QtCore.QObject.connect(self.ui.removeBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCurve)
+        QtCore.QObject.connect(self.ui.removeBOBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCurve)
+        
         
         
         

@@ -111,7 +111,7 @@ def binaryDataOrganizer(binaryData,val1 = None, val2 = None):
     return archive
 
 
-def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,winged = True,wingPc = 10,thPc = 15):
+def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,winged = True,wingPc = 10,thPc = 15,realCntPt = True):
     
     force = seg.f
     displ = seg.z
@@ -138,6 +138,10 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,winged = True,
     freeFit = np.polyfit(displ[(freeGoodL[0]+freeGoodRcutWing):(freeGoodL[1]+1-freeGoodRcutWing)], force[(freeGoodL[0]+freeGoodRcutWing):(freeGoodL[1]+1-freeGoodRcutWing)], 1)
     
     interPt = (freeFit[1]-contFit[1])/(contFit[0]-freeFit[0])
+    realZ = displ[np.where(displ>=interPt)[0][0]]
+    realF = force[np.where(displ>=interPt)[0][0]]
+    
+    ctPoint = [realZ,realF] if realCntPt else [interPt,freeFit[1]]
     
     contEnd = np.where(displ<=interPt)[0][-1]+1
     freeStart = contEnd
@@ -151,7 +155,7 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,winged = True,
     
     valid = almost(contFit[0],k,thPc) and almost(freeFit[0]+k,k,thPc)
     
-    return allFit, [interPt,freeFit[1]], valid
+    return allFit, ctPoint, valid
     
         
         
