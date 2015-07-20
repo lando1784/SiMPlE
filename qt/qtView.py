@@ -16,6 +16,7 @@ from os import makedirs
 from os.path import split, join, splitext, exists
 from shutil import rmtree
 from time import strftime
+from cursor import cursor
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
 
@@ -104,6 +105,8 @@ class curveWindow ( QtGui.QMainWindow ):
         self.simpleLogger(logString)
         for fnamealone in loadedFiles:
             #if i % 100 == 0:
+            if fnamealone[0]=='.':
+                continue
             QtCore.QCoreApplication.processEvents()
             fname = os.path.join(str(dirname), fnamealone)
             try:
@@ -229,6 +232,7 @@ class curveWindow ( QtGui.QMainWindow ):
                 self.ui.grafo.plot(p.z,p.f)
         if self.fitFlag:
             self.plotDeriv(-1)
+            self.cursor = cursor(self.ui.grafo.plotItem,1,True,True,'o','m')
         if self.alignFlags[dove]:
             self.ui.grafo.plotItem.addLine(x=0)
             self.ui.grafo.plotItem.addLine(y=0)

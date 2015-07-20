@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/ettore/GIT/SiMPlE/qt/qtView.ui'
 #
-# Created: Fri Jul 17 18:40:39 2015
+# Created: Mon Jul 20 17:54:47 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,7 +26,7 @@ except AttributeError:
 class Ui_facewindow(object):
     def setupUi(self, facewindow):
         facewindow.setObjectName(_fromUtf8("facewindow"))
-        facewindow.resize(1145, 749)
+        facewindow.resize(1169, 749)
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(_fromUtf8("../smfsmanager/D_mica.png")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         facewindow.setWindowIcon(icon)
@@ -222,6 +222,24 @@ class Ui_facewindow(object):
         self.gridLayout_3.addWidget(self.saveAllBtn, 1, 17, 1, 1)
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout_3.addItem(spacerItem2, 0, 16, 1, 1)
+        self.gridLayout_3.setColumnStretch(0, 3)
+        self.gridLayout_3.setColumnStretch(1, 3)
+        self.gridLayout_3.setColumnStretch(2, 1)
+        self.gridLayout_3.setColumnStretch(3, 1)
+        self.gridLayout_3.setColumnStretch(4, 1)
+        self.gridLayout_3.setColumnStretch(5, 1)
+        self.gridLayout_3.setColumnStretch(6, 3)
+        self.gridLayout_3.setColumnStretch(7, 3)
+        self.gridLayout_3.setColumnStretch(8, 3)
+        self.gridLayout_3.setColumnStretch(9, 3)
+        self.gridLayout_3.setColumnStretch(10, 1)
+        self.gridLayout_3.setColumnStretch(11, 1)
+        self.gridLayout_3.setColumnStretch(12, 1)
+        self.gridLayout_3.setColumnStretch(13, 7)
+        self.gridLayout_3.setColumnStretch(14, 1)
+        self.gridLayout_3.setColumnStretch(15, 1)
+        self.gridLayout_3.setColumnStretch(16, 1)
+        self.gridLayout_3.setColumnStretch(17, 3)
         self.gridLayout.addLayout(self.gridLayout_3, 1, 0, 1, 2)
         self.logTxt = QtGui.QTextEdit(self.centralwidget)
         self.logTxt.setEnabled(True)
@@ -244,7 +262,7 @@ class Ui_facewindow(object):
         self.gridLayout.setRowStretch(2, 1)
         facewindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(facewindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1145, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1169, 25))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         facewindow.setMenuBar(self.menubar)
 

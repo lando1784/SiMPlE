@@ -99,7 +99,7 @@ class curve(mvobject.mvobject):
             out_file.write("# columns: distance force\n")
             out_file.write("# speed: {0}\n".format(p.speed))
             for i in range(len(p.z)):
-                out_file.write("{0} {1}\n".format(p.z[i]*1e-9, -1.0*p.z[i]*1e-12))
+                out_file.write("{0} {1}\n".format(p.z[i]*1e-9, -1.0*p.f[i]*1e-12))
             i+=1
         out_file.close()
         return True
