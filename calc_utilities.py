@@ -138,10 +138,6 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,winged = True,
     freeFit = np.polyfit(displ[(freeGoodL[0]+freeGoodRcutWing):(freeGoodL[1]+1-freeGoodRcutWing)], force[(freeGoodL[0]+freeGoodRcutWing):(freeGoodL[1]+1-freeGoodRcutWing)], 1)
     
     interPt = (freeFit[1]-contFit[1])/(contFit[0]-freeFit[0])
-    realZ = displ[np.where(displ>=interPt)[0][0]]
-    realF = force[np.where(displ>=interPt)[0][0]]
-    
-    ctPoint = [realZ,realF] if realCntPt else [displ[contGoodL[1]],sForce[contGoodL[1]]]#[interPt,freeFit[1]]
     
     contEnd = np.where(displ<=interPt)[0][-1]+1
     freeStart = contEnd
@@ -150,6 +146,11 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,winged = True,
     freeZ = displ[freeStart:]
     contF = contZ*contFit[0]+contFit[1]
     freeF = freeZ*freeFit[0]+freeFit[1]
+    
+    realZ = displ[np.where(force>=freeF[0])[0][0]]
+    realF = force[np.where(force>=freeF[0])[0][0]]
+    
+    ctPoint = [realZ,realF] if realCntPt else [displ[contGoodL[1]],sForce[contGoodL[1]]]
     
     allFit = [contF,freeF]
     

@@ -518,6 +518,16 @@ p, li { white-space: pre-wrap; }
         </property>
        </widget>
       </item>
+      <item row="2" column="18">
+       <widget class="QPushButton" name="closeExpBtn">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Close Exp</string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
    </layout>

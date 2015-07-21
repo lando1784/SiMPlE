@@ -122,15 +122,18 @@ def batchR9conversion(dirIn,dirOut=''):
     if not exists(dirOut):
         makedirs(dirOut)
     for f in files:
-        fileTexts = chopR9file(join(dirIn,f))
-        counter = 1
-        for t in fileTexts: 
-            F = splitext(f)
-            newf = F[0]+'_jpkEquiv_'+str(counter)+F[1]
-            w = open(join(dirOut,newf),'w')
-            w.write(t)
-            w.close()
-            counter+=1
+        try:
+            fileTexts = chopR9file(join(dirIn,f))
+            counter = 1
+            for t in fileTexts: 
+                F = splitext(f)
+                newf = F[0]+'_jpkEquiv_'+str(counter)+F[1]
+                w = open(join(dirOut,newf),'w')
+                w.write(t)
+                w.close()
+                counter+=1
+        except Exception as e:
+            print e.message
 
 if __name__ == '__main__':
     batchR9conversion(dir,dir2)

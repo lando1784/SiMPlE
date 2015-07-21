@@ -2,6 +2,7 @@ from PyQt4 import QtCore, QtGui
 from scipy.signal._savitzky_golay import savgol_filter
 from copy import copy,deepcopy
 
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -318,7 +319,7 @@ class curveWindow ( QtGui.QMainWindow ):
     def plotDeriv(self,segInd):
         try:
             c = self.exp[self.ui.slide1.value()-1]
-            fits, ctPt,_ = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc,winged = False,wingPc = 0, thPc = self.ui.slopePcNum.value(),realCntPt = False)
+            fits, ctPt,_ = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc,winged = False,wingPc = 0, thPc = self.ui.slopePcNum.value())
             if self.ctPoints[self.ui.slide1.value()-1] == None:
                 self.ctPoints[self.ui.slide1.value()-1] = ctPt
             fit = np.concatenate((fits[0],fits[1]))
@@ -439,8 +440,7 @@ class curveWindow ( QtGui.QMainWindow ):
                 return None
             cc = deepcopy(c)
             dir = join(split(c.filename)[0],'aligned')
-            logString = 'Saving {0} aligned version in {1}\n'.format(c.basename,dir)
-            self.simpleLogger(logString)
+
             if not exists(dir):
                 makedirs(dir)
             onlyFile,ext = splitext(c.basename)
@@ -448,6 +448,10 @@ class curveWindow ( QtGui.QMainWindow ):
                 del cc[0]
             basename = onlyFile+'_aligned'+ext
             filename = join(dir,basename)
+            if exists(filename):
+                filename = str(QtGui.QFileDialog.getSaveFileName(self,'The name you chose already exists. Select another one or pick the same to overwrite',filename))
+            logString = 'Saving {0} aligned version in {1}\n'.format(split(filename)[1],split(filename)[0])
+            self.simpleLogger(logString)
             cc.save(filename)
             cc = None
         else:
@@ -457,8 +461,6 @@ class curveWindow ( QtGui.QMainWindow ):
                     continue
                 cc = deepcopy(c)
                 dir = join(split(c.filename)[0],'aligned')
-                logString = 'Saving {0} aligned version in {1}\n'.format(c.basename,dir)
-                self.simpleLogger(logString)
                 if not exists(dir):
                     makedirs(dir)
                 onlyFile,ext = splitext(c.basename)
@@ -466,6 +468,10 @@ class curveWindow ( QtGui.QMainWindow ):
                     del cc[0]
                 basename = onlyFile+'_aligned'+ext
                 filename = join(dir,basename)
+                if exists(filename):
+                    filename = str(QtGui.QFileDialog.getSaveFileName(self,'The name you chose already exists. Select another one or pick the same to overwrite',filename))
+                logString = 'Saving {0} aligned version in {1}\n'.format(split(filename)[1],split(filename)[0])
+                self.simpleLogger(logString)
                 cc.save(filename)
                 cc = None
         
@@ -544,6 +550,24 @@ class curveWindow ( QtGui.QMainWindow ):
             self.refillList()
     
     
+    def closeExp(self):
+        
+        self.ui.grafo.clear()
+        self.exp = []
+        self.curveRelatedEnabling(False)
+        self.fitFlag = False
+        self.alignFlags = []
+        self.ctPoints = []
+        self.bad = []
+        self.badFlags = []
+        self.exp = experiment.experiment()
+        self.ui.alignBtn.setEnabled(False)
+        self.ui.autoFitBtn.setEnabled(False)
+        self.refillList()
+        logString = 'Experiment closed\n'
+        self.simpleLogger(logString)
+    
+    
     def curveRelatedEnabling(self,value):
         
         self.ui.kNumDbl.setEnabled(value)
@@ -561,6 +585,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.removeBtn.setEnabled(value)
         self.ui.overlayBtn.setEnabled(value)
         self.ui.chgStatBtn.setEnabled(value)
+        self.ui.closeExpBtn.setEnabled(value)
 
 
     def setConnections(self):
@@ -595,6 +620,7 @@ class curveWindow ( QtGui.QMainWindow ):
         
         QtCore.QObject.connect(self.ui.overlayBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.overlay)
         QtCore.QObject.connect(self.ui.chgStatBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.changeStatus)
+        QtCore.QObject.connect(self.ui.closeExpBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.closeExp)
         
         
         

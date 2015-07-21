@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/ettore/GIT/SiMPlE/qt/qtView.ui'
 #
-# Created: Tue Jul 21 14:01:06 2015
+# Created: Tue Jul 21 18:14:00 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -245,6 +245,10 @@ class Ui_facewindow(object):
         self.overlayBtn.setEnabled(False)
         self.overlayBtn.setObjectName(_fromUtf8("overlayBtn"))
         self.gridLayout_3.addWidget(self.overlayBtn, 0, 18, 1, 1)
+        self.closeExpBtn = QtGui.QPushButton(self.centralwidget)
+        self.closeExpBtn.setEnabled(False)
+        self.closeExpBtn.setObjectName(_fromUtf8("closeExpBtn"))
+        self.gridLayout_3.addWidget(self.closeExpBtn, 2, 18, 1, 1)
         self.gridLayout_3.setColumnStretch(0, 3)
         self.gridLayout_3.setColumnStretch(1, 3)
         self.gridLayout_3.setColumnStretch(2, 1)
@@ -329,5 +333,6 @@ class Ui_facewindow(object):
         self.saveBtn.setText(_translate("facewindow", "Save", None))
         self.saveAllBtn.setText(_translate("facewindow", "Save All", None))
         self.overlayBtn.setText(_translate("facewindow", "Overlay", None))
+        self.closeExpBtn.setText(_translate("facewindow", "Close Exp", None))
 
 from pyqtgraph import PlotWidget
