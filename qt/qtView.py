@@ -53,6 +53,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.alignFlags = []
         self.ctPoints = []
         self.bad = []
+        self.badFlags = []
         
         self.exp = experiment.experiment()
         
@@ -77,9 +78,10 @@ class curveWindow ( QtGui.QMainWindow ):
             progress.setValue(i)
             i=i+1
             self.alignFlags.append(False)
+            self.badFlags.append(True)
+            self.ctPoints.append(None)
             if (progress.wasCanceled()):
                 break
-            self.ctPoints.append(None)
         progress.setValue(pmax)
         QtGui.QApplication.restoreOverrideCursor()
 
@@ -112,6 +114,7 @@ class curveWindow ( QtGui.QMainWindow ):
             try:
                 self.exp.addFiles([str(fname)])
                 self.alignFlags.append(False)
+                self.badFlags.append(True)
                 self.ctPoints.append(None)
             except Exception as e:
                 print e.message
@@ -190,8 +193,6 @@ class curveWindow ( QtGui.QMainWindow ):
         
         
     def goToCurve(self,dove):
-        print 'dove-1 ' + str(dove-1)
-        print 'len ' + str(len(self.exp)) 
         if len(self.exp)<=dove-1 or dove-1<0:
             return None
         else:
@@ -349,6 +350,7 @@ class curveWindow ( QtGui.QMainWindow ):
                 self.exp[self.ui.slide1.value()-1].relevant = valid
                 if not valid:
                     self.bad.append(self.ui.slide1.value()-1)
+                    self.badFlags[self.ui.slide1.value()-1] = False
                 self.alignFlags[self.ui.slide1.value()-1] = True
                 self.goToCurve(self.ui.slide1.value())
                 self.ui.slide1.setValue(self.ui.slide1.value())
@@ -378,6 +380,7 @@ class curveWindow ( QtGui.QMainWindow ):
                     c.relevant = valid
                     if not valid:
                         self.bad.append(i)
+                        self.badFlags[i] = False
                         
                     for s in c[1:]:
                         s.f = s.f[np.where(s.z>=contactPt[0])]-np.mean(fits[1])#contactPt[1]
@@ -410,6 +413,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.exp = experiment.experiment()
         for c in tempExp:
             self.alignFlags[i]=False
+            self.badFlags[i] = True
             self.ctPoints [i] = None
             i+=1
             progress.setValue(i)
@@ -482,7 +486,11 @@ class curveWindow ( QtGui.QMainWindow ):
             self.simpleLogger(logString)
             del self.exp[ind]
             del self.alignFlags[ind]
+            del self.badFlags[ind]
             del self.ctPoints[ind]
+            badInd = self.bad.index(ind)
+            del self.bad[badInd]
+            
             culprit.setText('Remove Curve')
             if len(self.exp)<1:
                 self.curveRelatedEnabling(False)
@@ -497,6 +505,7 @@ class curveWindow ( QtGui.QMainWindow ):
                 del self.exp[t.basename]
             self.alignFlags = [k for j, k in enumerate(self.alignFlags) if j not in self.bad]
             self.ctPoints = [k for j, k in enumerate(self.ctPoints) if j not in self.bad]
+            self.badFlags = [k for j, k in enumerate(self.badFlags) if j not in self.bad]
             culprit.setText('Remove bad ones')
             self.bad = []
             self.ui.removeBOBtn.setEnabled(False)
@@ -509,6 +518,31 @@ class curveWindow ( QtGui.QMainWindow ):
         
         self.refillList()
         
+    
+    def overlay(self):
+        
+        color = pg.mkColor(0,0,0,25.6)
+        self.ui.grafo.clear()
+        for i in xrange(len(self.exp)):
+            if self.alignFlags[i] and self.exp[i].relevant:
+                print self.exp[i][-1].z
+                self.ui.grafo.plot(self.exp[i][-1].z,self.exp[i][-1].f,pen=None,symbol='+',symbolPen = color, symbolBrush = color)
+                
+                
+    def changeStatus(self):
+        
+        ind = self.ui.slide1.value()-1
+        if self.alignFlags[ind]:
+            self.exp[ind].relevant = not self.exp[ind].relevant
+            if not self.badFlags[ind]:
+                badInd = self.bad.index(ind)
+                del self.bad[badInd]
+            else:
+                self.bad.append(ind)
+                self.ui.removeBOBtn.setEnabled(True)
+            self.badFlags[ind] = not self.badFlags[ind]
+            self.refillList()
+    
     
     def curveRelatedEnabling(self,value):
         
@@ -525,6 +559,8 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.slopePcNum.setEnabled(value)
         self.ui.alignAllBtn.setEnabled(value)
         self.ui.removeBtn.setEnabled(value)
+        self.ui.overlayBtn.setEnabled(value)
+        self.ui.chgStatBtn.setEnabled(value)
 
 
     def setConnections(self):
@@ -557,7 +593,8 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.removeBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCurve)
         QtCore.QObject.connect(self.ui.removeBOBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCurve)
         
-        
+        QtCore.QObject.connect(self.ui.overlayBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.overlay)
+        QtCore.QObject.connect(self.ui.chgStatBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.changeStatus)
         
         
         
