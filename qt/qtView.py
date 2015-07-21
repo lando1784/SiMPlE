@@ -232,7 +232,6 @@ class curveWindow ( QtGui.QMainWindow ):
                 self.ui.grafo.plot(p.z,p.f)
         if self.fitFlag:
             self.plotDeriv(-1)
-            self.cursor = cursor(self.ui.grafo.plotItem,1,True,True,'o','m')
         if self.alignFlags[dove]:
             self.ui.grafo.plotItem.addLine(x=0)
             self.ui.grafo.plotItem.addLine(y=0)
@@ -318,9 +317,10 @@ class curveWindow ( QtGui.QMainWindow ):
     def plotDeriv(self,segInd):
         try:
             c = self.exp[self.ui.slide1.value()-1]
-            fit, ctPt,_ = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc,winged = False,wingPc = 0, thPc = self.ui.slopePcNum.value())
+            fits, ctPt,_ = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc,winged = False,wingPc = 0, thPc = self.ui.slopePcNum.value(),realCntPt = False)
             if self.ctPoints[self.ui.slide1.value()-1] == None:
                 self.ctPoints[self.ui.slide1.value()-1] = ctPt
+            fit = np.concatenate((fits[0],fits[1]))
             self.ui.grafo.plot(self.ui.grafo.plotItem.curves[segInd].xData,fit,pen='r')
             self.ui.grafo.plot([ctPt[0]],[ctPt[1]], symbol = 'o',symbolPen = 'g',symbolBrush = 'g')
             self.fitFlag = True
@@ -335,14 +335,16 @@ class curveWindow ( QtGui.QMainWindow ):
             try:
                 logString = 'Aligning {0}\n'.format(self.exp[self.ui.slide1.value()-1].basename)
                 self.simpleLogger(logString)
-                _,contactPt, valid = fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',sgfWinPc,sgfDeg,compWinPc,
+                fits,contactPt, valid = fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',sgfWinPc,sgfDeg,compWinPc,
                                              winged = False,wingPc = 0, thPc = self.ui.slopePcNum.value())
                 if self.ctPoints[self.ui.slide1.value()-1] != None:
                     contactPt = self.ctPoints[self.ui.slide1.value()-1]
                     self.ctPoints[self.ui.slide1.value()-1] = None
                     
                 for s in self.exp[self.ui.slide1.value()-1][1:]:
-                    s.f = s.f[np.where(s.z>=contactPt[0])]-contactPt[1]
+                    print np.mean(fits[1])
+                    print s.f[-1:-10]
+                    s.f = s.f[np.where(s.z>=contactPt[0])]-np.mean(fits[1])#contactPt[1]
                     s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
                 self.exp[self.ui.slide1.value()-1].relevant = valid
                 if not valid:
@@ -368,7 +370,7 @@ class curveWindow ( QtGui.QMainWindow ):
                     i=i+1
                     continue
                 try:
-                    _,contactPt,valid = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,winged = False,wingPc = 0, 
+                    fits,contactPt,valid = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,winged = False,wingPc = 0, 
                                                 thPc = self.ui.slopePcNum.value())
                     if self.ctPoints[i] != None:
                         contactPt = self.ctPoints[i]
@@ -378,7 +380,7 @@ class curveWindow ( QtGui.QMainWindow ):
                         self.bad.append(i)
                         
                     for s in c[1:]:
-                        s.f = s.f[np.where(s.z>=contactPt[0])]-contactPt[1]
+                        s.f = s.f[np.where(s.z>=contactPt[0])]-np.mean(fits[1])#contactPt[1]
                         s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
                 except Exception as e:
                     print e.message
