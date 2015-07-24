@@ -32,7 +32,7 @@ pg.setConfigOption('foreground', 'k')
 htmlpre = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">\n<html><head><meta name="qrichtext" content="1" /><style type="text/css">\np, li { white-space: pre-wrap; }\n</style></head><body style=" font-family:"Ubuntu"; font-size:11pt; font-weight:400; font-style:normal;">\n<p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-size:8pt;">'
 htmlpost = '</span></p></body></html>'
 
-compWinPc = 10
+compWinPc = 5
 sgfWinPc = 10
 sgfDeg = 3
 
@@ -55,6 +55,8 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ctPoints = []
         self.bad = []
         self.badFlags = []
+        self.ui.setPathBtn.setStyleSheet('background-color: none')
+        self.globDir = ''
         
         self.exp = experiment.experiment()
         
@@ -78,7 +80,8 @@ class curveWindow ( QtGui.QMainWindow ):
             self.exp.addFiles([str(fname)])
             progress.setValue(i)
             i=i+1
-            self.alignFlags.append(False)
+            aligned = self.exp[-1][0].direction == 'far'
+            self.alignFlags.append(aligned)
             self.badFlags.append(True)
             self.ctPoints.append(None)
             if (progress.wasCanceled()):
@@ -114,7 +117,8 @@ class curveWindow ( QtGui.QMainWindow ):
             fname = os.path.join(str(dirname), fnamealone)
             try:
                 self.exp.addFiles([str(fname)])
-                self.alignFlags.append(False)
+                aligned = self.exp[-1][0].direction == 'far'
+                self.alignFlags.append(aligned)
                 self.badFlags.append(True)
                 self.ctPoints.append(None)
             except Exception as e:
@@ -219,7 +223,7 @@ class curveWindow ( QtGui.QMainWindow ):
     def viewCurve(self,dove = 1,autorange=True):
         dove -= 1
         self.ui.grafo.clear()
-        start = 1 if self.alignFlags[dove] else 0
+        start = -1 if self.alignFlags[dove] else 0
         self.ui.alignBtn.setEnabled(not self.alignFlags[dove])
         self.ui.alignAllBtn.setEnabled(not np.array(self.alignFlags).all())
         self.ui.autoFitBtn.setEnabled(not self.alignFlags[dove] and not self.fitFlag)
@@ -317,17 +321,19 @@ class curveWindow ( QtGui.QMainWindow ):
         
     
     def plotDeriv(self,segInd):
-        try:
+        #try:
+        if True:
             c = self.exp[self.ui.slide1.value()-1]
-            fits, ctPt,_ = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc,winged = False,wingPc = 0, thPc = self.ui.slopePcNum.value())
+            fits, ctPt,_,d = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
             if self.ctPoints[self.ui.slide1.value()-1] == None:
                 self.ctPoints[self.ui.slide1.value()-1] = ctPt
             fit = np.concatenate((fits[0],fits[1]))
             self.ui.grafo.plot(self.ui.grafo.plotItem.curves[segInd].xData,fit,pen='r')
+            self.ui.grafo.plot(d[0],d[1],pen='m')
             self.ui.grafo.plot([ctPt[0]],[ctPt[1]], symbol = 'o',symbolPen = 'g',symbolBrush = 'g')
             self.fitFlag = True
-        except Exception as e:
-            print e.message
+        #except Exception as e:
+            #print e.message
             
     
     def align(self):
@@ -337,15 +343,12 @@ class curveWindow ( QtGui.QMainWindow ):
             try:
                 logString = 'Aligning {0}\n'.format(self.exp[self.ui.slide1.value()-1].basename)
                 self.simpleLogger(logString)
-                fits,contactPt, valid = fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',sgfWinPc,sgfDeg,compWinPc,
-                                             winged = False,wingPc = 0, thPc = self.ui.slopePcNum.value())
+                fits,contactPt, valid,_= fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
                 if self.ctPoints[self.ui.slide1.value()-1] != None:
                     contactPt = self.ctPoints[self.ui.slide1.value()-1]
                     self.ctPoints[self.ui.slide1.value()-1] = None
                     
                 for s in self.exp[self.ui.slide1.value()-1][1:]:
-                    print np.mean(fits[1])
-                    print s.f[-1:-10]
                     s.f = s.f[np.where(s.z>=contactPt[0])]-np.mean(fits[1])#contactPt[1]
                     s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
                 self.exp[self.ui.slide1.value()-1].relevant = valid
@@ -373,8 +376,7 @@ class curveWindow ( QtGui.QMainWindow ):
                     i=i+1
                     continue
                 try:
-                    fits,contactPt,valid = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,winged = False,wingPc = 0, 
-                                                thPc = self.ui.slopePcNum.value())
+                    fits,contactPt,valid,_ = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
                     if self.ctPoints[i] != None:
                         contactPt = self.ctPoints[i]
                         self.ctPoints[i] = None
@@ -439,7 +441,10 @@ class curveWindow ( QtGui.QMainWindow ):
             if not self.alignFlags[ind] or len(c)<1:
                 return None
             cc = deepcopy(c)
-            dir = join(split(c.filename)[0],'aligned')
+            if self.globDir == '':
+                dir = join(split(c.filename)[0],'aligned')
+            else:
+                dir = self.globDir
 
             if not exists(dir):
                 makedirs(dir)
@@ -460,7 +465,10 @@ class curveWindow ( QtGui.QMainWindow ):
                 if not self.alignFlags[i] or len(c)<1:
                     continue
                 cc = deepcopy(c)
-                dir = join(split(c.filename)[0],'aligned')
+                if self.globDir == '':     
+                    dir = join(split(c.filename)[0],'aligned')
+                else:
+                    dir = self.globDir
                 if not exists(dir):
                     makedirs(dir)
                 onlyFile,ext = splitext(c.basename)
@@ -494,8 +502,11 @@ class curveWindow ( QtGui.QMainWindow ):
             del self.alignFlags[ind]
             del self.badFlags[ind]
             del self.ctPoints[ind]
-            badInd = self.bad.index(ind)
-            del self.bad[badInd]
+            try:
+                badInd = self.bad.index(ind)
+                del self.bad[badInd]
+            except:
+                pass
             
             culprit.setText('Remove Curve')
             if len(self.exp)<1:
@@ -526,13 +537,13 @@ class curveWindow ( QtGui.QMainWindow ):
         
     
     def overlay(self):
-        
-        color = pg.mkColor(0,0,0,25.6)
+        alpha = 256.0/(len(self.exp)-len(self.bad))
+        print alpha
+        color = pg.mkColor(0,0,0,alpha)
         self.ui.grafo.clear()
         for i in xrange(len(self.exp)):
             if self.alignFlags[i] and self.exp[i].relevant:
-                print self.exp[i][-1].z
-                self.ui.grafo.plot(self.exp[i][-1].z,self.exp[i][-1].f,pen=None,symbol='+',symbolPen = color, symbolBrush = color)
+                self.ui.grafo.plot(self.exp[i][-1].z,self.exp[i][-1].f,pen=None,symbol='o',symbolSize = 2,symbolPen = color, symbolBrush = color)
                 
                 
     def changeStatus(self):
@@ -566,6 +577,19 @@ class curveWindow ( QtGui.QMainWindow ):
         self.refillList()
         logString = 'Experiment closed\n'
         self.simpleLogger(logString)
+        self.globDir = ''
+        self.ui.setPathBtn.setStyleSheet('background-color: none')
+        
+    
+    def setSavePath(self):
+        
+        dirname = str(QtGui.QFileDialog.getExistingDirectory(self, 'Select a directory', './'))
+        if dirname != '':
+            logString = 'Global save path set at: {0}'.format(dirname)
+            self.simpleLogger(logString)
+            self.globDir = dirname
+            self.ui.setPathBtn.setStyleSheet('background-color: red')
+        
     
     
     def curveRelatedEnabling(self,value):
@@ -586,6 +610,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.overlayBtn.setEnabled(value)
         self.ui.chgStatBtn.setEnabled(value)
         self.ui.closeExpBtn.setEnabled(value)
+        self.ui.setPathBtn.setEnabled(value)
 
 
     def setConnections(self):
@@ -621,6 +646,7 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.overlayBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.overlay)
         QtCore.QObject.connect(self.ui.chgStatBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.changeStatus)
         QtCore.QObject.connect(self.ui.closeExpBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.closeExp)
+        QtCore.QObject.connect(self.ui.setPathBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.setSavePath)
         
         
         
