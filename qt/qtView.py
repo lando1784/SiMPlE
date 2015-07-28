@@ -12,7 +12,8 @@ import os as os
 import sys
 import pyqtgraph as pg
 import numpy as np
-import Ui_qtView as qtView_face
+#import Ui_qtView as qtView_face
+import Ui_SiMPlE_main as qtView_face
 from os import makedirs
 from os.path import split, join, splitext, exists
 from shutil import rmtree
@@ -57,6 +58,11 @@ class curveWindow ( QtGui.QMainWindow ):
         self.badFlags = []
         self.ui.setPathBtn.setStyleSheet('background-color: none')
         self.globDir = ''
+        self.peaksOnPlot = False
+        
+        self.ui.movAvgPcNum.setKeyboardTracking(False)
+        self.ui.movVarPcNum.setKeyboardTracking(False)
+        self.ui.peakThrsPcNum.setKeyboardTracking(False)
         
         self.exp = experiment.experiment()
         
@@ -202,6 +208,7 @@ class curveWindow ( QtGui.QMainWindow ):
             return None
         else:
             self.ui.labFilename.setText(htmlpre + self.exp[dove-1].basename + htmlpost)
+            self.ui.labelNumber.setText(str(dove))
             if self.prev != 0:
                 self.sqSwitch(self.prev,False)
             self.sqSwitch(dove,True)
@@ -223,26 +230,39 @@ class curveWindow ( QtGui.QMainWindow ):
     def viewCurve(self,dove = 1,autorange=True):
         dove -= 1
         self.ui.grafo.clear()
-        start = -1 if self.alignFlags[dove] else 0
+        self.checkCurve(dove)
+        for p in self.exp[dove][0:]:
+            if p == self.exp[dove][-1]:
+                if not self.alignFlags[dove]:
+                    self.ui.grafo.plot(p.z,p.f,pen='b')
+                else:
+                    self.ui.grafo.plot(p.z,p.f,symbolPen='b',symbolBrush='b',symbol='o',symbolSize=2)
+            else:
+                self.ui.grafo.plot(p.z,p.f)
+        if self.fitFlag:
+            self.plotFit(-1)
+        if autorange:
+            self.ui.grafo.autoRange()
+    
+    
+    def checkCurve(self,dove):
         self.ui.alignBtn.setEnabled(not self.alignFlags[dove])
+        self.ui.showPeakBtn.setEnabled(self.alignFlags[dove])
         self.ui.alignAllBtn.setEnabled(not np.array(self.alignFlags).all())
         self.ui.autoFitBtn.setEnabled(not self.alignFlags[dove] and not self.fitFlag)
         self.ui.rejectBtn.setEnabled(not self.alignFlags[dove] and self.fitFlag)
         self.ui.removeBOBtn.setEnabled(len(self.bad)>=1)
         self.ui.saveBtn.setEnabled(self.alignFlags[dove])
         self.ui.saveAllBtn.setEnabled(self.alignFlags[dove])
-        for p in self.exp[dove][start:]:
-            if p == self.exp[dove][-1]:
-                self.ui.grafo.plot(p.z,p.f,pen='b')
-            else:
-                self.ui.grafo.plot(p.z,p.f)
-        if self.fitFlag:
-            self.plotDeriv(-1)
+        self.ui.showPeakBtn.setEnabled(self.alignFlags[dove] and not self.peaksOnPlot)
+        self.ui.movVarPcNum.setEnabled(self.alignFlags[dove])
+        self.ui.movAvgPcNum.setEnabled(self.alignFlags[dove])
+        self.ui.peakThrsPcNum.setEnabled(self.alignFlags[dove])
         if self.alignFlags[dove]:
             self.ui.grafo.plotItem.addLine(x=0)
             self.ui.grafo.plotItem.addLine(y=0)
-        if autorange:
-            self.ui.grafo.autoRange()
+            if self.peaksOnPlot:
+                self.showPeaks()
             
     
     def batchConv(self):
@@ -305,12 +325,60 @@ class curveWindow ( QtGui.QMainWindow ):
                 c.changeSpeed(speed)
                 
     
-    def startAutoFit(self):
+    def showFit(self):
         
-        self.plotDeriv(-1)
+        self.plotFit(-1)
         self.ui.autoFitBtn.setEnabled(False)
         self.ui.rejectBtn.setEnabled(True)
        
+    
+    def showPeaks(self):
+        try:
+            c = self.exp[self.ui.slide1.value()-1]
+            VarT = int(c[-1].f.shape[0]*self.ui.movVarPcNum.value()/100)
+            vard = movingVar(c[-1].f,VarT)
+            TriT = self.ui.peakThrsPcNum.value()
+            AvgT = self.ui.movAvgPcNum.value()
+            tri= filteredTriangles(vard,TriT,AvgT)
+            self.ui.grafo.plot(c[-1].z[tri[:,0].astype(int)],c[-1].f[tri[:,0].astype(int)],pen=None,symbolPen = 'm', symbolBrush = 'm', symbol = '+')
+        except Exception as e:
+            logString = e.message+'\n'
+            self.simpleLogger(logString)
+        self.peaksOnPlot = True
+        self.ui.showPeakBtn.setEnabled(False)
+        self.ui.removePeakBtn.setEnabled(True)
+        
+    
+    def updatePeaks(self):
+        if not self.peaksOnPlot:
+            return None
+        try:
+            c = self.exp[self.ui.slide1.value()-1]
+            print len(self.ui.grafo.plotItem.curves)
+            print len(c)
+            if len(self.ui.grafo.plotItem.curves)>len(c):
+                print 'ciao'
+                self.ui.grafo.plotItem.removeItem(self.ui.grafo.plotItem.curves[-1])
+                print len(self.ui.grafo.plotItem.curves)
+                #self.ui.grafo.update()
+            VarT = int(c[-1].f.shape[0]*self.ui.movVarPcNum.value()/100)
+            vard = movingVar(c[-1].f,VarT)
+            TriT = self.ui.peakThrsPcNum.value()
+            AvgT = self.ui.movAvgPcNum.value()
+            tri= filteredTriangles(vard,TriT,AvgT)
+            self.ui.grafo.plot(c[-1].z[tri[:,0].astype(int)],c[-1].f[tri[:,0].astype(int)],pen=None,symbolPen = 'm', symbolBrush = 'm', symbol = '+')
+            self.peaksOnPlot = True
+        except Exception as e:
+            logString = e.message+'\n'
+            self.simpleLogger(logString)
+        
+    
+    def removePeaks(self):
+        self.peaksOnPlot = False
+        self.goToCurve(self.ui.slide1.value())
+        self.ui.showPeakBtn.setEnabled(True)
+        self.ui.removePeakBtn.setEnabled(False)
+    
     
     def rejectAlign(self):
         
@@ -320,16 +388,15 @@ class curveWindow ( QtGui.QMainWindow ):
             self.ctPoints[i] = None
         
     
-    def plotDeriv(self,segInd):
+    def plotFit(self,segInd):
         #try:
         if True:
             c = self.exp[self.ui.slide1.value()-1]
-            fits, ctPt,_,d = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
+            fits, ctPt,_ = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
             if self.ctPoints[self.ui.slide1.value()-1] == None:
                 self.ctPoints[self.ui.slide1.value()-1] = ctPt
             fit = np.concatenate((fits[0],fits[1]))
-            self.ui.grafo.plot(self.ui.grafo.plotItem.curves[segInd].xData,fit,pen='r')
-            self.ui.grafo.plot(d[0],d[1],pen='m')
+            self.ui.grafo.plot(c[segInd].z,fit,pen='r')
             self.ui.grafo.plot([ctPt[0]],[ctPt[1]], symbol = 'o',symbolPen = 'g',symbolBrush = 'g')
             self.fitFlag = True
         #except Exception as e:
@@ -343,7 +410,7 @@ class curveWindow ( QtGui.QMainWindow ):
             try:
                 logString = 'Aligning {0}\n'.format(self.exp[self.ui.slide1.value()-1].basename)
                 self.simpleLogger(logString)
-                fits,contactPt, valid,_= fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
+                fits,contactPt, valid= fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
                 if self.ctPoints[self.ui.slide1.value()-1] != None:
                     contactPt = self.ctPoints[self.ui.slide1.value()-1]
                     self.ctPoints[self.ui.slide1.value()-1] = None
@@ -356,6 +423,7 @@ class curveWindow ( QtGui.QMainWindow ):
                     self.bad.append(self.ui.slide1.value()-1)
                     self.badFlags[self.ui.slide1.value()-1] = False
                 self.alignFlags[self.ui.slide1.value()-1] = True
+                del self.exp[self.ui.slide1.value()-1][0]
                 self.goToCurve(self.ui.slide1.value())
                 self.ui.slide1.setValue(self.ui.slide1.value())
                 self.ui.slide2.setValue(self.ui.slide1.value())
@@ -376,7 +444,7 @@ class curveWindow ( QtGui.QMainWindow ):
                     i=i+1
                     continue
                 try:
-                    fits,contactPt,valid,_ = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
+                    fits,contactPt,valid = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
                     if self.ctPoints[i] != None:
                         contactPt = self.ctPoints[i]
                         self.ctPoints[i] = None
@@ -391,6 +459,7 @@ class curveWindow ( QtGui.QMainWindow ):
                 except Exception as e:
                     print e.message
                 self.alignFlags[i] = True
+                del c[0]
                 i=i+1
             progress.setValue(pmax)
             QtGui.QApplication.restoreOverrideCursor()
@@ -538,7 +607,6 @@ class curveWindow ( QtGui.QMainWindow ):
     
     def overlay(self):
         alpha = 256.0/(len(self.exp)-len(self.bad))
-        print alpha
         color = pg.mkColor(0,0,0,alpha)
         self.ui.grafo.clear()
         for i in xrange(len(self.exp)):
@@ -633,7 +701,7 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.updateSpeedBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSpeed)
         QtCore.QObject.connect(self.ui.updateAllSpeedBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSpeed)
         
-        QtCore.QObject.connect(self.ui.autoFitBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.startAutoFit)
+        QtCore.QObject.connect(self.ui.autoFitBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.showFit)
         QtCore.QObject.connect(self.ui.rejectBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.rejectAlign)
         QtCore.QObject.connect(self.ui.alignBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.align)
         QtCore.QObject.connect(self.ui.alignAllBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.align)
@@ -642,13 +710,18 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.saveAllBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.saveAligned)
         QtCore.QObject.connect(self.ui.removeBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCurve)
         QtCore.QObject.connect(self.ui.removeBOBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCurve)
+        QtCore.QObject.connect(self.ui.showPeakBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.showPeaks)
+        QtCore.QObject.connect(self.ui.removePeakBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removePeaks)
+        
         
         QtCore.QObject.connect(self.ui.overlayBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.overlay)
         QtCore.QObject.connect(self.ui.chgStatBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.changeStatus)
         QtCore.QObject.connect(self.ui.closeExpBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.closeExp)
         QtCore.QObject.connect(self.ui.setPathBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.setSavePath)
         
-        
+        QtCore.QObject.connect(self.ui.movVarPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
+        QtCore.QObject.connect(self.ui.movAvgPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
+        QtCore.QObject.connect(self.ui.peakThrsPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
         
         QtCore.QMetaObject.connectSlotsByName(self)
 

@@ -242,14 +242,42 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,thPc = 15,real
     
     contB = almost(contFit[0],k,thPc)
     freeB = almost(freeFit[0],0.0,thPc,1,-1)
-    print contB
-    print freeB
     valid = contB and freeB
     
-    return allFit, ctPoint, valid,[freeDp1,freeFp1]
+    return allFit, ctPoint, valid
     
+
+def findTriangles(data):
+    
+    triangles = []
+    floor = [[0,data[0]]]
+    for i in xrange(data.shape[0]-2):
         
-        
+        if data[i+1]>data[i] and data[i+1]>data[i+2]:
+            triangles.append([i+1,data[i+1]])
+        else:
+            floor.append([i+1,data[i+1]])
+    
+    floor.append([data.shape[0]-1,data[-1]])
+            
+    return np.array(triangles),np.array(floor)
+
+
+def filteredTriangles(data,thresh,smoothPc):
+    
+    triangles,floor = findTriangles(data)
+    ftri = []
+    smooth = movingAvg(data, data.shape[0]*smoothPc/100)
+    
+    
+    for t in triangles:
+        if t[1] > np.max(smooth)*thresh/100+smooth[t[0]]:
+            ftri.append(t)
+    
+    return np.array(ftri)
+    
+
+
 if __name__ == '__main__':
     
     p = np.array([1,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2])

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <class>facewindow</class>
+ <widget class="QMainWindow" name="facewindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -14,22 +14,22 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="simpleCtWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="6,2">
+   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="12,4,1">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="6,1">
       <item>
-       <widget class="QGraphicsView" name="graphicsView"/>
+       <widget class="PlotWidget" name="grafo"/>
       </item>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QGraphicsView" name="graphicsView_2"/>
+         <widget class="QGraphicsView" name="griglia"/>
         </item>
         <item>
-         <widget class="QDial" name="dial"/>
+         <widget class="QDial" name="slide2"/>
         </item>
         <item>
-         <widget class="QScrollBar" name="horizontalScrollBar">
+         <widget class="QScrollBar" name="slide1">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -42,7 +42,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="6,3">
       <item>
-       <widget class="QTabWidget" name="tabWidget">
+       <widget class="QTabWidget" name="functionsTabs">
         <property name="currentIndex">
          <number>0</number>
         </property>
@@ -50,28 +50,532 @@
          <attribute name="title">
           <string>Files Management</string>
          </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="4,4,4">
+          <item>
+           <widget class="QGroupBox" name="loadBox">
+            <property name="title">
+             <string>Load</string>
+            </property>
+            <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="2">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout">
+               <item>
+                <widget class="QPushButton" name="bAddDir">
+                 <property name="text">
+                  <string>Add DIR</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="bAddFiles">
+                 <property name="text">
+                  <string>Add Files</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="convr9Btn">
+                 <property name="text">
+                  <string>Convert R9 files</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QPushButton" name="reloadBtn">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>Reload</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="saveBox">
+            <property name="title">
+             <string>Save</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QPushButton" name="setPathBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Set Path</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="saveBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Save</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="saveAllBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Save All</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="removeBox">
+            <property name="title">
+             <string>Change and remove</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <widget class="QPushButton" name="chgStatBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Change Status</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="removeBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Remove Curve</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="removeBOBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Remove bad ones</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="closeExpBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Close Exp</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="tab_6">
          <attribute name="title">
           <string>Curve Params</string>
          </attribute>
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QGroupBox" name="fromFileBox">
+            <property name="title">
+             <string>From File</string>
+            </property>
+            <layout class="QGridLayout" name="gridLayout_2">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>k [N/nm]</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="kNumDbl">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="maximum">
+                <double>1000.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QPushButton" name="updateKBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>UPDATE</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QPushButton" name="updateAllKBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>UPDATE ALL</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Sensitivity [nm/V]</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="nmVNumDbl">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="maximum">
+                <double>1000.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QPushButton" name="updateNmVBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>UPDATE</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="3">
+              <widget class="QPushButton" name="updateAllNmVBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>UPDATE ALL</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>Speed [nm/s]</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="speedNumDbl">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="maximum">
+                <double>1000.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QPushButton" name="updateSpeedBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>UPDATE</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="3">
+              <widget class="QPushButton" name="updateAllSpeedBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>UPDATE ALL</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="fitNpeakBox">
+            <property name="title">
+             <string>Fitting and Peak finding</string>
+            </property>
+            <layout class="QFormLayout" name="formLayout">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>Slope tolerance %</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="slopePcNum">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>15</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="movVarPcNum">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>10</number>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QSpinBox" name="peakThrsPcNum">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>70</number>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Peak thrsh %</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_9">
+               <property name="text">
+                <string>Movig var win %</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>Moving avg %</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <widget class="QSpinBox" name="movAvgPcNum">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
+               <property name="value">
+                <number>20</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+         </layout>
         </widget>
         <widget class="QWidget" name="tab_7">
          <attribute name="title">
           <string>Plot Options</string>
          </attribute>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="autoFitBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Show Fit</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QPushButton" name="rejectBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Remove Fit</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QPushButton" name="alignBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Align</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QPushButton" name="alignAllBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Align All</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QPushButton" name="overlayBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Overlay</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QPushButton" name="showPeakBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Show Peaks</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QPushButton" name="removePeakBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Remove Peaks</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </widget>
       </item>
       <item>
-       <widget class="QTextEdit" name="textEdit"/>
+       <widget class="QTextEdit" name="logTxt"/>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="2,2,5,2,2,15">
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600;&quot;&gt;Current curve&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Name: &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labFilename">
+        <property name="text">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;//&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;Number: &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelNumber">
+        <property name="text">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Ubuntu'; font-size:11pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>
    </layout>
-   <zorder>horizontalLayoutWidget</zorder>
-   <zorder>graphicsView</zorder>
-   <zorder>horizontalLayoutWidget_2</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -83,8 +587,14 @@
     </rect>
    </property>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>PlotWidget</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqtgraph</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
