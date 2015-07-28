@@ -187,11 +187,9 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,thPc = 15,real
     force = seg.f
     displ = seg.z
     k = seg.k
-    sgfWin = force.shape[0]/100*sgfWinPc
-    sgfWin += int(sgfWin%2==0)
     compWin = force.shape[0]/100*compWinPc
     compWin += int(compWin%2==0)
-    sForce = sgf(force,sgfWin,sgfDeg)
+    sForce = smartSgf(force,sgfWinPc,sgfDeg)
     gForce = np.gradient(sForce)
     ggForce = np.gradient(gForce)
     gForceBi = movingComp(gForce,ggForce,sym,compWin)
@@ -275,7 +273,24 @@ def filteredTriangles(data,thresh,smoothPc):
             ftri.append(t)
     
     return np.array(ftri)
+   
+   
+def findJumps(data,multiplierPc):
+    meanDiff = np.mean(abs(data[1:]-data[:-1]))
+    thr = meanDiff*multiplierPc
+    jumps = []
+    for i in xrange(data.shape[0]-1):
+        if abs(data[i]-data[i+1])>thr:
+            jumps.append([i,data[i]])
+    return np.array(jumps)
+
+
+def smartSgf(data,sgfWinPc,sgfDeg):
     
+    sgfWin = data.shape[0]*sgfWinPc/100 + 1 - (data.shape[0]*sgfWinPc/100)%2
+    filtered = sgf(data,sgfWin,sgfDeg)
+    
+    return filtered
 
 
 if __name__ == '__main__':

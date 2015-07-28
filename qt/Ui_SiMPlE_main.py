@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/ettore/GIT/SiMPlE/qt/SiMPlE_main.ui'
+# Form implementation generated from reading ui file 'SiMPlE_main.ui'
 #
-# Created: Tue Jul 28 19:43:26 2015
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Tue Jul 28 22:06:43 2015
+#      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -259,6 +259,10 @@ class Ui_facewindow(object):
         self.removePeakBtn.setEnabled(False)
         self.removePeakBtn.setObjectName(_fromUtf8("removePeakBtn"))
         self.gridLayout.addWidget(self.removePeakBtn, 4, 1, 1, 1)
+        self.derivCkBox = QtGui.QCheckBox(self.tab_7)
+        self.derivCkBox.setEnabled(False)
+        self.derivCkBox.setObjectName(_fromUtf8("derivCkBox"))
+        self.gridLayout.addWidget(self.derivCkBox, 2, 1, 1, 1)
         self.functionsTabs.addTab(self.tab_7, _fromUtf8(""))
         self.horizontalLayout_3.addWidget(self.functionsTabs)
         self.logTxt = QtGui.QTextEdit(self.simpleCtWidget)
@@ -300,12 +304,12 @@ class Ui_facewindow(object):
         self.verticalLayout_3.setStretch(2, 1)
         facewindow.setCentralWidget(self.simpleCtWidget)
         self.menubar = QtGui.QMenuBar(facewindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1064, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1064, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         facewindow.setMenuBar(self.menubar)
 
         self.retranslateUi(facewindow)
-        self.functionsTabs.setCurrentIndex(0)
+        self.functionsTabs.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(facewindow)
 
     def retranslateUi(self, facewindow):
@@ -348,6 +352,7 @@ class Ui_facewindow(object):
         self.overlayBtn.setText(_translate("facewindow", "Overlay", None))
         self.showPeakBtn.setText(_translate("facewindow", "Show Peaks", None))
         self.removePeakBtn.setText(_translate("facewindow", "Remove Peaks", None))
+        self.derivCkBox.setText(_translate("facewindow", "Drivative", None))
         self.functionsTabs.setTabText(self.functionsTabs.indexOf(self.tab_7), _translate("facewindow", "Plot Options", None))
         self.label.setText(_translate("facewindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"

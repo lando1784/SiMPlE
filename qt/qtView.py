@@ -230,17 +230,22 @@ class curveWindow ( QtGui.QMainWindow ):
     def viewCurve(self,dove = 1,autorange=True):
         dove -= 1
         self.ui.grafo.clear()
-        self.checkCurve(dove)
         for p in self.exp[dove][0:]:
+            if not self.ui.derivCkBox.isChecked():
+                f = p.f
+            else:
+                sf = smartSgf(p.f,30,sgfDeg)
+                f = np.gradient(sf)
             if p == self.exp[dove][-1]:
                 if not self.alignFlags[dove]:
-                    self.ui.grafo.plot(p.z,p.f,pen='b')
+                    self.ui.grafo.plot(p.z,f,pen='b')
                 else:
-                    self.ui.grafo.plot(p.z,p.f,symbolPen='b',symbolBrush='b',symbol='o',symbolSize=2)
+                    self.ui.grafo.plot(p.z,f,symbolPen='b',symbolBrush='b',symbol='o',symbolSize=2)
             else:
-                self.ui.grafo.plot(p.z,p.f)
+                self.ui.grafo.plot(p.z,f)
         if self.fitFlag:
             self.plotFit(-1)
+        self.checkCurve(dove)
         if autorange:
             self.ui.grafo.autoRange()
     
@@ -335,12 +340,14 @@ class curveWindow ( QtGui.QMainWindow ):
     def showPeaks(self):
         try:
             c = self.exp[self.ui.slide1.value()-1]
+            plottedY = self.ui.grafo.plotItem.curves[-2].yData if len(self.ui.grafo.plotItem.curves)>len(c) else self.ui.grafo.plotItem.curves[-1].yData
             VarT = int(c[-1].f.shape[0]*self.ui.movVarPcNum.value()/100)
             vard = movingVar(c[-1].f,VarT)
             TriT = self.ui.peakThrsPcNum.value()
-            AvgT = self.ui.movAvgPcNum.value()
-            tri= filteredTriangles(vard,TriT,AvgT)
-            self.ui.grafo.plot(c[-1].z[tri[:,0].astype(int)],c[-1].f[tri[:,0].astype(int)],pen=None,symbolPen = 'm', symbolBrush = 'm', symbol = '+')
+            #AvgT = self.ui.movAvgPcNum.value()
+            #tri= filteredTriangles(vard,TriT,AvgT)
+            tri = findJumps(c[-1].f,TriT)
+            self.ui.grafo.plot(c[-1].z[tri[:,0].astype(int)],plottedY[tri[:,0].astype(int)],pen=None,symbolPen = 'm', symbolBrush = 'm', symbol = '+')
         except Exception as e:
             logString = e.message+'\n'
             self.simpleLogger(logString)
@@ -354,19 +361,20 @@ class curveWindow ( QtGui.QMainWindow ):
             return None
         try:
             c = self.exp[self.ui.slide1.value()-1]
-            print len(self.ui.grafo.plotItem.curves)
-            print len(c)
             if len(self.ui.grafo.plotItem.curves)>len(c):
                 print 'ciao'
                 self.ui.grafo.plotItem.removeItem(self.ui.grafo.plotItem.curves[-1])
                 print len(self.ui.grafo.plotItem.curves)
                 #self.ui.grafo.update()
+            plottedY = self.ui.grafo.plotItem.curves[-1].yData
             VarT = int(c[-1].f.shape[0]*self.ui.movVarPcNum.value()/100)
             vard = movingVar(c[-1].f,VarT)
             TriT = self.ui.peakThrsPcNum.value()
-            AvgT = self.ui.movAvgPcNum.value()
-            tri= filteredTriangles(vard,TriT,AvgT)
-            self.ui.grafo.plot(c[-1].z[tri[:,0].astype(int)],c[-1].f[tri[:,0].astype(int)],pen=None,symbolPen = 'm', symbolBrush = 'm', symbol = '+')
+            #AvgT = self.ui.movAvgPcNum.value()
+            #tri= filteredTriangles(vard,TriT,AvgT)
+            tri = findJumps(c[-1].f,TriT)
+            self.ui.grafo.plot(c[-1].z[tri[:,0].astype(int)],plottedY[tri[:,0].astype(int)],pen=None,symbolPen = 'm', symbolBrush = 'm', symbol = '+')
+            #self.ui.grafo.plot(c[-1].z[tri[:,0].astype(int)],c[-1].f[tri[:,0].astype(int)],pen=None,symbolPen = 'm', symbolBrush = 'm', symbol = '+')
             self.peaksOnPlot = True
         except Exception as e:
             logString = e.message+'\n'
@@ -657,7 +665,10 @@ class curveWindow ( QtGui.QMainWindow ):
             self.simpleLogger(logString)
             self.globDir = dirname
             self.ui.setPathBtn.setStyleSheet('background-color: red')
-        
+    
+    
+    def checked(self):
+        self.goToCurve(self.ui.slide1.value())    
     
     
     def curveRelatedEnabling(self,value):
@@ -679,6 +690,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.chgStatBtn.setEnabled(value)
         self.ui.closeExpBtn.setEnabled(value)
         self.ui.setPathBtn.setEnabled(value)
+        self.ui.derivCkBox.setEnabled(value)
 
 
     def setConnections(self):
@@ -722,6 +734,7 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.movVarPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
         QtCore.QObject.connect(self.ui.movAvgPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
         QtCore.QObject.connect(self.ui.peakThrsPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
+        QtCore.QObject.connect(self.ui.derivCkBox, QtCore.SIGNAL(_fromUtf8("clicked()")), self.checked)
         
         QtCore.QMetaObject.connectSlotsByName(self)
 
