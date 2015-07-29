@@ -190,8 +190,8 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,thPc = 15,real
     compWin = force.shape[0]/100*compWinPc
     compWin += int(compWin%2==0)
     sForce = smartSgf(force,sgfWinPc,sgfDeg)
-    gForce = np.gradient(sForce)
-    ggForce = np.gradient(gForce)
+    gForce = smartSgf(force,sgfWinPc,sgfDeg,1)
+    ggForce = smartSgf(force,sgfWinPc,sgfDeg,2)
     gForceBi = movingComp(gForce,ggForce,sym,compWin)
     forceArchive = binaryDataOrganizer(gForceBi, 1.0, 0.0)
     
@@ -285,10 +285,10 @@ def findJumps(data,multiplierPc):
     return np.array(jumps)
 
 
-def smartSgf(data,sgfWinPc,sgfDeg):
+def smartSgf(data,sgfWinPc,sgfDeg,sgfDerDeg = 0):
     
     sgfWin = data.shape[0]*sgfWinPc/100 + 1 - (data.shape[0]*sgfWinPc/100)%2
-    filtered = sgf(data,sgfWin,sgfDeg)
+    filtered = sgf(data,sgfWin,sgfDeg, deriv = sgfDerDeg)
     
     return filtered
 

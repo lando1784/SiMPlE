@@ -1,6 +1,8 @@
 from PyQt4 import QtCore, QtGui
 from scipy.signal._savitzky_golay import savgol_filter
 from copy import copy,deepcopy
+from PIL.PixarImagePlugin import PixarImageFile
+from numpy import uint16
 
 
 try:
@@ -19,6 +21,7 @@ from os.path import split, join, splitext, exists
 from shutil import rmtree
 from time import strftime
 from cursor import cursor
+import Image
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
 
@@ -34,7 +37,7 @@ htmlpre = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/T
 htmlpost = '</span></p></body></html>'
 
 compWinPc = 5
-sgfWinPc = 10
+sgfWinPc = 2.5
 sgfDeg = 3
 
 class curveWindow ( QtGui.QMainWindow ):
@@ -234,8 +237,10 @@ class curveWindow ( QtGui.QMainWindow ):
             if not self.ui.derivCkBox.isChecked():
                 f = p.f
             else:
-                sf = smartSgf(p.f,30,sgfDeg)
-                f = np.gradient(sf)
+                #sf = smartSgf(p.f,4,sgfDeg)
+                fg = smartSgf(p.f,5,sgfDeg,1)
+                fgross = smartSgf(p.f,10,sgfDeg,1)
+                f = np.abs(fg-fgross)
             if p == self.exp[dove][-1]:
                 if not self.alignFlags[dove]:
                     self.ui.grafo.plot(p.z,f,pen='b')
@@ -263,6 +268,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.movVarPcNum.setEnabled(self.alignFlags[dove])
         self.ui.movAvgPcNum.setEnabled(self.alignFlags[dove])
         self.ui.peakThrsPcNum.setEnabled(self.alignFlags[dove])
+        self.ui.hist2dBtn.setEnabled(self.alignFlags[dove])
         if self.alignFlags[dove]:
             self.ui.grafo.plotItem.addLine(x=0)
             self.ui.grafo.plotItem.addLine(y=0)
@@ -671,6 +677,36 @@ class curveWindow ( QtGui.QMainWindow ):
         self.goToCurve(self.ui.slide1.value())    
     
     
+    def show2Dhist(self):
+        goodF = []
+        goodZ = []
+        shortestSize = float('Inf')
+        for c in self.exp:
+            if c.relevant:
+                shortestSize = min(c[-1].f.shape[0],shortestSize) 
+                goodF.append(c[-1].f)
+                goodZ.append(c[-1].z)
+        
+        emptyF = np.array([])
+        emptyZ = np.array([])
+        
+        for i in xrange(len(goodF)):
+            emptyF = np.concatenate((emptyF,goodF[i][:shortestSize]))
+            emptyZ = np.concatenate((emptyZ,goodZ[i][:shortestSize]))
+        
+        histo = np.histogram2d(emptyZ, emptyF, [shortestSize,len(goodF)])
+        hist = histo[0]
+        hist = ((hist - np.min(hist))/(np.max(hist)-np.min(hist))*255).astype(np.uint8)
+        img = Image.fromarray(hist)
+        pix = QtGui.QPixmap(img.convert('RGBA').tostring('raw','RGBA'))
+        pixG = QtGui.QGraphicsPixmapItem(pix)
+        self.ui.grafo.clear()
+        self.ui.grafo.addItem(pixG)
+        self.ui.grafo.update()
+        
+        
+    
+    
     def curveRelatedEnabling(self,value):
         
         self.ui.kNumDbl.setEnabled(value)
@@ -691,6 +727,15 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.closeExpBtn.setEnabled(value)
         self.ui.setPathBtn.setEnabled(value)
         self.ui.derivCkBox.setEnabled(value)
+        self.ui.currCursXvalNumDbl.setEnabled(value)
+        self.ui.currCursYvalNumDbl.setEnabled(value)
+        self.ui.currCursXdelNumDbl.setEnabled(value)
+        self.ui.currCursYdelNumDbl.setEnabled(value)
+        self.ui.cursCmbBox.setEnabled(value)
+        self.ui.cursCmpCmbBox.setEnabled(value)
+        self.ui.addCursBtn.setEnabled(value)
+        self.ui.removeCursBtn.setEnabled(value)
+        
 
 
     def setConnections(self):
@@ -712,6 +757,7 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.updateAllNmVBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSens)
         QtCore.QObject.connect(self.ui.updateSpeedBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSpeed)
         QtCore.QObject.connect(self.ui.updateAllSpeedBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSpeed)
+        QtCore.QObject.connect(self.ui.hist2dBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.show2Dhist)
         
         QtCore.QObject.connect(self.ui.autoFitBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.showFit)
         QtCore.QObject.connect(self.ui.rejectBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.rejectAlign)
