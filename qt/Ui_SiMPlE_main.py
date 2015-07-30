@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/ettore/GIT/SiMPlE/qt/SiMPlE_main.ui'
 #
-# Created: Wed Jul 29 16:49:02 2015
+# Created: Thu Jul 30 18:53:47 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -206,7 +206,7 @@ class Ui_facewindow(object):
         self.peakThrsPcNum.setEnabled(False)
         self.peakThrsPcNum.setMinimum(1)
         self.peakThrsPcNum.setMaximum(100)
-        self.peakThrsPcNum.setProperty("value", 70)
+        self.peakThrsPcNum.setProperty("value", 3)
         self.peakThrsPcNum.setObjectName(_fromUtf8("peakThrsPcNum"))
         self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.peakThrsPcNum)
         self.label_8 = QtGui.QLabel(self.fitNpeakBox)
@@ -222,7 +222,7 @@ class Ui_facewindow(object):
         self.movAvgPcNum.setEnabled(False)
         self.movAvgPcNum.setMinimum(1)
         self.movAvgPcNum.setMaximum(100)
-        self.movAvgPcNum.setProperty("value", 20)
+        self.movAvgPcNum.setProperty("value", 1)
         self.movAvgPcNum.setObjectName(_fromUtf8("movAvgPcNum"))
         self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.movAvgPcNum)
         self.horizontalLayout_5.addWidget(self.fitNpeakBox)
@@ -260,24 +260,32 @@ class Ui_facewindow(object):
         self.currCursXvalNumDbl.setEnabled(False)
         self.currCursXvalNumDbl.setReadOnly(True)
         self.currCursXvalNumDbl.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.currCursXvalNumDbl.setMinimum(-100000.0)
+        self.currCursXvalNumDbl.setMaximum(100000.0)
         self.currCursXvalNumDbl.setObjectName(_fromUtf8("currCursXvalNumDbl"))
         self.gridLayout_4.addWidget(self.currCursXvalNumDbl, 0, 1, 1, 1)
         self.currCursYvalNumDbl = QtGui.QDoubleSpinBox(self.cursorsBox)
         self.currCursYvalNumDbl.setEnabled(False)
         self.currCursYvalNumDbl.setReadOnly(True)
         self.currCursYvalNumDbl.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.currCursYvalNumDbl.setMinimum(-100000.0)
+        self.currCursYvalNumDbl.setMaximum(100000.0)
         self.currCursYvalNumDbl.setObjectName(_fromUtf8("currCursYvalNumDbl"))
         self.gridLayout_4.addWidget(self.currCursYvalNumDbl, 0, 2, 1, 1)
         self.currCursXdelNumDbl = QtGui.QDoubleSpinBox(self.cursorsBox)
         self.currCursXdelNumDbl.setEnabled(False)
         self.currCursXdelNumDbl.setReadOnly(True)
         self.currCursXdelNumDbl.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.currCursXdelNumDbl.setMinimum(-100000.0)
+        self.currCursXdelNumDbl.setMaximum(100000.0)
         self.currCursXdelNumDbl.setObjectName(_fromUtf8("currCursXdelNumDbl"))
         self.gridLayout_4.addWidget(self.currCursXdelNumDbl, 1, 1, 1, 1)
         self.currCursYdelNumDbl = QtGui.QDoubleSpinBox(self.cursorsBox)
         self.currCursYdelNumDbl.setEnabled(False)
         self.currCursYdelNumDbl.setReadOnly(True)
         self.currCursYdelNumDbl.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+        self.currCursYdelNumDbl.setMinimum(-100000.0)
+        self.currCursYdelNumDbl.setMaximum(100000.0)
         self.currCursYdelNumDbl.setObjectName(_fromUtf8("currCursYdelNumDbl"))
         self.gridLayout_4.addWidget(self.currCursYdelNumDbl, 1, 2, 1, 1)
         self.cursCmbBox = QtGui.QComboBox(self.cursorsBox)
@@ -327,6 +335,7 @@ class Ui_facewindow(object):
         self.functionsTabs.addTab(self.tab_7, _fromUtf8(""))
         self.horizontalLayout_3.addWidget(self.functionsTabs)
         self.logTxt = QtGui.QTextEdit(self.simpleCtWidget)
+        self.logTxt.setReadOnly(True)
         self.logTxt.setObjectName(_fromUtf8("logTxt"))
         self.horizontalLayout_3.addWidget(self.logTxt)
         self.horizontalLayout_3.setStretch(0, 6)

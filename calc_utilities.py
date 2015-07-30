@@ -285,6 +285,25 @@ def findJumps(data,multiplierPc):
     return np.array(jumps)
 
 
+def findUnD(data,thrMul,distPc):
+    thr = np.var(data)*thrMul*(-1)
+    dist = data.shape[0]*distPc/100
+    uNd = []
+    up = None
+    down = None
+    
+    for i in xrange(data.shape[0]):
+        if data[i] <= thr and down == None:
+            down = i
+        elif data[i] > thr and down != None:
+            up = i
+            if up-down >= dist:
+                uNd.append([int(down),int(up)])
+            down = None
+            up = None
+            
+    return uNd
+
 def smartSgf(data,sgfWinPc,sgfDeg,sgfDerDeg = 0):
     
     sgfWin = data.shape[0]*sgfWinPc/100 + 1 - (data.shape[0]*sgfWinPc/100)%2

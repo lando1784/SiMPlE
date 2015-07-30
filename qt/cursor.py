@@ -4,13 +4,17 @@ import numpy as np
 
 
 
-class cursor(pg.GraphicsObject):
+class cursor(QtCore.QObject):
+    
+    moved = QtCore.pyqtSignal()
     
     def __init__(self,parent,curveIndex, xLine, yLine, symb, cPen):
         
+        super(cursor,self).__init__()
+        
         self.parent = parent
         
-        if abs(curveIndex) >= len(self.parent.curves):
+        if abs(curveIndex) > len(self.parent.curves):
             raise ValueError('The curve you selected does not exist')
         self.refPlot = self.parent.curves[curveIndex]
         xStart = self.refPlot.xData[0]
@@ -34,6 +38,8 @@ class cursor(pg.GraphicsObject):
                 self.singleLine = 'self.refPlot.yData'
                 
         self.point = self.parent.plot([self.refPlot.xData[0]],[self.refPlot.yData[0]],pen = None, symbol = symb, symbolPen = cPen, symbolBrush = cPen)
+        self.color = cPen
+        self.symbol = symb
         if xLine and yLine:
             self.whoMovesWho = {self.xRef: [self.yRef,'self.refPlot.xData',0], self.yRef: [self.xRef,'self.refPlot.yData',1]}
         
@@ -61,4 +67,19 @@ class cursor(pg.GraphicsObject):
             newPoint[1] = self.refPlot.yData[approxInd]
             
         self.point.setData([newPoint[0]],[newPoint[1]])
+        self.moved.emit()
         
+    
+    def pos(self):
+        
+        return [self.point.xData[0],self.point.yData[0]]
+    
+    
+    def suicide(self):
+        
+        if self.xRef is not None:
+            self.parent.removeItem(self.xRef)
+        if self.yRef is not None:
+            self.parent.removeItem(self.yRef)
+            
+        self.parent.removeItem(self.point)

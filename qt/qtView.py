@@ -54,6 +54,10 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.setupUi( self )
         self.setConnections()
         
+        self.cursColors = {0: ['Magenta','m'],1: ['Cyan','c'],2: ['Green','g'],3:['Black','k']}
+        self.cursors = []
+        self.ui.cursCmpCmbBox.addItem('Select a cursor')
+        
         self.fitFlag = False
         self.alignFlags = []
         self.ctPoints = []
@@ -238,9 +242,10 @@ class curveWindow ( QtGui.QMainWindow ):
                 f = p.f
             else:
                 #sf = smartSgf(p.f,4,sgfDeg)
-                fg = smartSgf(p.f,5,sgfDeg,1)
-                fgross = smartSgf(p.f,10,sgfDeg,1)
-                f = np.abs(fg-fgross)
+                fg = smartSgf(p.f,5,sgfDeg)
+                fg = np.gradient(fg)
+                fgross = smartSgf(fg,20,sgfDeg)#smartSgf(p.f,20,sgfDeg,1)
+                f = fg-fgross
             if p == self.exp[dove][-1]:
                 if not self.alignFlags[dove]:
                     self.ui.grafo.plot(p.z,f,pen='b')
@@ -251,6 +256,7 @@ class curveWindow ( QtGui.QMainWindow ):
         if self.fitFlag:
             self.plotFit(-1)
         self.checkCurve(dove)
+        self.refreshCursors()
         if autorange:
             self.ui.grafo.autoRange()
     
@@ -343,7 +349,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.rejectBtn.setEnabled(True)
        
     
-    def showPeaks(self):
+    def showPeaksOld(self):
         try:
             c = self.exp[self.ui.slide1.value()-1]
             plottedY = self.ui.grafo.plotItem.curves[-2].yData if len(self.ui.grafo.plotItem.curves)>len(c) else self.ui.grafo.plotItem.curves[-1].yData
@@ -361,6 +367,34 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.showPeakBtn.setEnabled(False)
         self.ui.removePeakBtn.setEnabled(True)
         
+    
+    def showPeaks(self):
+        try:
+            p = self.exp[self.ui.slide1.value()-1][-1]
+            curveInd = -2 if self.fitFlag else -1
+            curveInd -= len(self.cursors)
+            plottedY = self.ui.grafo.plotItem.curves[curveInd].yData
+            varPcT = self.ui.peakThrsPcNum.value()
+            distPcT = self.ui.movAvgPcNum.value()
+            fg = smartSgf(p.f,5,sgfDeg)
+            fg = np.gradient(fg)
+            fgross = smartSgf(fg,20,sgfDeg)#smartSgf(p.f,20,sgfDeg,1)
+            f = fg-fgross
+            
+            uNd = findUnD(f,varPcT,distPcT)
+            peaks = np.array([])
+            zpeaks = np.array([])
+            print uNd
+            for u in uNd:
+                peaks = np.concatenate((peaks,plottedY[u[0]:u[1]]))
+                zpeaks = np.concatenate((zpeaks,p.z[u[0]:u[1]]))
+            self.ui.grafo.plot(zpeaks,peaks,pen='r')
+            self.peaksOnPlot = True
+            self.ui.showPeakBtn.setEnabled(False)
+            self.ui.removePeakBtn.setEnabled(True)
+        except Exception as e:
+            print e.message
+            
     
     def updatePeaks(self):
         if not self.peaksOnPlot:
@@ -403,18 +437,16 @@ class curveWindow ( QtGui.QMainWindow ):
         
     
     def plotFit(self,segInd):
-        #try:
-        if True:
+        try:
             c = self.exp[self.ui.slide1.value()-1]
             fits, ctPt,_ = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
             if self.ctPoints[self.ui.slide1.value()-1] == None:
                 self.ctPoints[self.ui.slide1.value()-1] = ctPt
             fit = np.concatenate((fits[0],fits[1]))
             self.ui.grafo.plot(c[segInd].z,fit,pen='r')
-            self.ui.grafo.plot([ctPt[0]],[ctPt[1]], symbol = 'o',symbolPen = 'g',symbolBrush = 'g')
             self.fitFlag = True
-        #except Exception as e:
-            #print e.message
+        except Exception as e:
+            print e.message
             
     
     def align(self):
@@ -482,6 +514,7 @@ class curveWindow ( QtGui.QMainWindow ):
             self.goToCurve(1)
             self.ui.slide1.setValue(0)
             self.ui.slide2.setValue(0)
+        self.refreshCursors()
         self.refillList()
 
 
@@ -661,6 +694,14 @@ class curveWindow ( QtGui.QMainWindow ):
         self.simpleLogger(logString)
         self.globDir = ''
         self.ui.setPathBtn.setStyleSheet('background-color: none')
+        self.cursors = []
+        for i in xrange(self.ui.cursCmbBox.count()):
+            self.ui.cursCmbBox.removeItem(i)
+            self.ui.cursCmpCmbBox.removeItem(i+1)
+        self.ui.currCursXvalNumDbl.setValue(0.0)
+        self.ui.currCursYvalNumDbl.setValue(0.0)
+        self.ui.currCursXdelNumDbl.setValue(0.0)
+        self.ui.currCursYdelNumDbl.setValue(0.0)
         
     
     def setSavePath(self):
@@ -705,6 +746,73 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.grafo.update()
         
         
+    def addCursor(self):
+        
+        curveInd = -2 if self.fitFlag or self.peaksOnPlot else -1
+        curveInd -= len(self.cursors)
+        lim = len(self.cursors)
+        currInd = lim
+        for i in xrange(lim):
+            currName = self.cursColors[i][0]
+            names = []
+            for c in xrange(self.ui.cursCmbBox.count()):
+                names.append(self.ui.cursCmbBox.itemText(c))
+            if currName not in names:
+                currInd = i
+                break
+        self.cursors.append(cursor(self.ui.grafo.plotItem,curveInd,True,True,'+',self.cursColors[currInd][1]))
+        self.ui.cursCmbBox.addItem(self.cursColors[currInd][0])
+        self.ui.cursCmpCmbBox.addItem(self.cursColors[currInd][0])
+        
+        self.ui.cursCmbBox.setCurrentIndex(currInd)
+        QtCore.QObject.connect(self.cursors[self.ui.cursCmbBox.currentIndex()], QtCore.SIGNAL(_fromUtf8("moved()")), self.updateCursNums)
+        if len(self.cursors) == 4:
+            self.ui.addCursBtn.setEnabled(False)
+        if not self.ui.removeCursBtn.isEnabled():
+            self.ui.removeCursBtn.setEnabled(True)
+            
+        
+    def updateCursNums(self):
+        
+        position = self.sender().pos()
+        self.ui.cursCmbBox.setCurrentIndex(self.cursors.index(self.sender()))
+        self.ui.currCursXvalNumDbl.setValue(position[0])
+        self.ui.currCursYvalNumDbl.setValue(position[1])
+        if self.ui.cursCmpCmbBox.currentIndex() != 0 :
+            compCur = self.cursors[self.ui.cursCmpCmbBox.currentIndex()-1].pos()
+            self.ui.currCursXdelNumDbl.setValue(position[0]-compCur[0])
+            self.ui.currCursYdelNumDbl.setValue(position[1]-compCur[1])
+    
+    
+    def removeCursor(self):
+        if not self.ui.addCursBtn.isEnabled():
+            self.ui.addCursBtn.setEnabled(True)
+        ind = len(self.cursors)-1#self.ui.cursCmbBox.currentIndex()
+        self.cursors[ind].suicide()
+        self.ui.grafo.update()
+        del self.cursors[ind]
+        self.ui.cursCmbBox.removeItem(ind)
+        self.ui.cursCmpCmbBox.removeItem(ind+1)
+        if len(self.cursors) == 0:
+            self.ui.removeCursBtn.setEnabled(False)
+        
+    
+    
+    def refreshCursors(self):
+        
+        lim = len(self.cursors)
+        self.cursors = []
+        
+        for i in xrange(lim):
+            curveInd = -2 if self.fitFlag or self.peaksOnPlot else -1
+            curveInd -= len(self.cursors)
+            currName = self.ui.cursCmbBox.itemText(i)
+            for k in self.cursColors.keys():
+                if currName in self.cursColors[k]:
+                    currInd = i
+            self.cursors.append(cursor(self.ui.grafo.plotItem,curveInd,True,True,'+',self.cursColors[currInd][1]))
+            QtCore.QObject.connect(self.cursors[-1], QtCore.SIGNAL(_fromUtf8("moved()")), self.updateCursNums)
+        
     
     
     def curveRelatedEnabling(self,value):
@@ -734,7 +842,6 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.cursCmbBox.setEnabled(value)
         self.ui.cursCmpCmbBox.setEnabled(value)
         self.ui.addCursBtn.setEnabled(value)
-        self.ui.removeCursBtn.setEnabled(value)
         
 
 
@@ -771,16 +878,19 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.showPeakBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.showPeaks)
         QtCore.QObject.connect(self.ui.removePeakBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removePeaks)
         
-        
         QtCore.QObject.connect(self.ui.overlayBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.overlay)
         QtCore.QObject.connect(self.ui.chgStatBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.changeStatus)
         QtCore.QObject.connect(self.ui.closeExpBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.closeExp)
         QtCore.QObject.connect(self.ui.setPathBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.setSavePath)
+        QtCore.QObject.connect(self.ui.addCursBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.addCursor)
+        QtCore.QObject.connect(self.ui.removeCursBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCursor)
         
         QtCore.QObject.connect(self.ui.movVarPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
         QtCore.QObject.connect(self.ui.movAvgPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
         QtCore.QObject.connect(self.ui.peakThrsPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
         QtCore.QObject.connect(self.ui.derivCkBox, QtCore.SIGNAL(_fromUtf8("clicked()")), self.checked)
+        
+        
         
         QtCore.QMetaObject.connectSlotsByName(self)
 
