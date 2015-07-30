@@ -13,7 +13,6 @@ def genericFit(x,y,model=1,p0=None,logMe = False):
         fitP = (np.polyfit(x,y,model))
         fit = applyPolyModel(x,fitP)
         rsq = RsqPoly(x,y,fitP)
-        print 'ciao'
     else:
         fitP = (curve_fit(model,x,y,p0))[0]
         fit = model(x,*fitP)

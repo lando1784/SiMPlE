@@ -3,6 +3,7 @@ from scipy.signal import savgol_filter as sgf
 from types import FunctionType
 from matplotlib.colors import NP_CLIP_OUT
 import operator
+from fitLib import *
 
 
 def movingThing(data,window,thing,others = None):
@@ -285,24 +286,70 @@ def findJumps(data,multiplierPc):
     return np.array(jumps)
 
 
-def findUnD(data,thrMul,distPc):
+def findUnD(data,xAxis,thrMul,distPc,verify=True):
     thr = np.var(data)*thrMul*(-1)
-    dist = data.shape[0]*distPc/100
+    print 'internal ' + str(thr)
+    dist = (xAxis[-1]-xAxis[0])*distPc/100
     uNd = []
     up = None
     down = None
     
-    for i in xrange(data.shape[0]):
-        if data[i] <= thr and down == None:
-            down = i
-        elif data[i] > thr and down != None:
-            up = i
-            if up-down >= dist:
-                uNd.append([int(down),int(up)])
+    for i in xrange(data.shape[0]-1):
+        if data[i+1] <= thr and down == None:
+            down = i+1 if data[i] >= thr else None
+        elif data[i+1] > thr and down != None:
+            up = i+1
+            if (xAxis[up]-xAxis[down]) >= dist:
+                if verify:
+                    fit = genericFit(np.arange(up-down),data[down:up],2)
+                    go = fit['R^2']>=0.9
+                else:
+                    go = True
+                if go:
+                    uNd.append([int(down),int(up)])
             down = None
             up = None
             
-    return uNd
+    return uNd,thr
+
+
+def findDnU(data,thrMul,distPc,):
+    thr = np.var(data)*thrMul
+    dist = data.shape[0]*distPc/100
+    dNu = []
+    up = None
+    down = None
+    
+    for i in xrange(data.shape[0]):
+        if data[i] >= thr and up == None:
+            up = i
+        elif data[i] < thr and up != None:
+            down = i
+            if down-up >= dist:
+                dNu.append([int(up),int(down)])
+            down = None
+            up = None
+            
+    return dNu,thr
+
+
+def polishedDerive(data,sgfWinPcF,sgfWinPcG,sgfDeg,cut = False):
+    
+    fg = smartSgf(data,sgfWinPcF,sgfDeg)
+    fg = np.gradient(fg)
+    fgross = smartSgf(data,sgfWinPcG,sgfDeg)
+    fgross = np.gradient(fgross)
+    f = fg-fgross
+    
+    start = 0
+    end = f.shape[0]
+    
+    if cut:
+        start = end*sgfWinPcF/100/2
+        end = f.shape[0]-start
+    
+    return f,start,end
+
 
 def smartSgf(data,sgfWinPc,sgfDeg,sgfDerDeg = 0):
     

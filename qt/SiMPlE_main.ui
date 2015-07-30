@@ -355,26 +355,10 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
-              <widget class="QSpinBox" name="peakThrsPcNum">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
-               <property name="value">
-                <number>3</number>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="0">
               <widget class="QLabel" name="label_8">
                <property name="text">
-                <string>Peak thrsh %</string>
+                <string>Peak threshold</string>
                </property>
               </widget>
              </item>
@@ -388,23 +372,30 @@
              <item row="3" column="0">
               <widget class="QLabel" name="label_10">
                <property name="text">
-                <string>Moving avg %</string>
+                <string>Peak Length %</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="peakThrsPcNum">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="value">
+                <double>0.010000000000000</double>
                </property>
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QSpinBox" name="movAvgPcNum">
+              <widget class="QDoubleSpinBox" name="movAvgPcNum">
                <property name="enabled">
                 <bool>false</bool>
                </property>
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="maximum">
-                <number>100</number>
-               </property>
                <property name="value">
-                <number>1</number>
+                <double>0.500000000000000</double>
                </property>
               </widget>
              </item>
@@ -757,7 +748,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1064</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

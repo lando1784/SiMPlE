@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file '/home/ettore/GIT/SiMPlE/qt/SiMPlE_main.ui'
+# Form implementation generated from reading ui file 'd:\Software\GIT\SiMPlE\qt\SiMPlE_main.ui'
 #
-# Created: Thu Jul 30 18:53:47 2015
-#      by: PyQt4 UI code generator 4.10.4
+# Created: Thu Jul 30 23:24:25 2015
+#      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -202,13 +202,6 @@ class Ui_facewindow(object):
         self.movVarPcNum.setProperty("value", 10)
         self.movVarPcNum.setObjectName(_fromUtf8("movVarPcNum"))
         self.formLayout.setWidget(1, QtGui.QFormLayout.FieldRole, self.movVarPcNum)
-        self.peakThrsPcNum = QtGui.QSpinBox(self.fitNpeakBox)
-        self.peakThrsPcNum.setEnabled(False)
-        self.peakThrsPcNum.setMinimum(1)
-        self.peakThrsPcNum.setMaximum(100)
-        self.peakThrsPcNum.setProperty("value", 3)
-        self.peakThrsPcNum.setObjectName(_fromUtf8("peakThrsPcNum"))
-        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.peakThrsPcNum)
         self.label_8 = QtGui.QLabel(self.fitNpeakBox)
         self.label_8.setObjectName(_fromUtf8("label_8"))
         self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_8)
@@ -218,11 +211,15 @@ class Ui_facewindow(object):
         self.label_10 = QtGui.QLabel(self.fitNpeakBox)
         self.label_10.setObjectName(_fromUtf8("label_10"))
         self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.label_10)
-        self.movAvgPcNum = QtGui.QSpinBox(self.fitNpeakBox)
+        self.peakThrsPcNum = QtGui.QDoubleSpinBox(self.fitNpeakBox)
+        self.peakThrsPcNum.setEnabled(False)
+        self.peakThrsPcNum.setDecimals(4)
+        self.peakThrsPcNum.setProperty("value", 0.01)
+        self.peakThrsPcNum.setObjectName(_fromUtf8("peakThrsPcNum"))
+        self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.peakThrsPcNum)
+        self.movAvgPcNum = QtGui.QDoubleSpinBox(self.fitNpeakBox)
         self.movAvgPcNum.setEnabled(False)
-        self.movAvgPcNum.setMinimum(1)
-        self.movAvgPcNum.setMaximum(100)
-        self.movAvgPcNum.setProperty("value", 1)
+        self.movAvgPcNum.setProperty("value", 0.5)
         self.movAvgPcNum.setObjectName(_fromUtf8("movAvgPcNum"))
         self.formLayout.setWidget(3, QtGui.QFormLayout.FieldRole, self.movAvgPcNum)
         self.horizontalLayout_5.addWidget(self.fitNpeakBox)
@@ -374,7 +371,7 @@ class Ui_facewindow(object):
         self.verticalLayout_3.setStretch(2, 1)
         facewindow.setCentralWidget(self.simpleCtWidget)
         self.menubar = QtGui.QMenuBar(facewindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1064, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1064, 21))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         facewindow.setMenuBar(self.menubar)
 
@@ -411,9 +408,9 @@ class Ui_facewindow(object):
         self.updateAllSpeedBtn.setText(_translate("facewindow", "UPDATE ALL", None))
         self.fitNpeakBox.setTitle(_translate("facewindow", "Fitting and Peak finding", None))
         self.label_7.setText(_translate("facewindow", "Slope tolerance %", None))
-        self.label_8.setText(_translate("facewindow", "Peak thrsh %", None))
+        self.label_8.setText(_translate("facewindow", "Peak threshold", None))
         self.label_9.setText(_translate("facewindow", "Movig var win %", None))
-        self.label_10.setText(_translate("facewindow", "Moving avg %", None))
+        self.label_10.setText(_translate("facewindow", "Peak Length %", None))
         self.functionsTabs.setTabText(self.functionsTabs.indexOf(self.tab_6), _translate("facewindow", "Curve Params", None))
         self.alignemenBox.setTitle(_translate("facewindow", "Alignment", None))
         self.alignBtn.setText(_translate("facewindow", "Align", None))

@@ -21,7 +21,7 @@ from os.path import split, join, splitext, exists
 from shutil import rmtree
 from time import strftime
 from cursor import cursor
-import Image
+#import Image
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
 
@@ -38,6 +38,8 @@ htmlpost = '</span></p></body></html>'
 
 compWinPc = 5
 sgfWinPc = 2.5
+sgfWinPcF = 7.5
+sgfWinPcG = 30
 sgfDeg = 3
 
 class curveWindow ( QtGui.QMainWindow ):
@@ -240,17 +242,14 @@ class curveWindow ( QtGui.QMainWindow ):
         for p in self.exp[dove][0:]:
             if not self.ui.derivCkBox.isChecked():
                 f = p.f
+                z = p.z
             else:
                 #sf = smartSgf(p.f,4,sgfDeg)
-                fg = smartSgf(p.f,5,sgfDeg)
-                fg = np.gradient(fg)
-                fgross = smartSgf(fg,20,sgfDeg)#smartSgf(p.f,20,sgfDeg,1)
-                f = fg-fgross
+                f,start,end = polishedDerive(p.f,sgfWinPcF,sgfWinPcG,sgfDeg,True)
+                f = f[start:end]
+                z = p.z[start:end]
             if p == self.exp[dove][-1]:
-                if not self.alignFlags[dove]:
-                    self.ui.grafo.plot(p.z,f,pen='b')
-                else:
-                    self.ui.grafo.plot(p.z,f,symbolPen='b',symbolBrush='b',symbol='o',symbolSize=2)
+                self.ui.grafo.plot(z,f,pen='b')
             else:
                 self.ui.grafo.plot(p.z,f)
         if self.fitFlag:
@@ -348,77 +347,81 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.autoFitBtn.setEnabled(False)
         self.ui.rejectBtn.setEnabled(True)
        
-    
-    def showPeaksOld(self):
-        try:
-            c = self.exp[self.ui.slide1.value()-1]
-            plottedY = self.ui.grafo.plotItem.curves[-2].yData if len(self.ui.grafo.plotItem.curves)>len(c) else self.ui.grafo.plotItem.curves[-1].yData
-            VarT = int(c[-1].f.shape[0]*self.ui.movVarPcNum.value()/100)
-            vard = movingVar(c[-1].f,VarT)
-            TriT = self.ui.peakThrsPcNum.value()
-            #AvgT = self.ui.movAvgPcNum.value()
-            #tri= filteredTriangles(vard,TriT,AvgT)
-            tri = findJumps(c[-1].f,TriT)
-            self.ui.grafo.plot(c[-1].z[tri[:,0].astype(int)],plottedY[tri[:,0].astype(int)],pen=None,symbolPen = 'm', symbolBrush = 'm', symbol = '+')
-        except Exception as e:
-            logString = e.message+'\n'
-            self.simpleLogger(logString)
-        self.peaksOnPlot = True
-        self.ui.showPeakBtn.setEnabled(False)
-        self.ui.removePeakBtn.setEnabled(True)
         
-    
     def showPeaks(self):
         try:
             p = self.exp[self.ui.slide1.value()-1][-1]
             curveInd = -2 if self.fitFlag else -1
             curveInd -= len(self.cursors)
-            plottedY = self.ui.grafo.plotItem.curves[curveInd].yData
             varPcT = self.ui.peakThrsPcNum.value()
             distPcT = self.ui.movAvgPcNum.value()
-            fg = smartSgf(p.f,5,sgfDeg)
-            fg = np.gradient(fg)
-            fgross = smartSgf(fg,20,sgfDeg)#smartSgf(p.f,20,sgfDeg,1)
-            f = fg-fgross
+            f,start,end = polishedDerive(p.f,sgfWinPcF,sgfWinPcG,sgfDeg,True)
+            f = f[start:end]
+            z = p.z[start:end]
+            plottedY = self.ui.grafo.plotItem.curves[curveInd].yData if self.ui.derivCkBox.isChecked() else self.ui.grafo.plotItem.curves[curveInd].yData[start:end]
             
-            uNd = findUnD(f,varPcT,distPcT)
+            uNd,thr = findUnD(f,z,varPcT,distPcT)
             peaks = np.array([])
             zpeaks = np.array([])
-            print uNd
-            for u in uNd:
+
+            result = uNd
+            
+            thres = thr
+            print thr
+            
+            for u in result:
                 peaks = np.concatenate((peaks,plottedY[u[0]:u[1]]))
-                zpeaks = np.concatenate((zpeaks,p.z[u[0]:u[1]]))
-            self.ui.grafo.plot(zpeaks,peaks,pen='r')
+                zpeaks = np.concatenate((zpeaks,z[u[0]:u[1]]))
+            self.ui.grafo.plot(zpeaks,peaks,pen = None,symbolPen='r',symbolBrush='r',symbol='o',symbolSize = 2)
             self.peaksOnPlot = True
             self.ui.showPeakBtn.setEnabled(False)
             self.ui.removePeakBtn.setEnabled(True)
+            
+            thrLine = pg.InfiniteLine(pos = thres,angle = 0,movable = False, pen = 'r')
+            self.ui.grafo.plotItem.addItem(thrLine) 
+            
         except Exception as e:
             print e.message
             
     
+           
     def updatePeaks(self):
         if not self.peaksOnPlot:
             return None
         try:
-            c = self.exp[self.ui.slide1.value()-1]
-            if len(self.ui.grafo.plotItem.curves)>len(c):
-                print 'ciao'
-                self.ui.grafo.plotItem.removeItem(self.ui.grafo.plotItem.curves[-1])
-                print len(self.ui.grafo.plotItem.curves)
-                #self.ui.grafo.update()
-            plottedY = self.ui.grafo.plotItem.curves[-1].yData
-            VarT = int(c[-1].f.shape[0]*self.ui.movVarPcNum.value()/100)
-            vard = movingVar(c[-1].f,VarT)
-            TriT = self.ui.peakThrsPcNum.value()
-            #AvgT = self.ui.movAvgPcNum.value()
-            #tri= filteredTriangles(vard,TriT,AvgT)
-            tri = findJumps(c[-1].f,TriT)
-            self.ui.grafo.plot(c[-1].z[tri[:,0].astype(int)],plottedY[tri[:,0].astype(int)],pen=None,symbolPen = 'm', symbolBrush = 'm', symbol = '+')
-            #self.ui.grafo.plot(c[-1].z[tri[:,0].astype(int)],c[-1].f[tri[:,0].astype(int)],pen=None,symbolPen = 'm', symbolBrush = 'm', symbol = '+')
+            p = self.exp[self.ui.slide1.value()-1][-1]
+            curveInd = -2 if self.fitFlag else -1
+            curveInd -= len(self.cursors)
+            varPcT = self.ui.peakThrsPcNum.value()
+            print varPcT
+            distPcT = self.ui.movAvgPcNum.value()
+            f,start,end = polishedDerive(p.f,sgfWinPcF,sgfWinPcG,sgfDeg,True)
+            f = f[start:end]
+            z = p.z[start:end]
+            plottedY = self.ui.grafo.plotItem.curves[curveInd].yData if self.ui.derivCkBox.isChecked() else self.ui.grafo.plotItem.curves[curveInd].yData[start:end]
+            
+            uNd,thr = findUnD(f,z,varPcT,distPcT)
+            peaks = np.array([])
+            zpeaks = np.array([])
+
+            result = uNd
+            thres = thr
+            
+            for u in result:
+                peaks = np.concatenate((peaks,plottedY[u[0]:u[1]]))
+                zpeaks = np.concatenate((zpeaks,z[u[0]:u[1]]))
+            self.ui.grafo.plot(zpeaks,peaks,pen = None,symbolPen='r',symbolBrush='r',symbol='o',symbolSize = 2)
             self.peaksOnPlot = True
+            self.ui.showPeakBtn.setEnabled(False)
+            self.ui.removePeakBtn.setEnabled(True)
+            
+            print thr
+            
+            thrLine = pg.InfiniteLine(pos = thr,angle = 0,movable = False, pen = 'r')
+            self.ui.grafo.plotItem.addItem(thrLine)
+            
         except Exception as e:
-            logString = e.message+'\n'
-            self.simpleLogger(logString)
+            print e.message
         
     
     def removePeaks(self):
@@ -885,9 +888,9 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.addCursBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.addCursor)
         QtCore.QObject.connect(self.ui.removeCursBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCursor)
         
-        QtCore.QObject.connect(self.ui.movVarPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
-        QtCore.QObject.connect(self.ui.movAvgPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
-        QtCore.QObject.connect(self.ui.peakThrsPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.updatePeaks)
+        QtCore.QObject.connect(self.ui.movVarPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(float)")), self.updatePeaks)
+        QtCore.QObject.connect(self.ui.movAvgPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(float)")), self.updatePeaks)
+        QtCore.QObject.connect(self.ui.peakThrsPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(float)")), self.updatePeaks)
         QtCore.QObject.connect(self.ui.derivCkBox, QtCore.SIGNAL(_fromUtf8("clicked()")), self.checked)
         
         
