@@ -38,9 +38,11 @@ htmlpost = '</span></p></body></html>'
 
 compWinPc = 5
 sgfWinPc = 2.5
-sgfWinPcF = 7.5
-sgfWinPcG = 30
+sgfWinPcF = 8
+sgfWinPcG = 40
 sgfDeg = 3
+
+line = pg.graphicsItems.InfiniteLine.InfiniteLine
 
 class curveWindow ( QtGui.QMainWindow ):
     iter = 0
@@ -69,9 +71,9 @@ class curveWindow ( QtGui.QMainWindow ):
         self.globDir = ''
         self.peaksOnPlot = False
         
-        self.ui.movAvgPcNum.setKeyboardTracking(False)
-        self.ui.movVarPcNum.setKeyboardTracking(False)
-        self.ui.peakThrsPcNum.setKeyboardTracking(False)
+        self.ui.peakLenPcNumDbl.setKeyboardTracking(False)
+        self.ui.rsqLimNumDbl.setKeyboardTracking(False)
+        self.ui.peakThrsNumDbl.setKeyboardTracking(False)
         
         self.exp = experiment.experiment()
         
@@ -251,7 +253,7 @@ class curveWindow ( QtGui.QMainWindow ):
             if p == self.exp[dove][-1]:
                 self.ui.grafo.plot(z,f,pen='b')
             else:
-                self.ui.grafo.plot(p.z,f)
+                self.ui.grafo.plot(z,f)
         if self.fitFlag:
             self.plotFit(-1)
         self.checkCurve(dove)
@@ -270,9 +272,9 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.saveBtn.setEnabled(self.alignFlags[dove])
         self.ui.saveAllBtn.setEnabled(self.alignFlags[dove])
         self.ui.showPeakBtn.setEnabled(self.alignFlags[dove] and not self.peaksOnPlot)
-        self.ui.movVarPcNum.setEnabled(self.alignFlags[dove])
-        self.ui.movAvgPcNum.setEnabled(self.alignFlags[dove])
-        self.ui.peakThrsPcNum.setEnabled(self.alignFlags[dove])
+        self.ui.rsqLimNumDbl.setEnabled(self.alignFlags[dove])
+        self.ui.peakLenPcNumDbl.setEnabled(self.alignFlags[dove])
+        self.ui.peakThrsNumDbl.setEnabled(self.alignFlags[dove])
         self.ui.hist2dBtn.setEnabled(self.alignFlags[dove])
         if self.alignFlags[dove]:
             self.ui.grafo.plotItem.addLine(x=0)
@@ -353,32 +355,20 @@ class curveWindow ( QtGui.QMainWindow ):
             p = self.exp[self.ui.slide1.value()-1][-1]
             curveInd = -2 if self.fitFlag else -1
             curveInd -= len(self.cursors)
-            varPcT = self.ui.peakThrsPcNum.value()
-            distPcT = self.ui.movAvgPcNum.value()
-            f,start,end = polishedDerive(p.f,sgfWinPcF,sgfWinPcG,sgfDeg,True)
-            f = f[start:end]
-            z = p.z[start:end]
-            plottedY = self.ui.grafo.plotItem.curves[curveInd].yData if self.ui.derivCkBox.isChecked() else self.ui.grafo.plotItem.curves[curveInd].yData[start:end]
+            peakThrPc = self.ui.peakThrsNumDbl.value()
+            distPcT = self.ui.peakLenPcNumDbl.value()
+            rsqLim = self.ui.rsqLimNumDbl.value()
+            toPlot = self.ui.grafo.plotItem.curves[curveInd]
             
-            uNd,thr = findUnD(f,z,varPcT,distPcT)
-            peaks = np.array([])
-            zpeaks = np.array([])
-
-            result = uNd
+            peaks,zpeaks,thr = self.getPeaks(p, toPlot, sgfWinPcF, sgfWinPcG, sgfDeg, True, peakThrPc, distPcT, True, rsqLim)
             
-            thres = thr
-            print thr
-            
-            for u in result:
-                peaks = np.concatenate((peaks,plottedY[u[0]:u[1]]))
-                zpeaks = np.concatenate((zpeaks,z[u[0]:u[1]]))
-            self.ui.grafo.plot(zpeaks,peaks,pen = None,symbolPen='r',symbolBrush='r',symbol='o',symbolSize = 2)
+            self.ui.grafo.plot(zpeaks,peaks,pen = None,symbolPen='r',symbolBrush='r',symbol='o',symbolSize = 5)
             self.peaksOnPlot = True
             self.ui.showPeakBtn.setEnabled(False)
             self.ui.removePeakBtn.setEnabled(True)
             
-            thrLine = pg.InfiniteLine(pos = thres,angle = 0,movable = False, pen = 'r')
-            self.ui.grafo.plotItem.addItem(thrLine) 
+            self.thrLine = pg.InfiniteLine(pos = thr,angle = 0,movable = False, pen = 'r')
+            self.ui.grafo.plotItem.addItem(self.thrLine)
             
         except Exception as e:
             print e.message
@@ -386,43 +376,53 @@ class curveWindow ( QtGui.QMainWindow ):
     
            
     def updatePeaks(self):
+
         if not self.peaksOnPlot:
             return None
         try:
             p = self.exp[self.ui.slide1.value()-1][-1]
-            curveInd = -2 if self.fitFlag else -1
+            curveInd = -3 if self.fitFlag else -2
             curveInd -= len(self.cursors)
-            varPcT = self.ui.peakThrsPcNum.value()
-            print varPcT
-            distPcT = self.ui.movAvgPcNum.value()
-            f,start,end = polishedDerive(p.f,sgfWinPcF,sgfWinPcG,sgfDeg,True)
-            f = f[start:end]
-            z = p.z[start:end]
-            plottedY = self.ui.grafo.plotItem.curves[curveInd].yData if self.ui.derivCkBox.isChecked() else self.ui.grafo.plotItem.curves[curveInd].yData[start:end]
+            peakThrPc = self.ui.peakThrsNumDbl.value()
+            distPcT = self.ui.peakLenPcNumDbl.value()
+            rsqLim = self.ui.rsqLimNumDbl.value()
+            toPlot = self.ui.grafo.plotItem.curves[curveInd]
             
-            uNd,thr = findUnD(f,z,varPcT,distPcT)
-            peaks = np.array([])
-            zpeaks = np.array([])
-
-            result = uNd
-            thres = thr
+            peaks,zpeaks,thr = self.getPeaks(p, toPlot, sgfWinPcF, sgfWinPcG, sgfDeg, True, peakThrPc, distPcT, True, rsqLim)
             
-            for u in result:
-                peaks = np.concatenate((peaks,plottedY[u[0]:u[1]]))
-                zpeaks = np.concatenate((zpeaks,z[u[0]:u[1]]))
-            self.ui.grafo.plot(zpeaks,peaks,pen = None,symbolPen='r',symbolBrush='r',symbol='o',symbolSize = 2)
+            self.ui.grafo.plotItem.curves[curveInd+1].setData(zpeaks,peaks)
             self.peaksOnPlot = True
             self.ui.showPeakBtn.setEnabled(False)
             self.ui.removePeakBtn.setEnabled(True)
             
-            print thr
+            for d in self.ui.grafo.plotItem.childItems():
+                print d
+                if str(type(d)) == str(line):
+                    thrLine = d
             
-            thrLine = pg.InfiniteLine(pos = thr,angle = 0,movable = False, pen = 'r')
-            self.ui.grafo.plotItem.addItem(thrLine)
+            self.thrLine.setPos(thr)
             
         except Exception as e:
             print e.message
+
+
+    def getPeaks(self,p,toPlot,sgfWinPcFine,sgfWinPcRough,sgfD,cut,peakThrPc,distPcT,verify,rsqLim):
+    
+        f,start,end = polishedDerive(p.f,sgfWinPcF,sgfWinPcG,sgfDeg,cut)
+        f = f[start:end]
+        z = p.z[start:end]
+        plottedY = toPlot.yData if self.ui.derivCkBox.isChecked() else toPlot.yData[start:end]
+            
+        uNd,thr = findUnD(f,z,peakThrPc,distPcT,verify,rsqLim)
+        peaks = np.array([])
+        zpeaks = np.array([])
+
+        for u in uNd:
+            peaks = np.concatenate((peaks,plottedY[u[0]:u[1]]))
+            zpeaks = np.concatenate((zpeaks,z[u[0]:u[1]]))
         
+        return peaks,zpeaks,thr
+
     
     def removePeaks(self):
         self.peaksOnPlot = False
@@ -888,12 +888,10 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.addCursBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.addCursor)
         QtCore.QObject.connect(self.ui.removeCursBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCursor)
         
-        QtCore.QObject.connect(self.ui.movVarPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(float)")), self.updatePeaks)
-        QtCore.QObject.connect(self.ui.movAvgPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(float)")), self.updatePeaks)
-        QtCore.QObject.connect(self.ui.peakThrsPcNum, QtCore.SIGNAL(_fromUtf8("valueChanged(float)")), self.updatePeaks)
+        self.ui.rsqLimNumDbl.valueChanged.connect(self.updatePeaks)
+        self.ui.peakThrsNumDbl.valueChanged.connect(self.updatePeaks)
+        self.ui.peakLenPcNumDbl.valueChanged.connect(self.updatePeaks)
         QtCore.QObject.connect(self.ui.derivCkBox, QtCore.SIGNAL(_fromUtf8("clicked()")), self.checked)
-        
-        
         
         QtCore.QMetaObject.connectSlotsByName(self)
 

@@ -244,37 +244,7 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,thPc = 15,real
     valid = contB and freeB
     
     return allFit, ctPoint, valid
-    
-
-def findTriangles(data):
-    
-    triangles = []
-    floor = [[0,data[0]]]
-    for i in xrange(data.shape[0]-2):
-        
-        if data[i+1]>data[i] and data[i+1]>data[i+2]:
-            triangles.append([i+1,data[i+1]])
-        else:
-            floor.append([i+1,data[i+1]])
-    
-    floor.append([data.shape[0]-1,data[-1]])
-            
-    return np.array(triangles),np.array(floor)
-
-
-def filteredTriangles(data,thresh,smoothPc):
-    
-    triangles,floor = findTriangles(data)
-    ftri = []
-    smooth = movingAvg(data, data.shape[0]*smoothPc/100)
-    
-    
-    for t in triangles:
-        if t[1] > np.max(smooth)*thresh/100+smooth[t[0]]:
-            ftri.append(t)
-    
-    return np.array(ftri)
-   
+      
    
 def findJumps(data,multiplierPc):
     meanDiff = np.mean(abs(data[1:]-data[:-1]))
@@ -286,9 +256,8 @@ def findJumps(data,multiplierPc):
     return np.array(jumps)
 
 
-def findUnD(data,xAxis,thrMul,distPc,verify=True):
+def findUnD(data,xAxis,thrMul,distPc,verify=True,rsqT=0.8):
     thr = np.var(data)*thrMul*(-1)
-    print 'internal ' + str(thr)
     dist = (xAxis[-1]-xAxis[0])*distPc/100
     uNd = []
     up = None
@@ -302,7 +271,7 @@ def findUnD(data,xAxis,thrMul,distPc,verify=True):
             if (xAxis[up]-xAxis[down]) >= dist:
                 if verify:
                     fit = genericFit(np.arange(up-down),data[down:up],2)
-                    go = fit['R^2']>=0.9
+                    go = fit['R^2']>=rsqT
                 else:
                     go = True
                 if go:
@@ -311,26 +280,6 @@ def findUnD(data,xAxis,thrMul,distPc,verify=True):
             up = None
             
     return uNd,thr
-
-
-def findDnU(data,thrMul,distPc,):
-    thr = np.var(data)*thrMul
-    dist = data.shape[0]*distPc/100
-    dNu = []
-    up = None
-    down = None
-    
-    for i in xrange(data.shape[0]):
-        if data[i] >= thr and up == None:
-            up = i
-        elif data[i] < thr and up != None:
-            down = i
-            if down-up >= dist:
-                dNu.append([int(up),int(down)])
-            down = None
-            up = None
-            
-    return dNu,thr
 
 
 def polishedDerive(data,sgfWinPcF,sgfWinPcG,sgfDeg,cut = False):
@@ -349,6 +298,38 @@ def polishedDerive(data,sgfWinPcF,sgfWinPcG,sgfDeg,cut = False):
         end = f.shape[0]-start
     
     return f,start,end
+
+
+def peakFinder(segment,sgfWinPcF,sgfWinPcG,sgfDeg,cut,thrMul,distPc,verify,rsqT):
+    
+    f = segment.f
+    z = segment.z
+    der,start,end = polishedDerive(f, sgfWinPcF, sgfWinPcG, sgfDeg, cut)
+    fnew = f[start:end]
+    znew = f[start:end]
+    derNew = der[start:end]
+    uNd,thr = findUnD(derNew, znew, thrMul, distPc, verify, rsqT)
+    peaks = []
+    zPeaks = []
+    derPeaks = []
+    last = 0
+    for u in uNd:
+        fSlice = fnew[u[0]:u[1]]
+        maxPind = np.where(fSlice==np.max(fSlice))[0]
+        if u[0]==last:
+            first = u[0]
+        else:
+            base = np.mean(fSlice[maxPind+1:u[1]])
+            valleyInd = np.where(fnew[start:maxPind]<=base)[-1]
+            if not valleyInd:
+                first = last+1
+            else:
+                first = valleyInd
+        peaks.append(fnew[first,u[1]])
+        zPeaks.append(znew[first,u[1]])
+        derPeaks.append(derNew[first,u[1]])
+        last = u[1]
+    return peaks,zpeaks,derPeaks
 
 
 def smartSgf(data,sgfWinPc,sgfDeg,sgfDerDeg = 0):
