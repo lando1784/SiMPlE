@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>SiMPlE</string>
   </property>
   <widget class="QWidget" name="simpleCtWidget">
    <layout class="QVBoxLayout" name="verticalLayout_3" stretch="12,4,1">
@@ -43,8 +43,14 @@
      <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="6,3">
       <item>
        <widget class="QTabWidget" name="functionsTabs">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="currentIndex">
          <number>0</number>
+        </property>
+        <property name="movable">
+         <bool>false</bool>
         </property>
         <widget class="QWidget" name="tab_5">
          <attribute name="title">
@@ -412,55 +418,6 @@
           <string>Plot Options</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="0">
-           <widget class="QGroupBox" name="alignemenBox">
-            <property name="title">
-             <string>Alignment</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout">
-             <item row="1" column="0">
-              <widget class="QPushButton" name="alignBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Align</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QPushButton" name="autoFitBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Show Fit</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QPushButton" name="rejectBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Remove Fit</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QPushButton" name="alignAllBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Align All</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
           <item row="0" column="1" rowspan="2">
            <widget class="QGroupBox" name="cursorsBox">
             <property name="title">
@@ -593,29 +550,49 @@
             </layout>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QGroupBox" name="groupBox">
+          <item row="0" column="0" rowspan="2">
+           <widget class="QGroupBox" name="alignemenBox">
             <property name="title">
-             <string>Other</string>
+             <string>Alignment</string>
             </property>
-            <layout class="QGridLayout" name="gridLayout_3">
-             <item row="0" column="0">
-              <widget class="QPushButton" name="showPeakBtn">
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="1" column="0">
+              <widget class="QPushButton" name="alignBtn">
                <property name="enabled">
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Show Peaks</string>
+                <string>Align</string>
                </property>
               </widget>
              </item>
              <item row="0" column="1">
-              <widget class="QPushButton" name="removePeakBtn">
+              <widget class="QPushButton" name="rejectBtn">
                <property name="enabled">
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Remove Peaks</string>
+                <string>Remove Fit</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="alignAllBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Align All</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0">
+              <widget class="QPushButton" name="autoFitBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Show Fit</string>
                </property>
               </widget>
              </item>
@@ -629,16 +606,6 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
-              <widget class="QCheckBox" name="derivCkBox">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Drivative</string>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="1">
               <widget class="QPushButton" name="hist2dBtn">
                <property name="enabled">
@@ -649,10 +616,144 @@
                </property>
               </widget>
              </item>
+             <item row="3" column="0">
+              <widget class="QCheckBox" name="derivCkBox">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Drivative</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
          </layout>
+        </widget>
+        <widget class="QWidget" name="peaksTab">
+         <attribute name="title">
+          <string>Peaks</string>
+         </attribute>
+         <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,0,0,0,0">
+          <item row="0" column="4">
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="showPeakBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Show Peaks</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QPushButton" name="removePeakBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Remove Peaks</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="peaksCmbBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="peaksNum">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+            <property name="buttonSymbols">
+             <enum>QAbstractSpinBox::NoButtons</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="3">
+           <widget class="QPushButton" name="saveAllPeaksBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Save all Peaks Data</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QPushButton" name="savePeaksBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Save Current Peaks Data</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2" rowspan="2">
+           <widget class="QTextEdit" name="peakDataTxt">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="junkTab">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <attribute name="title">
+          <string>Junk</string>
+         </attribute>
+         <widget class="QDoubleSpinBox" name="peakAreaNumDbl">
+          <property name="geometry">
+           <rect>
+            <x>200</x>
+            <y>90</y>
+            <width>95</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="readOnly">
+           <bool>true</bool>
+          </property>
+          <property name="buttonSymbols">
+           <enum>QAbstractSpinBox::NoButtons</enum>
+          </property>
+          <property name="maximum">
+           <double>1000000000.000000000000000</double>
+          </property>
+         </widget>
         </widget>
        </widget>
       </item>
@@ -751,7 +852,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1064</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>

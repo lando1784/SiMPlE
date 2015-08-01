@@ -306,7 +306,7 @@ def peakFinder(segment,sgfWinPcF,sgfWinPcG,sgfDeg,cut,thrMul,distPc,verify,rsqT)
     z = segment.z
     der,start,end = polishedDerive(f, sgfWinPcF, sgfWinPcG, sgfDeg, cut)
     fnew = f[start:end]
-    znew = f[start:end]
+    znew = z[start:end]
     derNew = der[start:end]
     uNd,thr = findUnD(derNew, znew, thrMul, distPc, verify, rsqT)
     peaks = []
@@ -314,22 +314,32 @@ def peakFinder(segment,sgfWinPcF,sgfWinPcG,sgfDeg,cut,thrMul,distPc,verify,rsqT)
     derPeaks = []
     last = 0
     for u in uNd:
+        print last
         fSlice = fnew[u[0]:u[1]]
-        maxPind = np.where(fSlice==np.max(fSlice))[0]
+        maxPind = np.where(fSlice==np.max(fSlice))[0][0]
         if u[0]==last:
             first = u[0]
         else:
-            base = np.mean(fSlice[maxPind+1:u[1]])
-            valleyInd = np.where(fnew[start:maxPind]<=base)[-1]
-            if not valleyInd:
+            base = np.mean(fSlice[(maxPind+1):(u[1]-u[0])])
+            valleyInd = np.where(fnew[last:(maxPind+u[0])]<=base)[0]
+            if not valleyInd.shape[0]:
                 first = last+1
             else:
-                first = valleyInd
-        peaks.append(fnew[first,u[1]])
-        zPeaks.append(znew[first,u[1]])
-        derPeaks.append(derNew[first,u[1]])
+                first = valleyInd[-1]+last
+        peaks.append(fnew[first:u[1]])
+        zPeaks.append(znew[first:u[1]])
+        derPeaks.append(derNew[first:u[1]])
         last = u[1]
-    return peaks,zpeaks,derPeaks
+    return peaks,zPeaks,derPeaks,thr
+
+
+def peakArea(peak,z):
+    
+    step = np.mean(z[1:]-z[:-1])
+    
+    area = np.sum(peak*step)
+    
+    return area
 
 
 def smartSgf(data,sgfWinPc,sgfDeg,sgfDerDeg = 0):
