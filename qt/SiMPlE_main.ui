@@ -700,12 +700,12 @@
            </spacer>
           </item>
           <item row="1" column="3">
-           <widget class="QPushButton" name="saveAllPeaksBtn">
+           <widget class="QPushButton" name="savePeaksStatsBtn">
             <property name="enabled">
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Save all Peaks Data</string>
+             <string>Save Peaks Stats</string>
             </property>
            </widget>
           </item>
@@ -715,7 +715,7 @@
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Save Current Peaks Data</string>
+             <string>Save Peaks Data</string>
             </property>
            </widget>
           </item>

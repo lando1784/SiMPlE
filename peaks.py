@@ -24,7 +24,12 @@ class peak(object):
     
     def getBaseLine(self):
         
-        return np.mean(self.f[self.apex[0]+1:])
+        baseline = np.mean(self.f[self.apex[0]+1:])
+        
+        if str(baseline) == 'nan':
+            baseline = np.min(self.f)
+        
+        return baseline
         
     
     def getHeight(self):
@@ -74,11 +79,19 @@ class peak(object):
         return info
     
     
-    def getStatsFileEntry(self):
+    def getStatsFileEntry(self,eStr = False, label = ''):
         
         entry = [self.z[0],self.z[-1],self.apex[0],self.apex[1],self.getBaseLine(),self.getArea()]
         
-        return np.array(entry)
+        if eStr:
+            eTemp = ''
+            for e in entry:
+                eTemp += str(e)+'\t'
+            entry = eTemp+'\n'
+            if label != '':
+                entry = label + '\t' + entry
+        
+        return entry
         
 
 class Peaks(object):
@@ -135,12 +148,11 @@ class Peaks(object):
         
         basicStats = {'areaM':None,'areaV':None,'heightM':None,'heightV':None,'lengthM':None,'lengthV':None}
         
-        template = np.zeros(len(self.peaks))
-        areas = template
-        lengths = template
-        heights = template
+        areas = np.zeros(len(self.peaks))
+        lengths = np.zeros(len(self.peaks))
+        heights = np.zeros(len(self.peaks))
         
-        for i in xrange(template):
+        for i in xrange(areas.shape[0]):
             areas[i] = self.peaks[i].getArea()
             heights[i] = self.peaks[i].getHeight()
             lengths[i] = self.peaks[i].getLength()
@@ -155,27 +167,36 @@ class Peaks(object):
         return basicStats
     
     
-    def getStatsFileEntry(self):
+    def getStatsFileEntry(self,eStr = False, label = ''):
         
-        if self.basicStats == None:
-            self.getBasicStats()
+        basicStats = self.getBasicStats()
             
-        entry = np.array([self.basicStats['areaM'],self.basicStats['areaV'],self.basicStats['heightM'],
-                          self.basicStats['heightV'],self.basicStats['lengthM'],self.basicStats['lengthV']])
+        entry = [basicStats['areaM'],basicStats['areaV'],basicStats['heightM'],
+                 basicStats['heightV'],basicStats['lengthM'],basicStats['lengthV']]
+        
+        if eStr:
+            eTemp = ''
+            for e in entry:
+                eTemp += str(e)+'\t'
+            entry = eTemp+'\n'
+            if label != '':
+                entry = label + '\t' + entry
         
         return entry
     
     
-    def getSinglePeakStatsEntries(self):
+    def getSinglePeakStatsEntries(self,eStr = False, label = ''):
         
-        entries = []
+        entries = [] if not eStr else ''
         
         for p in self.peaks:
             
-            entries.append(p.getStatsFileEntry())
-            
-        return np.array(entries)
-
+            if not eStr:
+                entries.append(p.getStatsFileEntry())
+            else:
+                entries += p.getStatsFileEntry(True,label)
+        
+        return entries
 
 
 

@@ -125,7 +125,32 @@ class curve(mvobject.mvobject):
         
         for s in self.segments:
             s.speed = newSpeed
+    
+    
+    def getPeaksStats(self,single = False, eStr = False):
         
+        stats = '' if eStr else []
+        
+        for s in self.segments:
+            if len(s.peaks)>=1:
+                if single:
+                    stats+=s.peaks.getSinglePeakStatsEntries(eStr,self.basename)
+                else:
+                    if eStr:
+                        stats+=s.peaks.getStatsFileEntry(eStr,self.basename)
+                    else:
+                        stats.append(s.peaks.getStatsFileEntry(eStr,self.basename))
+                
+        return stats
+    
+    
+    def anyPeaks(self):
+        
+        answer = 0
+        for s in self.segments:
+            answer += len(s.peaks)
+        return answer
+            
     
 if __name__ == "__main__":
     print 'not for direct use'

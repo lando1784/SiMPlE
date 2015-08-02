@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'd:\Software\GIT\SiMPlE\qt\SiMPlE_main.ui'
 #
-# Created: Sat Aug 01 18:40:34 2015
+# Created: Sun Aug 02 17:00:15 2015
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -345,10 +345,10 @@ class Ui_facewindow(object):
         self.gridLayout_3.addWidget(self.peaksNum, 0, 1, 1, 1)
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.gridLayout_3.addItem(spacerItem2, 1, 4, 1, 1)
-        self.saveAllPeaksBtn = QtGui.QPushButton(self.peaksTab)
-        self.saveAllPeaksBtn.setEnabled(False)
-        self.saveAllPeaksBtn.setObjectName(_fromUtf8("saveAllPeaksBtn"))
-        self.gridLayout_3.addWidget(self.saveAllPeaksBtn, 1, 3, 1, 1)
+        self.savePeaksStatsBtn = QtGui.QPushButton(self.peaksTab)
+        self.savePeaksStatsBtn.setEnabled(False)
+        self.savePeaksStatsBtn.setObjectName(_fromUtf8("savePeaksStatsBtn"))
+        self.gridLayout_3.addWidget(self.savePeaksStatsBtn, 1, 3, 1, 1)
         self.savePeaksBtn = QtGui.QPushButton(self.peaksTab)
         self.savePeaksBtn.setEnabled(False)
         self.savePeaksBtn.setObjectName(_fromUtf8("savePeaksBtn"))
@@ -465,8 +465,8 @@ class Ui_facewindow(object):
         self.functionsTabs.setTabText(self.functionsTabs.indexOf(self.tab_7), _translate("facewindow", "Plot Options", None))
         self.showPeakBtn.setText(_translate("facewindow", "Show Peaks", None))
         self.removePeakBtn.setText(_translate("facewindow", "Remove Peaks", None))
-        self.saveAllPeaksBtn.setText(_translate("facewindow", "Save all Peaks Data", None))
-        self.savePeaksBtn.setText(_translate("facewindow", "Save Current Peaks Data", None))
+        self.savePeaksStatsBtn.setText(_translate("facewindow", "Save Peaks Stats", None))
+        self.savePeaksBtn.setText(_translate("facewindow", "Save Peaks Data", None))
         self.functionsTabs.setTabText(self.functionsTabs.indexOf(self.peaksTab), _translate("facewindow", "Peaks", None))
         self.functionsTabs.setTabText(self.functionsTabs.indexOf(self.junkTab), _translate("facewindow", "Junk", None))
         self.label.setText(_translate("facewindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
