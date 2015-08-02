@@ -29,6 +29,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
 import experiment
 import convertR9module as r9
 from calc_utilities import *
+from peaks import peak,Peaks
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -258,7 +259,8 @@ class curveWindow ( QtGui.QMainWindow ):
         if self.fitFlag:
             self.plotFit(-1)
         self.checkCurve(dove)
-        self.refreshCursors()
+        if len(self.cursors)>=1:
+            self.refreshCursors()
         if autorange:
             self.ui.grafo.autoRange()
     
@@ -352,7 +354,9 @@ class curveWindow ( QtGui.QMainWindow ):
        
         
     def showPeaks(self):
-        try:
+        #try:
+        if True:
+            self.peaks = []
             self.ui.peaksCmbBox.setEnabled(True)
             self.ui.peaksCmbBox.clear()
             self.ui.peaksCmbBox.addItem('Select a Peak')
@@ -362,34 +366,38 @@ class curveWindow ( QtGui.QMainWindow ):
             peakThrPc = self.ui.peakThrsNumDbl.value()
             distPcT = self.ui.peakLenPcNumDbl.value()
             rsqLim = self.ui.rsqLimNumDbl.value()
+            der,start,end = polishedDerive(p.f, sgfWinPcF, sgfWinPcG, sgfDeg, False)
             
-            peaksL,zpeaksL,derivpeaksL, thr = peakFinder(p, sgfWinPcF, sgfWinPcG, sgfDeg, cutMe, peakThrPc, distPcT, True, rsqLim)
-
-            peaks = np.array([])
-            zpeaks = np.array([])
-            derivpeaks = np.array([])
+            peaks = Peaks(p.z, p.f, peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
+            peaksA = np.array([])
+            zpeaksA = np.array([])
+            derivpeaksA = np.array([])
+            i = 0
             
-            for i in xrange(len(peaksL)):
-                peaks = np.concatenate((peaks,np.array(peaksL[i])))
-                zpeaks = np.concatenate((zpeaks,np.array(zpeaksL[i])))
-                derivpeaks = np.concatenate((derivpeaks,np.array(derivpeaksL[i])))
+            for pk in peaks:
+                peaksA = np.concatenate((peaksA,pk.f))
+                zpeaksA = np.concatenate((zpeaksA,pk.z))
+                start = list(p.z).index(pk.z[0])
+                end = list(p.z).index(pk.z[-1])
+                derivpeaksA = np.concatenate((derivpeaksA,der[start:end+1]))
                 self.ui.peaksCmbBox.addItem(str(i))
+                i+=1
             
-            self.ui.grafo.plot(zpeaks,derivpeaks if self.ui.derivCkBox.isChecked() else peaks,pen = None,symbolPen='r',symbolBrush='r',symbol='o',symbolSize = 5)
+            
             self.peaksOnPlot = True
+            if peaksA.shape[0]<1:
+                return None
+            
+            self.ui.grafo.plot(zpeaksA,derivpeaksA if self.ui.derivCkBox.isChecked() else peaksA,pen = None,symbolPen='r',symbolBrush='r',symbol='o',symbolSize = 5)
             self.ui.showPeakBtn.setEnabled(False)
             self.ui.removePeakBtn.setEnabled(True)
             self.ui.peaksCmbBox.setEnabled(True)
-            self.peaks = peaksL
-            self.zpeaks = zpeaksL
+            self.peaks = peaks
             
-            self.ui.peaksNum.setValue(len(peaksL))
+            self.ui.peaksNum.setValue(len(peaks))
             
-            self.thrLine = pg.InfiniteLine(pos = thr,angle = 0,movable = False, pen = 'r')
-            self.ui.grafo.plotItem.addItem(self.thrLine)
-            
-        except Exception as e:
-            print e.message
+        #except Exception as e:
+            #print e.message
             
     
            
@@ -398,6 +406,7 @@ class curveWindow ( QtGui.QMainWindow ):
         if not self.peaksOnPlot:
             return None
         try:
+            self.peaks = []
             self.ui.peaksCmbBox.clear()
             self.ui.peaksCmbBox.addItem('Select a Peak')
             p = self.exp[self.ui.slide1.value()-1][-1]
@@ -406,25 +415,31 @@ class curveWindow ( QtGui.QMainWindow ):
             peakThrPc = self.ui.peakThrsNumDbl.value()
             distPcT = self.ui.peakLenPcNumDbl.value()
             rsqLim = self.ui.rsqLimNumDbl.value()
+            der,start,end = polishedDerive(p.f, sgfWinPcF, sgfWinPcG, sgfDeg, False)
             
-            peaksL,zpeaksL,derivpeaksL, thr = peakFinder(p, sgfWinPcF, sgfWinPcG, sgfDeg, cutMe, peakThrPc, distPcT, True, rsqLim)
-            peaks = np.array([])
-            zpeaks = np.array([])
-            derivpeaks = np.array([])
+            peaks = Peaks(p.z, p.f, peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
+
+            peaksA = np.array([])
+            zpeaksA = np.array([])
+            derivpeaksA = np.array([])
+            i = 0
             
-            for i in xrange(len(peaksL)):
-                peaks = np.concatenate((peaks,np.array(peaksL[i])))
-                zpeaks = np.concatenate((zpeaks,np.array(zpeaksL[i])))
-                derivpeaks = np.concatenate((derivpeaks,np.array(derivpeaksL[i])))
+            for pk in peaks:
+                peaksA = np.concatenate((peaksA,pk.f))
+                zpeaksA = np.concatenate((zpeaksA,pk.z))
+                start = list(p.z).index(pk.z[0])
+                end = list(p.z).index(pk.z[-1])
+                derivpeaksA = np.concatenate((derivpeaksA,der[start:end+1]))
                 self.ui.peaksCmbBox.addItem(str(i))
+                i+=1
             
-            self.ui.grafo.plotItem.curves[curveInd+1].setData(zpeaks,derivpeaks if self.ui.derivCkBox.isChecked() else peaks)
-            self.peaks = peaksL
-            self.zpeaks = zpeaksL
+            if peaksA.shape[0]<1:
+                return None
+            
+            self.ui.grafo.plotItem.curves[curveInd+1].setData(zpeaksA,derivpeaksA if self.ui.derivCkBox.isChecked() else peaksA)
+            self.peaks = peaks
             
             self.ui.peaksNum.setValue(len(peaks))
-            
-            self.thrLine.setPos(thr)
             
         except Exception as e:
             print e.message
@@ -435,9 +450,9 @@ class curveWindow ( QtGui.QMainWindow ):
         ind = self.sender().currentIndex()-1
         if ind < 0:
             return None
-        
-        area = peakArea(self.peaks[ind],self.zpeaks[ind])
-        self.ui.peakAreaNumDbl.setValue(area)
+        self.ui.peakDataTxt.clear()
+        info = self.peaks[ind].getInfo()
+        self.ui.peakDataTxt.insertPlainText(info)
 
  
     def removePeaks(self):
@@ -533,7 +548,8 @@ class curveWindow ( QtGui.QMainWindow ):
             self.goToCurve(1)
             self.ui.slide1.setValue(0)
             self.ui.slide2.setValue(0)
-        self.refreshCursors()
+        if len(self.cursors)>=1:
+            self.refreshCursors()
         self.refillList()
 
 
@@ -564,7 +580,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.goToCurve(1)
         self.ui.slide1.setValue(0)
         self.ui.slide2.setValue(0)
-        self.ui.deriveCkBox.setChecked(False)
+        self.ui.derivCkBox.setChecked(False)
         self.ui.showPeakBtn.setEnabled(False)
         logString = 'Curves reloaded\n'
         self.simpleLogger(logString)
@@ -825,9 +841,9 @@ class curveWindow ( QtGui.QMainWindow ):
         
         lim = len(self.cursors)
         self.cursors = []
-        
+
         for i in xrange(lim):
-            curveInd = -2 if self.fitFlag or self.peaksOnPlot else -1
+            curveInd = -2 if self.fitFlag or (self.peaksOnPlot and len(self.peaks)>=1) else -1
             curveInd -= len(self.cursors)
             currName = self.ui.cursCmbBox.itemText(i)
             for k in self.cursColors.keys():

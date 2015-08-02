@@ -300,10 +300,8 @@ def polishedDerive(data,sgfWinPcF,sgfWinPcG,sgfDeg,cut = False):
     return f,start,end
 
 
-def peakFinder(segment,sgfWinPcF,sgfWinPcG,sgfDeg,cut,thrMul,distPc,verify,rsqT):
+def peakFinder(z,f,sgfWinPcF,sgfWinPcG,sgfDeg,cut,thrMul,distPc,verify,rsqT):
     
-    f = segment.f
-    z = segment.z
     der,start,end = polishedDerive(f, sgfWinPcF, sgfWinPcG, sgfDeg, cut)
     fnew = f[start:end]
     znew = z[start:end]
@@ -314,7 +312,6 @@ def peakFinder(segment,sgfWinPcF,sgfWinPcG,sgfDeg,cut,thrMul,distPc,verify,rsqT)
     derPeaks = []
     last = 0
     for u in uNd:
-        print last
         fSlice = fnew[u[0]:u[1]]
         maxPind = np.where(fSlice==np.max(fSlice))[0][0]
         if u[0]==last:
@@ -330,7 +327,7 @@ def peakFinder(segment,sgfWinPcF,sgfWinPcG,sgfDeg,cut,thrMul,distPc,verify,rsqT)
         zPeaks.append(znew[first:u[1]])
         derPeaks.append(derNew[first:u[1]])
         last = u[1]
-    return peaks,zPeaks,derPeaks,thr
+    return peaks,zPeaks
 
 
 def peakArea(peak,z):

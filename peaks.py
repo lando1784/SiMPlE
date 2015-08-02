@@ -10,6 +10,7 @@ class peak(object):
         self.model = model
         self.fit = None
         
+        self.apex = self.getApex()
     
     def getGrowth(self):
         
@@ -28,13 +29,14 @@ class peak(object):
     
     def getHeight(self):
         
-        return self.apex[1]-self.getBaseline()
+        return self.apex[1]-self.getBaseLine()
     
     
     def getArea(self):
     
         step = np.mean(self.z[1:]-self.z[:-1])
         deltas = self.f-self.getBaseLine()
+        print deltas
         deltas[np.where(deltas<0)[0]] = 0
         
         area = np.sum(deltas*step)
@@ -44,7 +46,7 @@ class peak(object):
     
     def getApex(self):
         
-        return [z[np.where(self.f==np.max(self.f))][0][0],np.max(self.f)]
+        return [self.z[np.where(self.f==np.max(self.f))[0][0]],np.max(self.f)]
     
     
     def fitGrowth(self,fitModel = None):
@@ -66,11 +68,17 @@ class peak(object):
         info += 'Peak area [zJ]: ' + str(self.getArea()) + '\n'
         info += 'Starting point [nm]: ' + str(self.z[0]) + '\n'
         info += 'Ending point [nm]: ' + str(self.z[-1]) + '\n'
+        info += 'Peak apex position [nm]' + str(self.apex[0]) + '\n'
+        info += 'Peak apex force [pN]' + str(self.apex[1]) + '\n'
+    
+        return info
+    
+    
+    def getStatsFileEntry(self):
         
-        apex = self.getApex()
+        entry = [self.z[0],self.z[-1],self.apex[0],self.apex[1],self.getBaseLine(),self.getArea()]
         
-        info += 'Peak apex position [nm]' + str(apex[0]) + '\n'
-        info += 'Peak apex force [pN]' + str(apex[1]) + '\n'
+        return np.array(entry)
         
 
 class Peaks(object):
@@ -81,8 +89,6 @@ class Peaks(object):
         self.fTrack = f
         
         self.peaks = []
-        
-        self.basicStats = {'areaM':None,'areaV':None,'heightM':None,'heightV':None,'lengthM':None,'lengthV':None}
         
         self.searchTheTrack(z,f,peakFinder,peakModel,argsPF,kwArgsPF)
     
@@ -101,6 +107,11 @@ class Peaks(object):
         
         del self.peaks[index]
         
+        
+    def __len__(self):
+        
+        return len(self.peaks)
+        
     
     def append(self,obj):
         
@@ -115,14 +126,14 @@ class Peaks(object):
         fpeaks,zpeaks = pfFun(z,f,*pfArgs,**pfKwargs)
         
         for i in xrange(len(fpeaks)):
-            
+            if zpeaks[i].shape[0]<=1:
+                continue
             self.peaks.append(peak(zpeaks[i],fpeaks[i],modelFun))
     
     
     def getBasicStats(self):
         
-        if self.basicStats != None:
-            return self.basicStats
+        basicStats = {'areaM':None,'areaV':None,'heightM':None,'heightV':None,'lengthM':None,'lengthV':None}
         
         template = np.zeros(len(self.peaks))
         areas = template
@@ -134,17 +145,17 @@ class Peaks(object):
             heights[i] = self.peaks[i].getHeight()
             lengths[i] = self.peaks[i].getLength()
             
-        self.basicStats['areaM'] = np.mean(areas)
-        self.basicStats['areaV'] = np.var(areas)
-        self.basicStats['heightM'] = np.mean(heights)
-        self.basicStats['heightV'] = np.var(heights)
-        self.basicStats['lengthM'] = np.mean(lengths)
-        self.basicStats['lengthV'] = np.var(lengths)
+        basicStats['areaM'] = np.mean(areas)
+        basicStats['areaV'] = np.var(areas)
+        basicStats['heightM'] = np.mean(heights)
+        basicStats['heightV'] = np.var(heights)
+        basicStats['lengthM'] = np.mean(lengths)
+        basicStats['lengthV'] = np.var(lengths)
         
-        return self.basicStats
+        return basicStats
     
     
-    def getStatFileEntry(self):
+    def getStatsFileEntry(self):
         
         if self.basicStats == None:
             self.getBasicStats()
@@ -153,9 +164,17 @@ class Peaks(object):
                           self.basicStats['heightV'],self.basicStats['lengthM'],self.basicStats['lengthV']])
         
         return entry
-
-
-
+    
+    
+    def getSinglePeakStatsEntries(self):
+        
+        entries = []
+        
+        for p in self.peaks:
+            
+            entries.append(p.getStatsFileEntry())
+            
+        return np.array(entries)
 
 
 
