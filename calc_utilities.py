@@ -330,15 +330,6 @@ def peakFinder(z,f,sgfWinPcF,sgfWinPcG,sgfDeg,cut,thrMul,distPc,verify,rsqT):
     return peaks,zPeaks
 
 
-def peakArea(peak,z):
-    
-    step = np.mean(z[1:]-z[:-1])
-    
-    area = np.sum(peak*step)
-    
-    return area
-
-
 def smartSgf(data,sgfWinPc,sgfDeg,sgfDerDeg = 0):
     
     sgfWin = data.shape[0]*sgfWinPc/100 + 1 - (data.shape[0]*sgfWinPc/100)%2

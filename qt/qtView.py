@@ -3,6 +3,8 @@ from scipy.signal._savitzky_golay import savgol_filter
 from copy import copy,deepcopy
 from PIL.PixarImagePlugin import PixarImageFile
 from numpy import uint16
+from cmath import rect
+from telnetlib import RCTE
 
 
 try:
@@ -188,7 +190,8 @@ class curveWindow ( QtGui.QMainWindow ):
             if j == Nx:
                 j=0
                 i+=1
-
+        
+        scena.mouseReleaseEvent = self.aim
         scena.wheelEvent = self.scorri
         self.ui.griglia.setScene(scena)
         self.ui.slide1.setValue(1)
@@ -202,6 +205,34 @@ class curveWindow ( QtGui.QMainWindow ):
         return True
     
     
+    def pointInRect(self,point,rect):
+        
+        tl = rect.topLeft()
+        br = rect.bottomRight()
+        
+        tlBound = point.x() >= tl.x() and point.y() >= tl.y()
+        brBound = point.x() <= br.x() and point.y() <= br.y()
+        
+        return tlBound and brBound
+    
+    
+    def aim(self,ev=None):
+        mPos = ev.scenePos()
+        print 'items'
+        it = self.ui.griglia.items()
+        ind = 0
+        lenIt = len(it)
+        for i in xrange(lenIt):
+            rct = it[-(i+1)].rect()
+            print i
+            print rct.topLeft()
+            print rct.bottomRight()
+            if self.pointInRect(mPos, rct):
+                ind = i
+                break
+        self.ui.slide1.setValue(ind+1)
+        
+        
     def scorri(self,ev=None):
         delta = ev.delta()/120
         self.ui.slide2.setSliderPosition(self.ui.slide2.sliderPosition()-delta)
@@ -355,8 +386,7 @@ class curveWindow ( QtGui.QMainWindow ):
        
         
     def showPeaks(self):
-        #try:
-        if True:
+        try:
             self.ui.savePeaksBtn.setEnabled(True)
             self.ui.savePeaksStatsBtn.setEnabled(True)
             self.ui.peaksCmbBox.setEnabled(True)
@@ -398,9 +428,10 @@ class curveWindow ( QtGui.QMainWindow ):
             self.ui.peaksCmbBox.setEnabled(True)
             
             self.ui.peaksNum.setValue(res)
+            self.ui.peaksCmbBox.setCurrentIndex(1)
             
-        #except Exception as e:
-            #print e.message
+        except Exception as e:
+            print e.message
             
     
            
@@ -442,6 +473,7 @@ class curveWindow ( QtGui.QMainWindow ):
             self.ui.grafo.plotItem.curves[curveInd+1].setData(zpeaksA,derivpeaksA if self.ui.derivCkBox.isChecked() else peaksA)
             
             self.ui.peaksNum.setValue(res)
+            self.ui.peaksCmbBox.setCurrentIndex(1)
             
         except Exception as e:
             print e.message

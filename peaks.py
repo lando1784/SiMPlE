@@ -41,7 +41,6 @@ class peak(object):
     
         step = np.mean(self.z[1:]-self.z[:-1])
         deltas = self.f-self.getBaseLine()
-        print deltas
         deltas[np.where(deltas<0)[0]] = 0
         
         area = np.sum(deltas*step)
