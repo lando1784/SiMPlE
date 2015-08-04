@@ -44,10 +44,10 @@ class segment(mvobject.mvobject):
         self.z=self.z-self.f/self.k
         
         
-    def getPeaks(self,peakFinder = None, peakModel = None, argsPF = [], kwArgsPF = {}):
+    def getPeaks(self,peakFinder = None, peakModel = None, argsPF = [], kwArgsPF = {},id = ''):
         
         self.peaks = []
-        self.peaks = Peaks(self.z,self.f,peakFinder, peakModel, argsPF, kwArgsPF)
+        self.peaks = Peaks(self.z,self.f,peakFinder, peakModel, argsPF, kwArgsPF,id)
         
         return len(self.peaks)
         

@@ -1,14 +1,17 @@
 import numpy as np
 from fitLib import *
+from os import makedirs
+from os.path import split, join, splitext, exists
 
 class peak(object):
     
-    def __init__(self,z,f,model = None):
+    def __init__(self,z,f,model = None,id=''):
         
         self.z = z
         self.f = f
         self.model = model
         self.fit = None
+        self.id = id
         
         self.apex = self.getApex()
     
@@ -64,6 +67,20 @@ class peak(object):
         self.fit = genericFit(gZ,gF,fitModel)
         
     
+    def savePeak(self,filePath):
+        if splitext(filePath)[1] != '.pkf':
+            filePath = splitext(filePath)[0]+'.pkf'
+        fileText = '#Peak ID:\t' + self.id + '\n'
+        fileText += '#\n'
+        fileText += '#\n'
+        fileText += '#Displacement [nm]\tForce [pN]\n'
+        fileText += '#\n'
+        for i in xrange(len(self.z)):
+            fileText += str(self.z[i])+'\t'+str(self.f[i])+'\n'
+        outputFile = open(filePath,'w')
+        outputFile.write(fileText)
+        
+    
     def getInfo(self):
         
         info = ''
@@ -92,17 +109,21 @@ class peak(object):
         
         return entry
         
+        
 
 class Peaks(object):
     
-    def __init__(self, z, f, peakFinder = None, peakModel = None, argsPF = [], kwArgsPF = {}):
+    def __init__(self, z = None, f = None, peakFinder = None, peakModel = None, argsPF = [], kwArgsPF = {}, collectionID = ''):
+        
+        if z is None:
+            return None
         
         self.zTrack = z
         self.fTrack = f
         
         self.peaks = []
         
-        self.searchTheTrack(z,f,peakFinder,peakModel,argsPF,kwArgsPF)
+        self.searchTheTrack(z,f,peakFinder,peakModel,argsPF,kwArgsPF,collectionID)
     
     
     def __getitem__(self,index):
@@ -133,14 +154,14 @@ class Peaks(object):
             raise ValueError('Youtried to append a non\'peak\' object')
         
         
-    def searchTheTrack(self,z,f,pfFun,modelFun,pfArgs,pfKwargs):
+    def searchTheTrack(self,z,f,pfFun,modelFun,pfArgs,pfKwargs,id=''):
         
         fpeaks,zpeaks = pfFun(z,f,*pfArgs,**pfKwargs)
         
         for i in xrange(len(fpeaks)):
             if zpeaks[i].shape[0]<=1:
                 continue
-            self.peaks.append(peak(zpeaks[i],fpeaks[i],modelFun))
+            self.peaks.append(peak(zpeaks[i],fpeaks[i],modelFun,id))
     
     
     def getBasicStats(self):
@@ -196,7 +217,53 @@ class Peaks(object):
                 entries += p.getStatsFileEntry(True,label)
         
         return entries
-
+    
+    
+    def saveCollection(self,dir,baseName='',overWrite = False):
+        
+        if not exists(dir):
+            makedirs(dir)
+        
+        noBase = baseName == ''
+        
+        i = 0
+        
+        for p in self.peaks:
+            fname = p.id if noBase else baseName + '_' + str(i)
+            if exists(join(dir,fname)):
+                fname += '_bis' if not overWrite else ''
+            p.savePeak(join(dir,fname))
+            i+=1
+    
+    
+    def loadPKF(self,filePath):
+        
+        pf = open(filePath)
+        
+        data = []
+        
+        first = pf.readline()
+        id = first.split('\t')[1]
+        
+        for l in pf.readline():
+            if l[0] == '#':
+                continue
+            dataChunk = np.array([float(d) for d in l.split('\t')])
+            data.append(dataChunk)
+        data = np.array(data)
+        
+        return peak(data[:,0],data[:,1],id)
+    
+    
+    def loadDir(self,dir):
+        files = [f for f in os.listdir(dir) if os.isfile(join(dir,f)) and splitext(f)[1] == '.pkf']
+        
+        for f in files:
+            self.peaks.append(self.loadPKF(join(dir,f)))
+    
+    
+    
+        
 
 
 

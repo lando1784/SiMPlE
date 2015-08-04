@@ -73,6 +73,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.setPathBtn.setStyleSheet('background-color: none')
         self.globDir = ''
         self.peaksOnPlot = False
+        self.peaksAlreadyPlotted = False
         self.lastOperation = ''
         
         self.ui.peakLenPcNumDbl.setKeyboardTracking(False)
@@ -200,13 +201,15 @@ class curveWindow ( QtGui.QMainWindow ):
         scena.mouseReleaseEvent = self.aim
         scena.wheelEvent = self.scorri
         self.ui.griglia.setScene(scena)
-        self.ui.slide1.setValue(lastInd)
         og = self.ui.griglia.items()
         for i in range(len(og)):
             if not self.exp[-i-1].relevant:
                 og[i].setBrush(self.cRosso)
                 og[i].setPen(self.cRosso)
         self.ui.griglia.invalidateScene()
+        self.ui.slide1.setValue(lastInd)
+        if lastInd == self.ui.slide1.value():
+            self.goToCurve(lastInd)
 
         return True
     
@@ -250,6 +253,7 @@ class curveWindow ( QtGui.QMainWindow ):
         
         
     def goToCurve(self,dove):
+        print dove
         if len(self.exp)<=dove-1 or dove-1<0:
             return None
         else:
@@ -291,6 +295,7 @@ class curveWindow ( QtGui.QMainWindow ):
                 self.ui.grafo.plot(z,f)
         if self.fitFlag:
             self.plotFit(-1)
+        print self.ui.grafo.plotItem.curves
         self.checkCurve(dove)
         if len(self.cursors)>=1:
             self.refreshCursors()
@@ -393,6 +398,7 @@ class curveWindow ( QtGui.QMainWindow ):
         try:
             self.lastOperation = 'peaks detection'
             self.ui.savePeaksBtn.setEnabled(True)
+            self.ui.saveWholePeakBtn.setEnabled(True)
             self.ui.savePeaksStatsBtn.setEnabled(True)
             self.ui.showPeakBtn.setEnabled(True)
             self.ui.peaksCmbBox.setEnabled(True)
@@ -402,11 +408,18 @@ class curveWindow ( QtGui.QMainWindow ):
         
             i = 0
             for c in self.exp:
-                res = c[-1].getPeaks(peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
+                res = c.getMarkedPeaks(-1,peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
                 if res<1:
                     c.relevant = False
                     self.bad.append(i)
                     self.badFlags[i] = True
+                else:
+                    c.relevant = True
+                    try:
+                        del self.bad[i]
+                    except:
+                        pass
+                    self.badFlags[i] = False
                 i+=1
                 
             self.populatePeaksCmb()
@@ -448,6 +461,7 @@ class curveWindow ( QtGui.QMainWindow ):
     
     def showPeaks(self):
         try:
+            setData = False
             curveInd = -2 if self.fitFlag else -1
             curveInd -= len(self.cursors)
             peakThrPc = self.ui.peakThrsNumDbl.value()
@@ -488,30 +502,36 @@ class curveWindow ( QtGui.QMainWindow ):
     
     def savePeaks(self):
         
-        peakThrPc = self.ui.peakThrsNumDbl.value()
-        distPcT = self.ui.peakLenPcNumDbl.value()
-        rsqLim = self.ui.rsqLimNumDbl.value()
+        if self.sender() == self.ui.saveWholePeakBtn:
+            dirname = str(QtGui.QFileDialog.getExistingDirectory(self, 'Select a directory for the peaks', './'))
+            if dirname != '':
+                for c in self.exp:
+                    if len(c[-1].peaks)>0:
+                        c[-1].peaks.saveCollection(dirname,(splitext(c.basename)[0]+'_peak'))
+            else:
+                return None
         
-        for c in self.exp:
-            if len(c[-1].peaks) < 1:
-                c[-1].getPeaks(peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
+        else:
+            peakThrPc = self.ui.peakThrsNumDbl.value()
+            distPcT = self.ui.peakLenPcNumDbl.value()
+            rsqLim = self.ui.rsqLimNumDbl.value()
         
-        single = self.sender() == self.ui.savePeaksBtn
+            for c in self.exp:
+                if len(c[-1].peaks) < 1:
+                    c[-1].getPeaks(peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
         
-        table = self.exp.getPeaksStatsTable(single,True)
+            single = self.sender() == self.ui.savePeaksBtn
         
-        #[self.z[0],self.z[-1],self.apex[0],self.apex[1],self.getBaseLine(),self.getArea()]
+            table = self.exp.getPeaksStatsTable(single,True)
         
-        #basicStats['areaM'],basicStats['areaV'],basicStats['heightM'],basicStats['heightV'],basicStats['lengthM'],basicStats['lengthV']
+            header = 'Curve\tStart [nm]\tEnd [nm]\tApex z [nm]\tApex force [pN]\tBaseline [pN]\tArea [zJ]\n' if single else 'Curve\tMean Area [zJ]\tArea var [zJ]\tMean Height [zJ]\tHeight var [zJ]\tMean Length [zJ]\tLength var [zJ]\n'
         
-        header = 'Curve\tStart [nm]\tEnd [nm]\tApex z [nm]\tApex force [pN]\tBaseline [pN]\tArea [zJ]\n' if single else 'Curve\tMean Area [zJ]\tArea var [zJ]\tMean Height [zJ]\tHeight var [zJ]\tMean Length [zJ]\tLength var [zJ]\n'
+            table = header+table
         
-        table = header+table
+            filename = QtGui.QFileDialog.getSaveFileName(self,'Choose the path for peaks stats')
         
-        filename = QtGui.QFileDialog.getSaveFileName(self,'Choose the path for peaks stats')
-        
-        f = open(filename,'w')
-        f.write(table)
+            f = open(filename,'w')
+            f.write(table)
     
     
     def rejectAlign(self):
@@ -983,6 +1003,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.findPeaksBtn.clicked.connect(self.findPeaks)
         self.ui.savePeaksBtn.clicked.connect(self.savePeaks)
         self.ui.savePeaksStatsBtn.clicked.connect(self.savePeaks)
+        self.ui.saveWholePeakBtn.clicked.connect(self.savePeaks)
         
         QtCore.QObject.connect(self.ui.overlayBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.overlay)
         QtCore.QObject.connect(self.ui.chgStatBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.changeStatus)

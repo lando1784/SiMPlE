@@ -127,6 +127,12 @@ class curve(mvobject.mvobject):
             s.speed = newSpeed
     
     
+    def getMarkedPeaks(self, segInd, peakFinder = None, peakModel = None, argsPF = [], kwArgsPF = {}):
+        
+        amount = self.segments[segInd].getPeaks(peakFinder, peakModel, argsPF, kwArgsPF,id = self.filename)
+        
+        return amount
+    
     def getPeaksStats(self,single = False, eStr = False):
         
         stats = '' if eStr else []
