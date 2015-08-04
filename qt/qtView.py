@@ -1,7 +1,6 @@
 from PyQt4 import QtCore, QtGui
 from scipy.signal._savitzky_golay import savgol_filter
 from copy import copy,deepcopy
-from PIL.PixarImagePlugin import PixarImageFile
 from numpy import uint16
 from cmath import rect
 from telnetlib import RCTE
@@ -44,7 +43,7 @@ sgfWinPc = 2.5
 sgfWinPcF = 8
 sgfWinPcG = 40
 sgfDeg = 3
-cutMe = False
+cutMe = True
 
 line = pg.graphicsItems.InfiniteLine.InfiniteLine
 
@@ -99,6 +98,9 @@ class curveWindow ( QtGui.QMainWindow ):
             self.simpleLogger(logString)
             QtCore.QCoreApplication.processEvents()
             self.exp.addFiles([str(fname)])
+            if self.exp[-1][0].f.all() == 0 or self.exp[-1][-1].f.all() == 0:
+                    del self.exp[-1]
+                    continue
             progress.setValue(i)
             i=i+1
             aligned = self.exp[-1][0].direction == 'far'
@@ -138,6 +140,9 @@ class curveWindow ( QtGui.QMainWindow ):
             fname = os.path.join(str(dirname), fnamealone)
             try:
                 self.exp.addFiles([str(fname)])
+                if self.exp[-1][0].f.all() == 0 or self.exp[-1][-1].f.all() == 0:
+                    del self.exp[-1]
+                    continue
                 aligned = self.exp[-1][0].direction == 'far'
                 self.alignFlags.append(aligned)
                 self.badFlags.append(True)
@@ -218,15 +223,11 @@ class curveWindow ( QtGui.QMainWindow ):
     
     def aim(self,ev=None):
         mPos = ev.scenePos()
-        print 'items'
         it = self.ui.griglia.items()
         ind = 0
         lenIt = len(it)
         for i in xrange(lenIt):
             rct = it[-(i+1)].rect()
-            print i
-            print rct.topLeft()
-            print rct.bottomRight()
             if self.pointInRect(mPos, rct):
                 ind = i
                 break
@@ -567,6 +568,7 @@ class curveWindow ( QtGui.QMainWindow ):
                 self.exp[self.ui.slide1.value()-1].relevant = valid
                 if not valid:
                     self.bad.append(self.ui.slide1.value()-1)
+                    self.bad.sort()
                     self.badFlags[self.ui.slide1.value()-1] = False
                 self.alignFlags[self.ui.slide1.value()-1] = True
                 del self.exp[self.ui.slide1.value()-1][0]
@@ -579,7 +581,6 @@ class curveWindow ( QtGui.QMainWindow ):
             pmax = len(self.exp)
             logString = 'Aligning all curves...\n'
             self.simpleLogger(logString)
-            QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
             progress = QtGui.QProgressDialog("Aligning curves...", "Cancel aligning", 0, pmax);
             i=0
             for c in self.exp:
@@ -597,6 +598,7 @@ class curveWindow ( QtGui.QMainWindow ):
                     c.relevant = valid
                     if not valid:
                         self.bad.append(i)
+                        self.bad.sort()
                         self.badFlags[i] = False
                         
                     for s in c[1:]:
@@ -608,7 +610,6 @@ class curveWindow ( QtGui.QMainWindow ):
                 del c[0]
                 i=i+1
             progress.setValue(pmax)
-            QtGui.QApplication.restoreOverrideCursor()
             logString = 'Curves aligned\n'
             self.simpleLogger(logString)
             self.goToCurve(1)
@@ -723,6 +724,8 @@ class curveWindow ( QtGui.QMainWindow ):
             del self.ctPoints[ind]
             try:
                 badInd = self.bad.index(ind)
+                for i in xrange(len(self.bad[badInd+1])):
+                    self.bad[i] -= 1
                 del self.bad[badInd]
             except:
                 pass
@@ -775,6 +778,7 @@ class curveWindow ( QtGui.QMainWindow ):
             else:
                 self.bad.append(ind)
                 self.ui.removeBOBtn.setEnabled(True)
+            self.bad.sort()
             self.badFlags[ind] = not self.badFlags[ind]
             self.refillList()
     

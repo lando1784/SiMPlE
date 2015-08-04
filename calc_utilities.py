@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.signal import savgol_filter as sgf
 from types import FunctionType
-from matplotlib.colors import NP_CLIP_OUT
 import operator
 from fitLib import *
 
