@@ -168,6 +168,10 @@ class curveWindow ( QtGui.QMainWindow ):
 
 
     def refillList(self,lastInd=1):
+        self.ui.curveNameCmbBox.clear()
+        self.ui.curveNameCmbBox.addItem('Currently loaded curves:')
+        for f in self.exp.basenames:
+            self.ui.curveNameCmbBox.addItem(f)
         scena = QtGui.QGraphicsScene()
         width = self.ui.griglia.width()
         height = self.ui.griglia.height()
@@ -256,7 +260,6 @@ class curveWindow ( QtGui.QMainWindow ):
         if len(self.exp)<=dove-1 or dove-1<0:
             return None
         else:
-            self.ui.labFilename.setText(htmlpre + self.exp[dove-1].basename + htmlpost)
             self.ui.labelNumber.setText(str(dove))
             if self.prev != 0:
                 self.sqSwitch(self.prev,False)
@@ -407,7 +410,6 @@ class curveWindow ( QtGui.QMainWindow ):
             i = 0
             for c in self.exp:
                 res = c.getMarkedPeaks(-1,peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
-                print c.basename + ' ' + str(res) + ' ' + str(len(c[-1].peaks))
                 if res<1:
                     c.relevant = False
                     self.bad.append(i)
@@ -587,6 +589,7 @@ class curveWindow ( QtGui.QMainWindow ):
             progress = QtGui.QProgressDialog("Aligning curves...", "Cancel aligning", 0, pmax);
             i=0
             for c in self.exp:
+                print c.basename
                 progress.setValue(i)
                 if (progress.wasCanceled()):
                     break
@@ -971,9 +974,11 @@ class curveWindow ( QtGui.QMainWindow ):
     def setConnections(self):
 
         QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide2.setValue)
-        
         QtCore.QObject.connect(self.ui.slide2, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide1.setValue)
-        
+        QtCore.QObject.connect(self.ui.slide2, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.curveNameCmbBox.setCurrentIndex)
+        QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.curveNameCmbBox.setCurrentIndex)
+        QtCore.QObject.connect(self.ui.curveNameCmbBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.ui.slide1.setValue)
+        QtCore.QObject.connect(self.ui.curveNameCmbBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.ui.slide2.setValue)
         QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.goToCurve )
 
         QtCore.QObject.connect(self.ui.bAddDir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.addDirectory)

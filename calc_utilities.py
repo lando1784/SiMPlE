@@ -337,6 +337,9 @@ def smartSgf(data,sgfWinPc,sgfDeg,sgfDerDeg = 0):
     return filtered
 
 
+def pieceWisesavGol(data,multiplierPc,sgfWinPc,sgfDeg,sgfDerDeg = 0):
+    pass
+
 if __name__ == '__main__':
     
     p = np.array([1,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2])

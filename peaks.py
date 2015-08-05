@@ -279,10 +279,14 @@ class Peaks(object):
         self.changeMode(True)
         
         files = [f for f in os.listdir(dir) if os.isfile(join(dir,f)) and splitext(f)[1] == '.pkf']
+        if files == []:
+            return False
+        files.sort()
         
         for f in files:
             self.peaks.append(self.loadPKF(join(dir,f)))
-    
+            
+        return True
     
     
         

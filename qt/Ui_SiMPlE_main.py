@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/ettore/GIT/SiMPlE/qt/SiMPlE_main.ui'
 #
-# Created: Wed Aug  5 11:45:11 2015
+# Created: Wed Aug  5 15:30:56 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -390,9 +390,9 @@ class Ui_facewindow(object):
         self.label_2.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.horizontalLayout_6.addWidget(self.label_2)
-        self.labFilename = QtGui.QLabel(self.simpleCtWidget)
-        self.labFilename.setObjectName(_fromUtf8("labFilename"))
-        self.horizontalLayout_6.addWidget(self.labFilename)
+        self.curveNameCmbBox = QtGui.QComboBox(self.simpleCtWidget)
+        self.curveNameCmbBox.setObjectName(_fromUtf8("curveNameCmbBox"))
+        self.horizontalLayout_6.addWidget(self.curveNameCmbBox)
         self.label_3 = QtGui.QLabel(self.simpleCtWidget)
         self.label_3.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.label_3.setObjectName(_fromUtf8("label_3"))
@@ -404,7 +404,7 @@ class Ui_facewindow(object):
         self.horizontalLayout_6.addItem(spacerItem4)
         self.horizontalLayout_6.setStretch(0, 2)
         self.horizontalLayout_6.setStretch(1, 2)
-        self.horizontalLayout_6.setStretch(2, 5)
+        self.horizontalLayout_6.setStretch(2, 9)
         self.horizontalLayout_6.setStretch(3, 2)
         self.horizontalLayout_6.setStretch(4, 2)
         self.horizontalLayout_6.setStretch(5, 15)
@@ -484,11 +484,6 @@ class Ui_facewindow(object):
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">Name: </span></p></body></html>", None))
-        self.labFilename.setText(_translate("facewindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
-"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
-"p, li { white-space: pre-wrap; }\n"
-"</style></head><body style=\" font-family:\'Ubuntu\'; font-size:11pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:8pt;\">//</span></p></body></html>", None))
         self.label_3.setText(_translate("facewindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
