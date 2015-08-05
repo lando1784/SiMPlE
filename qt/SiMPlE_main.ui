@@ -622,7 +622,7 @@
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>Drivative</string>
+                <string>Derivative</string>
                </property>
               </widget>
              </item>
@@ -756,27 +756,8 @@
           <bool>false</bool>
          </property>
          <attribute name="title">
-          <string>Junk</string>
+          <string>Undefined</string>
          </attribute>
-         <widget class="QDoubleSpinBox" name="peakAreaNumDbl">
-          <property name="geometry">
-           <rect>
-            <x>200</x>
-            <y>90</y>
-            <width>95</width>
-            <height>20</height>
-           </rect>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-          <property name="buttonSymbols">
-           <enum>QAbstractSpinBox::NoButtons</enum>
-          </property>
-          <property name="maximum">
-           <double>1000000000.000000000000000</double>
-          </property>
-         </widget>
         </widget>
        </widget>
       </item>

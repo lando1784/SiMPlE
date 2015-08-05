@@ -253,7 +253,6 @@ class curveWindow ( QtGui.QMainWindow ):
         
         
     def goToCurve(self,dove):
-        print dove
         if len(self.exp)<=dove-1 or dove-1<0:
             return None
         else:
@@ -295,7 +294,6 @@ class curveWindow ( QtGui.QMainWindow ):
                 self.ui.grafo.plot(z,f)
         if self.fitFlag:
             self.plotFit(-1)
-        print self.ui.grafo.plotItem.curves
         self.checkCurve(dove)
         if len(self.cursors)>=1:
             self.refreshCursors()
@@ -409,6 +407,7 @@ class curveWindow ( QtGui.QMainWindow ):
             i = 0
             for c in self.exp:
                 res = c.getMarkedPeaks(-1,peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
+                print c.basename + ' ' + str(res) + ' ' + str(len(c[-1].peaks))
                 if res<1:
                     c.relevant = False
                     self.bad.append(i)
@@ -448,14 +447,12 @@ class curveWindow ( QtGui.QMainWindow ):
     def populatePeaksCmb(self):
         self.ui.peaksCmbBox.clear()
         self.ui.peaksCmbBox.addItem('Select a Peak')
-        if len(self.exp[self.ui.slide1.value()-1][-1].peaks)<1:
-            return None
-        i = 0
-            
+        
+        i = 0    
         for pk in self.exp[self.ui.slide1.value()-1][-1].peaks:
             self.ui.peaksCmbBox.addItem(str(i))
             i+=1
-        self.ui.peaksCmbBox.setCurrentIndex(1)
+        self.ui.peaksCmbBox.setCurrentIndex(int(i>0))
         self.ui.peaksNum.setValue(len(self.exp[self.ui.slide1.value()-1][-1].peaks))
             
     
@@ -487,7 +484,7 @@ class curveWindow ( QtGui.QMainWindow ):
             self.ui.grafo.plot(zpeaksA,derivpeaksA if self.ui.derivCkBox.isChecked() else peaksA,pen = None,symbolPen='r',symbolBrush='r',symbol='o',symbolSize = 5)
         
         except Exception as e:
-            print end.message
+            print e.message
                 
             
     def calcArea(self):
@@ -781,6 +778,8 @@ class curveWindow ( QtGui.QMainWindow ):
                 
                 
     def changeStatus(self):
+        
+        print self.bad
         
         ind = self.ui.slide1.value()-1
         if self.alignFlags[ind]:

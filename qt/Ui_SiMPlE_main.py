@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/ettore/GIT/SiMPlE/qt/SiMPlE_main.ui'
 #
-# Created: Tue Aug  4 17:33:48 2015
+# Created: Wed Aug  5 11:45:11 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -372,12 +372,6 @@ class Ui_facewindow(object):
         self.junkTab = QtGui.QWidget()
         self.junkTab.setEnabled(False)
         self.junkTab.setObjectName(_fromUtf8("junkTab"))
-        self.peakAreaNumDbl = QtGui.QDoubleSpinBox(self.junkTab)
-        self.peakAreaNumDbl.setGeometry(QtCore.QRect(200, 90, 95, 20))
-        self.peakAreaNumDbl.setReadOnly(True)
-        self.peakAreaNumDbl.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
-        self.peakAreaNumDbl.setMaximum(1000000000.0)
-        self.peakAreaNumDbl.setObjectName(_fromUtf8("peakAreaNumDbl"))
         self.functionsTabs.addTab(self.junkTab, _fromUtf8(""))
         self.horizontalLayout_3.addWidget(self.functionsTabs)
         self.logTxt = QtGui.QTextEdit(self.simpleCtWidget)
@@ -471,7 +465,7 @@ class Ui_facewindow(object):
         self.autoFitBtn.setText(_translate("facewindow", "Show Fit", None))
         self.overlayBtn.setText(_translate("facewindow", "Overlay", None))
         self.hist2dBtn.setText(_translate("facewindow", "2D hyst", None))
-        self.derivCkBox.setText(_translate("facewindow", "Drivative", None))
+        self.derivCkBox.setText(_translate("facewindow", "Derivative", None))
         self.functionsTabs.setTabText(self.functionsTabs.indexOf(self.tab_7), _translate("facewindow", "Plot Options", None))
         self.showPeakBtn.setText(_translate("facewindow", "Show Peaks", None))
         self.savePeaksBtn.setText(_translate("facewindow", "Save Peaks Data", None))
@@ -479,7 +473,7 @@ class Ui_facewindow(object):
         self.findPeaksBtn.setText(_translate("facewindow", "Find Peaks", None))
         self.saveWholePeakBtn.setText(_translate("facewindow", "Save Peaks", None))
         self.functionsTabs.setTabText(self.functionsTabs.indexOf(self.peaksTab), _translate("facewindow", "Peaks", None))
-        self.functionsTabs.setTabText(self.functionsTabs.indexOf(self.junkTab), _translate("facewindow", "Junk", None))
+        self.functionsTabs.setTabText(self.functionsTabs.indexOf(self.junkTab), _translate("facewindow", "Undefined", None))
         self.label.setText(_translate("facewindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"

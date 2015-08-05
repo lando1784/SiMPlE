@@ -118,6 +118,10 @@ class Peaks(object):
         if z is None:
             return None
         
+        
+        self.readMode = False
+        
+        
         self.zTrack = z
         self.fTrack = f
         
@@ -236,7 +240,22 @@ class Peaks(object):
             i+=1
     
     
+    def changeMode(self,mode = None):
+        
+        if mode == self.readMode:
+            return None
+        if mode is None:
+            mode = not self.readMode
+        
+        self.readMode = mode
+        
+        self.peaks = []
+    
+    
     def loadPKF(self,filePath):
+        
+        if not self.readMode:
+            return None
         
         pf = open(filePath)
         
@@ -256,6 +275,9 @@ class Peaks(object):
     
     
     def loadDir(self,dir):
+        
+        self.changeMode(True)
+        
         files = [f for f in os.listdir(dir) if os.isfile(join(dir,f)) and splitext(f)[1] == '.pkf']
         
         for f in files:
