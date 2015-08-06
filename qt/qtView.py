@@ -396,7 +396,12 @@ class curveWindow ( QtGui.QMainWindow ):
        
     
     def findPeaks(self):
-        try:
+        #try:
+        if True:
+            if self.lastOperation != 'peaks detection':
+                self.ui.rsqLimNumDbl.valueChanged.connect(self.findPeaks)
+                self.ui.peakThrsNumDbl.valueChanged.connect(self.findPeaks)
+                self.ui.peakLenPcNumDbl.valueChanged.connect(self.findPeaks)
             self.lastOperation = 'peaks detection'
             self.ui.savePeaksBtn.setEnabled(True)
             self.ui.saveWholePeakBtn.setEnabled(True)
@@ -409,7 +414,10 @@ class curveWindow ( QtGui.QMainWindow ):
         
             i = 0
             for c in self.exp:
-                res = c.getMarkedPeaks(-1,peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
+                if self.ui.jumpCkBox.isChecked():
+                    res = c.getMarkedPeaks(-1,pwSgfPeaksFinder, peakModel = 2, argsPF = [peakThrPc,sgfWinPcG,sgfDeg,distPcT,True])
+                else:
+                    res = c.getMarkedPeaks(-1,peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
                 if res<1:
                     c.relevant = False
                     self.bad.append(i)
@@ -426,8 +434,8 @@ class curveWindow ( QtGui.QMainWindow ):
             self.populatePeaksCmb()
             
             self.refillList(self.ui.slide1.value())
-        except Exception as e:
-            print e.message
+        #except Exception as e:
+            #print e.message
     
         
     def showHidePeaks(self):
@@ -459,7 +467,8 @@ class curveWindow ( QtGui.QMainWindow ):
             
     
     def showPeaks(self):
-        try:
+        #try:
+        if True:
             setData = False
             curveInd = -2 if self.fitFlag else -1
             curveInd -= len(self.cursors)
@@ -485,8 +494,8 @@ class curveWindow ( QtGui.QMainWindow ):
                 
             self.ui.grafo.plot(zpeaksA,derivpeaksA if self.ui.derivCkBox.isChecked() else peaksA,pen = None,symbolPen='r',symbolBrush='r',symbol='o',symbolSize = 5)
         
-        except Exception as e:
-            print e.message
+        #except Exception as e:
+            #print e.message
                 
             
     def calcArea(self):
@@ -1016,9 +1025,7 @@ class curveWindow ( QtGui.QMainWindow ):
         QtCore.QObject.connect(self.ui.addCursBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.addCursor)
         QtCore.QObject.connect(self.ui.removeCursBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCursor)
         
-        self.ui.rsqLimNumDbl.valueChanged.connect(self.findPeaks)
-        self.ui.peakThrsNumDbl.valueChanged.connect(self.findPeaks)
-        self.ui.peakLenPcNumDbl.valueChanged.connect(self.findPeaks)
+        
         self.ui.peaksCmbBox.currentIndexChanged.connect(self.calcArea)
         QtCore.QObject.connect(self.ui.derivCkBox, QtCore.SIGNAL(_fromUtf8("clicked()")), self.checked)
         

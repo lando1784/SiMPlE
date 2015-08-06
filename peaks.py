@@ -5,13 +5,14 @@ from os.path import split, join, splitext, exists
 
 class peak(object):
     
-    def __init__(self,z,f,model = None,id=''):
+    def __init__(self,z,f,baseLine = None,model = None,id=''):
         
         self.z = z
         self.f = f
         self.model = model
         self.fit = None
         self.id = id
+        self.baseLine = baseLine
         
         self.apex = self.getApex()
     
@@ -27,10 +28,15 @@ class peak(object):
     
     def getBaseLine(self):
         
+        if self.baseLine is not None:
+            return self.baseLine
+        
         baseline = np.mean(self.f[self.apex[0]+1:])
         
         if str(baseline) == 'nan':
             baseline = np.min(self.f)
+            
+        self.baseLine = baseline
         
         return baseline
         
@@ -160,12 +166,20 @@ class Peaks(object):
         
     def searchTheTrack(self,z,f,pfFun,modelFun,pfArgs,pfKwargs,id=''):
         
-        fpeaks,zpeaks = pfFun(z,f,*pfArgs,**pfKwargs)
+        returned = pfFun(z,f,*pfArgs,**pfKwargs)
+        
+        fpeaks = returned[0]
+        zpeaks = returned[1]
+        
+        if len(returned)>2:
+            baselines = returned[2]
+        else:
+            baselines = [None]*len(fpeaks)
         
         for i in xrange(len(fpeaks)):
             if zpeaks[i].shape[0]<=1:
                 continue
-            self.peaks.append(peak(zpeaks[i],fpeaks[i],modelFun,id))
+            self.peaks.append(peak(zpeaks[i],fpeaks[i],baselines[i],modelFun,id))
     
     
     def getBasicStats(self):

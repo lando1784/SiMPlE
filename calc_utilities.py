@@ -248,11 +248,12 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,thPc = 15,real
 def findJumps(data,multiplierPc):
     meanDiff = np.mean(abs(data[1:]-data[:-1]))
     thr = meanDiff*multiplierPc
-    jumps = []
-    for i in xrange(data.shape[0]-1):
-        if abs(data[i]-data[i+1])>thr:
-            jumps.append([i,data[i]])
-    return np.array(jumps)
+    #jumps = []
+    jumps = np.where(abs(data[1:]-data[:-1])>thr)[0]
+    #for i in xrange(data.shape[0]-1):
+    #    if abs(data[i]-data[i+1])>thr:
+    #        jumps.append([i,data[i]])
+    return list(jumps)
 
 
 def findUnD(data,xAxis,thrMul,distPc,verify=True,rsqT=0.8):
@@ -337,20 +338,82 @@ def smartSgf(data,sgfWinPc,sgfDeg,sgfDerDeg = 0):
     return filtered
 
 
-def pieceWisesavGol(data,multiplierPc,sgfWinPc,sgfDeg,sgfDerDeg = 0):
-    pass
+def pieceWiseSavGol(data,multiplierPc,sgfWinPc,sgfDeg,sgfDerDeg = 0, pieces = False):
+    
+    jumps = findJumps(data, multiplierPc)
+    oldInd = 0
+    pwFiltData = np.array([])
+    pwDataPieces = []
+    badJ = []
+    
+    for j in jumps:
+        window = (j-oldInd)/100*sgfWinPc
+        if window<=sgfDeg:
+            deg = window-1
+            if deg<1:
+                badJ.append(j)
+                continue
+        else:
+            deg = sgfDeg
+        tempData = smartSgf(data[oldInd:j], sgfWinPc, deg, sgfDerDeg)
+        if pieces:
+            pwDataPieces.append(tempData)
+        else:
+            np.concatenate((pwFiltData,tempData))
+        oldInd = j
+    tempData = smartSgf(data[oldInd:], sgfWinPc, sgfDeg, sgfDerDeg)
+    if pieces:
+        pwDataPieces.append(tempData)
+    else:
+        np.concatenate((pwFiltData,tempData))
+        
+    for bj in badJ:
+        bi = jumps.index(bj)
+        del jumps[bi]
+    
+    result = pwDataPieces if pieces else pwFiltData
+    
+    return result,jumps
+
+
+def pwSgfPeaksFinder(z,f,multiplierPc,sgfWinPc,sgfDeg,maxLengthPc,filtered = True):
+    
+    pwFilt,jumps = pieceWiseSavGol(f, multiplierPc, sgfWinPc, sgfDeg,0,True)
+    
+    minLen = abs(z[-1]-z[0])*maxLengthPc/100.0
+    dz = abs(np.mean(z[1:]-z[:-1]))
+    minPt = int(minLen/(dz))
+    oldInd = 0
+    peaksStarts = []
+    fPeaks = []
+    zPeaks = []
+    baselines = []
+    
+    for i in xrange(len(jumps)):
+        forceLev = f[jumps[i]+2]
+        flatZone = np.where(pwFilt[i]<=forceLev)[0]
+        if flatZone.shape[0] == 0:
+            tempInd = 0
+        else:
+            tempInd = flatZone[-1]
+        if abs(z[jumps[i]]-z[tempInd])<minLen:
+            tempInd = 0
+        peaksStarts.append(tempInd)
+    oldInd = 0
+    for i in xrange(len(jumps)):
+        tempZ = z[(peaksStarts[i]+oldInd+1):(jumps[i]+1)]
+        tempF = pwFilt[i][peaksStarts[i]:] if filtered else f[(peaksStarts[i]+oldInd):(jumps[i]+1)]
+        oldInd = jumps[i]
+        if len(tempZ)*dz<minLen:
+            continue
+        zPeaks.append(tempZ)
+        fPeaks.append(tempF)
+        baselines.append(np.min(tempF) if tempF.shape[0]>0 else None)
+    
+    
+    return fPeaks,zPeaks,baselines
+
 
 if __name__ == '__main__':
     
-    p = np.array([1,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1,1,1,1,2,2,2,2,2])
-    z = np.arange(300)
-    f = np.concatenate((np.arange(100)-100,np.zeros(200)))
-    pRes = binaryDataOrganizer(p)
-    keys = pRes.keys()
-    keys.sort()
-    for k in keys:
-        print k
-        print pRes[k]
-    
-    fitCnNC(z,f)
-    
+    print 'Not for standalone use'

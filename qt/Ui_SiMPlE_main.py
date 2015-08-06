@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file '/home/ettore/GIT/SiMPlE/qt/SiMPlE_main.ui'
 #
-# Created: Wed Aug  5 15:30:56 2015
+# Created: Thu Aug  6 18:07:36 2015
 #      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -225,6 +225,9 @@ class Ui_facewindow(object):
         self.label_9 = QtGui.QLabel(self.fitNpeakBox)
         self.label_9.setObjectName(_fromUtf8("label_9"))
         self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.label_9)
+        self.jumpCkBox = QtGui.QCheckBox(self.fitNpeakBox)
+        self.jumpCkBox.setObjectName(_fromUtf8("jumpCkBox"))
+        self.formLayout.setWidget(4, QtGui.QFormLayout.FieldRole, self.jumpCkBox)
         self.horizontalLayout_5.addWidget(self.fitNpeakBox)
         self.functionsTabs.addTab(self.tab_6, _fromUtf8(""))
         self.tab_7 = QtGui.QWidget()
@@ -454,6 +457,7 @@ class Ui_facewindow(object):
         self.label_8.setText(_translate("facewindow", "Peak threshold", None))
         self.label_10.setText(_translate("facewindow", "Peak Length %", None))
         self.label_9.setText(_translate("facewindow", "Peak shape R^2 lim", None))
+        self.jumpCkBox.setText(_translate("facewindow", "Jump Mode", None))
         self.functionsTabs.setTabText(self.functionsTabs.indexOf(self.tab_6), _translate("facewindow", "Curve Params", None))
         self.cursorsBox.setTitle(_translate("facewindow", "Cursors", None))
         self.addCursBtn.setText(_translate("facewindow", "+", None))
