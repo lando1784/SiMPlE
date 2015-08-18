@@ -1,7 +1,8 @@
 import numpy as np
 from fitLib import *
+import os
 from os import makedirs
-from os.path import split, join, splitext, exists
+from os.path import split, join, splitext, exists, isfile
 
 class peak(object):
     
@@ -62,6 +63,69 @@ class peak(object):
         return [self.z[np.where(self.f==np.max(self.f))[0][0]],np.max(self.f)]
     
     
+    def __add__(self,p2):
+        
+        if isinstance(p2,peak):
+            return self.getArea() + p2.getArea()
+        else:
+            raise TypeError('A peak can only be added to another peak')
+        
+        
+    def __radd__(self,p2):
+        if p2 == 0:
+            return self
+        else:
+            return self.__add__(p2)
+        
+        
+    def __sub__(self,p2):
+        
+        if isinstance(p2,peak):
+            return self.getArea() - p2.getArea()
+        else:
+            raise TypeError('A peak can only be subtracted to another peak')
+        
+        
+    def __gt__(self,p2):
+        
+        if isinstance(p2,peak):
+            return self.getArea() > p2.getArea()
+        return self.getArea() > p2
+    
+    
+    def __lt__(self,p2):
+        
+        if isinstance(p2,peak):
+            return self.getArea() < p2.getArea()
+        return self.getArea() < p2
+    
+    
+    def __ge__(self,p2):
+        
+        if isinstance(p2,peak):
+            return self.getArea() >= p2.getArea()
+        return self.getArea() >= p2
+    
+    
+    def __le__(self,p2):
+        
+        if isinstance(p2,peak):
+            return self.getArea() <= p2.getArea()
+        return self.getArea() <= p2
+    
+    
+    def longer(self,p2):
+        if isinstance(p2,peak):
+            return self.getLength() > p2.getLength()
+        return self.getLength() > p2
+    
+    
+    def higher(self,p2):
+        if isinstance(p2,peak):
+            return self.getHeight() > p2.getHeight()
+        return self.getHeight() > p2
+    
+    
     def fitGrowth(self,fitModel = None):
         
         if fitModel == None:
@@ -120,18 +184,15 @@ class peak(object):
 class Peaks(object):
     
     def __init__(self, z = None, f = None, peakFinder = None, peakModel = None, argsPF = [], kwArgsPF = {}, collectionID = ''):
-        
+
+        self.readMode = False
+        self.peaks = []     
+
         if z is None:
             return None
         
-        
-        self.readMode = False
-        
-        
         self.zTrack = z
         self.fTrack = f
-        
-        self.peaks = []
         
         self.searchTheTrack(z,f,peakFinder,peakModel,argsPF,kwArgsPF,collectionID)
     
@@ -161,7 +222,7 @@ class Peaks(object):
         if isinstance(obj, peak):
             self.peaks.append(obj)
         else:
-            raise ValueError('Youtried to append a non\'peak\' object')
+            raise ValueError('You tried to append a non\'peak\' object')
         
         
     def searchTheTrack(self,z,f,pfFun,modelFun,pfArgs,pfKwargs,id=''):
@@ -267,7 +328,7 @@ class Peaks(object):
     
     
     def loadPKF(self,filePath):
-        
+
         if not self.readMode:
             return None
         
@@ -276,23 +337,26 @@ class Peaks(object):
         data = []
         
         first = pf.readline()
-        id = first.split('\t')[1]
-        
-        for l in pf.readline():
-            if l[0] == '#':
+        id = (first.split('\t')[1]).split('\n')[0]
+
+        for l in pf.readlines():
+            if l.find('#') != -1:
+                continue
+	    if l[0] == '\n':
                 continue
             dataChunk = np.array([float(d) for d in l.split('\t')])
             data.append(dataChunk)
-        data = np.array(data)
-        
-        return peak(data[:,0],data[:,1],id)
+        data = np.array(data)      
+
+        return peak(data[:,0],data[:,1],id = id)
     
     
     def loadDir(self,dir):
         
-        self.changeMode(True)
-        
-        files = [f for f in os.listdir(dir) if os.isfile(join(dir,f)) and splitext(f)[1] == '.pkf']
+        self.changeMode(True)     
+
+        files = [f for f in os.listdir(dir) if isfile(join(dir,f)) and splitext(f)[1] == '.pkf']
+
         if files == []:
             return False
         files.sort()
