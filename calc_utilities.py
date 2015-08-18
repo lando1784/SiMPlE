@@ -356,16 +356,17 @@ def pieceWiseSavGol(data,multiplierPc,sgfWinPc,sgfDeg,sgfDerDeg = 0, pieces = Fa
         else:
             deg = sgfDeg
         tempData = smartSgf(data[oldInd:j], sgfWinPc, deg, sgfDerDeg)
+        print tempData
         if pieces:
             pwDataPieces.append(tempData)
         else:
-            np.concatenate((pwFiltData,tempData))
+            pwFiltData = np.concatenate((pwFiltData,tempData))
         oldInd = j
     tempData = smartSgf(data[oldInd:], sgfWinPc, sgfDeg, sgfDerDeg)
     if pieces:
         pwDataPieces.append(tempData)
     else:
-        np.concatenate((pwFiltData,tempData))
+        pwFiltData = np.concatenate((pwFiltData,tempData))
         
     for bj in badJ:
         bi = jumps.index(bj)

@@ -103,6 +103,9 @@
           </item>
           <item>
            <widget class="QGroupBox" name="saveBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="title">
              <string>Save</string>
             </property>
@@ -318,10 +321,16 @@
           </item>
           <item>
            <widget class="QGroupBox" name="fitNpeakBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="title">
              <string>Fitting and Peak finding</string>
             </property>
             <layout class="QFormLayout" name="formLayout">
+             <property name="fieldGrowthPolicy">
+              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+             </property>
              <item row="0" column="0">
               <widget class="QLabel" name="label_7">
                <property name="text">
@@ -345,6 +354,13 @@
                </property>
               </widget>
              </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Peak threshold</string>
+               </property>
+              </widget>
+             </item>
              <item row="1" column="1">
               <widget class="QDoubleSpinBox" name="peakThrsNumDbl">
                <property name="enabled">
@@ -358,6 +374,13 @@
                </property>
               </widget>
              </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>Peak Length %</string>
+               </property>
+              </widget>
+             </item>
              <item row="2" column="1">
               <widget class="QDoubleSpinBox" name="peakLenPcNumDbl">
                <property name="enabled">
@@ -365,6 +388,13 @@
                </property>
                <property name="value">
                 <double>0.500000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_9">
+               <property name="text">
+                <string>Peak shape R^2 lim</string>
                </property>
               </widget>
              </item>
@@ -387,34 +417,6 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_8">
-               <property name="text">
-                <string>Peak threshold</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0">
-              <widget class="QLabel" name="label_10">
-               <property name="text">
-                <string>Peak Length %</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <widget class="QLabel" name="label_9">
-               <property name="text">
-                <string>Peak shape R^2 lim</string>
-               </property>
-              </widget>
-             </item>
-             <item row="4" column="1">
-              <widget class="QCheckBox" name="jumpCkBox">
-               <property name="text">
-                <string>Jump Mode</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </item>
@@ -425,8 +427,11 @@
           <string>Plot Options</string>
          </attribute>
          <layout class="QGridLayout" name="gridLayout_5">
-          <item row="0" column="1" rowspan="2">
+          <item row="0" column="2" rowspan="2">
            <widget class="QGroupBox" name="cursorsBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="title">
              <string>Cursors</string>
             </property>
@@ -558,42 +563,15 @@
            </widget>
           </item>
           <item row="0" column="0" rowspan="2">
-           <widget class="QGroupBox" name="alignemenBox">
+           <widget class="QGroupBox" name="alignBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="title">
              <string>Alignment</string>
             </property>
-            <layout class="QGridLayout" name="gridLayout">
-             <item row="1" column="0">
-              <widget class="QPushButton" name="alignBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Align</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QPushButton" name="rejectBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Remove Fit</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QPushButton" name="alignAllBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Align All</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
               <widget class="QPushButton" name="autoFitBtn">
                <property name="enabled">
                 <bool>false</bool>
@@ -603,7 +581,39 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="0">
+             <item>
+              <widget class="QPushButton" name="rejectBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Remove Fit</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="alignAllBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Align</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QGroupBox" name="plotModBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="title">
+             <string>Plot Modes</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_6">
+             <item>
               <widget class="QPushButton" name="overlayBtn">
                <property name="enabled">
                 <bool>false</bool>
@@ -613,7 +623,7 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
+             <item>
               <widget class="QPushButton" name="hist2dBtn">
                <property name="enabled">
                 <bool>false</bool>
@@ -623,7 +633,7 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
+             <item>
               <widget class="QCheckBox" name="derivCkBox">
                <property name="enabled">
                 <bool>false</bool>
@@ -639,10 +649,20 @@
          </layout>
         </widget>
         <widget class="QWidget" name="peaksTab">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <attribute name="title">
           <string>Peaks</string>
          </attribute>
-         <layout class="QGridLayout" name="gridLayout_3" columnstretch="2,2,5,2,1">
+         <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,2,4,3,6,1">
+          <item row="0" column="2" rowspan="3">
+           <widget class="QTextEdit" name="peakDataTxt">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="0">
            <widget class="QPushButton" name="showPeakBtn">
             <property name="enabled">
@@ -652,29 +672,6 @@
              <string>Show Peaks</string>
             </property>
            </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QPushButton" name="savePeaksBtn">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Save Peaks Data</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="4">
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
           </item>
           <item row="1" column="1">
            <widget class="QComboBox" name="peaksCmbBox">
@@ -693,17 +690,79 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="3">
-           <widget class="QPushButton" name="savePeaksStatsBtn">
+          <item row="2" column="0" colspan="2">
+           <widget class="QCheckBox" name="jumpCkBox">
             <property name="enabled">
              <bool>false</bool>
             </property>
             <property name="text">
-             <string>Save Peaks Stats</string>
+             <string>Jump Mode</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="4">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="findPeaksBtn">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Find Peaks</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3" rowspan="3">
+           <widget class="QGroupBox" name="savePeaksBox">
+            <property name="title">
+             <string>Save</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_7">
+             <item>
+              <widget class="QPushButton" name="saveWholePeakBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Peaks</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="savePeaksBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Peaks Data</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="savePeaksStatsBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Peaks Stats</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="4" colspan="2">
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="1" column="4" colspan="2">
            <spacer name="horizontalSpacer_4">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -716,34 +775,7 @@
             </property>
            </spacer>
           </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="findPeaksBtn">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Find Peaks</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="3">
-           <widget class="QPushButton" name="saveWholePeakBtn">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Save Peaks</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2" rowspan="3">
-           <widget class="QTextEdit" name="peakDataTxt">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="4">
+          <item row="2" column="4" colspan="2">
            <spacer name="horizontalSpacer_5">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -765,6 +797,22 @@
          <attribute name="title">
           <string>Undefined</string>
          </attribute>
+         <widget class="QPushButton" name="alignBtn">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="geometry">
+           <rect>
+            <x>310</x>
+            <y>50</y>
+            <width>75</width>
+            <height>23</height>
+           </rect>
+          </property>
+          <property name="text">
+           <string>Align</string>
+          </property>
+         </widget>
         </widget>
        </widget>
       </item>
@@ -855,7 +903,7 @@ p, li { white-space: pre-wrap; }
      <x>0</x>
      <y>0</y>
      <width>1064</width>
-     <height>25</height>
+     <height>21</height>
     </rect>
    </property>
   </widget>
