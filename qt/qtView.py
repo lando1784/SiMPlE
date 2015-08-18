@@ -89,7 +89,7 @@ class curveWindow ( QtGui.QMainWindow ):
                               [self.ui.removeBOBtn,self.ui.saveBox,self.ui.peaksTab,self.ui.chgStatBtn]],
                            3:[[self.ui.removeBOBtn,self.ui.saveBox,self.ui.peaksTab,self.ui.chgStatBtn,self.ui.findPeaksBtn],
                               [self.ui.showPeakBtn,self.ui.peaksCmbBox,self.ui.alignBox,self.ui.savePeaksBox]],
-                           4:[[self.ui.showPeakBtn,self.ui.peaksCmbBox,self.ui.savePeaksBox],
+                           4:[[self.ui.showPeakBtn,self.ui.peaksCmbBox,self.ui.savePeaksBox,self.ui.removeBOBtn],
                               []]}
         
         logString = 'Welcome!\n'
@@ -106,8 +106,6 @@ class curveWindow ( QtGui.QMainWindow ):
                     c.setEnabled(True)
                 except:
                     pass
-            print act
-            print act.isEnabled()
         for dis in self.statusDict[status][1]:
             dis.setEnabled(False)
             for c in act.children():
@@ -115,8 +113,6 @@ class curveWindow ( QtGui.QMainWindow ):
                     c.setEnabled(True)
                 except:
                     pass
-            print dis
-            print dis.isEnabled()
 
 
     def addFiles(self, fnames = None):
@@ -765,12 +761,15 @@ class curveWindow ( QtGui.QMainWindow ):
         
     def removeCurve(self):
         culprit = self.sender()
-        if culprit.text() == 'Remove Curve' or culprit.text() == 'Remove bad ones':
-            culprit.setText('REALLY?')
+        warningDial = QtGui.QMessageBox(self)
+        warningDial.setWindowTitle(culprit.text())
+        warningDial.setText('Do you want to procede?')
+        warningDial.setStandardButtons(QtGui.QMessageBox.Yes|QtGui.QMessageBox.No)
+        warningDial.setDefaultButton(QtGui.QMessageBox.No)
+        answer = warningDial.exec_()
+        if answer == 65536:
             return None
-        elif culprit is self.ui.removeBtn:
-            sandro = QtGui.QInputDialog.getItem(self, 'stringa 1', 'stringa2', [])
-            
+        if culprit is self.ui.removeBtn:
             ind = self.ui.slide1.value()-1
             logString = '{0} Removed\n'.format(self.exp[ind].basename)
             self.simpleLogger(logString)
@@ -786,9 +785,8 @@ class curveWindow ( QtGui.QMainWindow ):
             except:
                 pass
             
-            culprit.setText('Remove Curve')
             if len(self.exp)<1:
-                self.curveRelatedEnabling(False)
+                self.setStatus(1)
                 self.ui.grafo.clear()
             else:
                 self.goToCurve(1)
@@ -802,15 +800,14 @@ class curveWindow ( QtGui.QMainWindow ):
             self.alignFlags = [k for j, k in enumerate(self.alignFlags) if j not in self.bad]
             self.ctPoints = [k for j, k in enumerate(self.ctPoints) if j not in self.bad]
             self.badFlags = [k for j, k in enumerate(self.badFlags) if j not in self.bad]
-            culprit.setText('Remove bad ones')
             self.logOperations(self.lastOperation, totalNum, len(tempExp))
             self.bad = []
             self.ui.removeBOBtn.setEnabled(False)
             if len(self.exp)<1:
-                self.curveRelatedEnabling(False)
+                self.setStatus(1)
                 self.ui.grafo.clear()
             else:
-                self.goToCurve(1)
+                self.ui.slide1.setValue(1)
                 
         
         self.refillList()
