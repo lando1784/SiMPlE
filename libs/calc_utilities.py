@@ -2,7 +2,7 @@ import numpy as np
 from scipy.signal import savgol_filter as sgf
 from types import FunctionType
 import operator
-from fitLib import *
+from libs.fitLib import *
 
 
 def movingThing(data,window,thing,others = None):
@@ -15,7 +15,7 @@ def movingThing(data,window,thing,others = None):
     for i in np.arange(data.shape[0]-hWin-hWinUp+1)+hWin:
         filtered[i] = thing(data[i-hWin:i+hWin]) if others == None else thing(data[i-hWin:i+hWin],*others)
         
-    for i in xrange(hWin):
+    for i in range(hWin):
         filtered[i] = thing(data[0:i+hWin]) if others == None else thing(data[0:i+hWin],*others)
         
     j = 0
@@ -32,7 +32,7 @@ def splitLinFit(x, y, controlVal, controlFunc, iterLim = 10, controlParams=None)
     tempY = np.array(y)
     fit = np.polyfit(tempX, tempY, 1)
     
-    for i in xrange(iterLim):
+    for i in range(iterLim):
         condition = controlFunc(fit[0],controlVal) if controlParams == None else controlFunc(fit[0],controlVal,*controlParams)
         if condition:
             return tempX,tempY,fit
@@ -63,7 +63,7 @@ def movingAvg(data,window):
     for i in np.arange(data.shape[0]-hWin-hWinUp+1)+hWin:
         filtered[i] = np.average(data[i-hWin:i+hWin])
         
-    for i in xrange(hWin):
+    for i in range(hWin):
         filtered[i] = np.average(data[0:i+hWin])
         
     j = 0
@@ -84,7 +84,7 @@ def movingVar(data,window):
     for i in np.arange(data.shape[0]-hWin-hWinUp+1)+hWin:
         filtered[i] = np.var(data[i-hWin:i+hWin])
         
-    for i in xrange(hWin):
+    for i in range(hWin):
         filtered[i] = np.var(data[0:i+hWin])
         
     j = 0
@@ -101,7 +101,7 @@ def movingComp(a,b,sym = '<',window = 10, oneOrdata = True):
         return None
     
     if type(a) is not np.ndarray:
-        print '\'a\' must be an array'
+        print('\'a\' must be an array')
         return None
     
     bArray = type(b) is np.ndarray
@@ -116,7 +116,7 @@ def movingComp(a,b,sym = '<',window = 10, oneOrdata = True):
         temp = eval('aClip'+sym+'bClip') if type(sym) is str else sym(aClip,bClip)
         filtered[i]=int(temp.all()) if oneOrdata else int(temp.all())*a[i] 
         
-    for i in xrange(hWin):
+    for i in range(hWin):
         aClip = a[0:i+hWin]
         bClip = b[0:i+hWin] if bArray else b
         temp = eval('aClip'+sym+'bClip') if type(sym) is str else sym(aClip,bClip)
@@ -138,11 +138,11 @@ def almost(a,b,thrPc = 10, rangeMax = 1.0, rangeMin=0.0):
         #thr = min(np.std(a), np.std(b), thrPc*np.mean(b)/100) if thrPc != None else min(np.std(a), np.std(b))
         thr = thrPc*np.mean(b)/100
         result = (b-thr<=a<=b+thr).all()
-    elif type(a) is np.ndarray and isinstance(b,(int,long,float,complex)):
+    elif type(a) is np.ndarray and isinstance(b,(int,float,complex)):
         #thr = min(np.std(a), thrPc*b/100) if thrPc != None else np.std(a)
         thr = thrPc*b/100
         result = b-thr<=a.all()<=b+thr
-    elif isinstance(a,(int,float,long,complex)) and isinstance(b,(int,long,float,complex)):
+    elif isinstance(a,(int,float,complex)) and isinstance(b,(int,float,complex)):
         thr = thrPc*b/100 if b != 0.0 else thrPc*(rangeMax-rangeMin)/100.0
         result = b-thr<=a<=b+thr
     else:
@@ -159,7 +159,7 @@ def binaryDataOrganizer(binaryData,val1 = None, val2 = None):
     bMask = np.zeros(binaryData.shape[0])
     count = 1
     start = 0
-    for i in xrange(binaryData.shape[0]-1):
+    for i in range(binaryData.shape[0]-1):
         bMask[i] = int(binaryData[i]!=binaryData[i+1])
         if bMask[i]:
             #arrow = 122 if binaryData[i] == value2 else 221
@@ -250,7 +250,7 @@ def findJumps(data,multiplierPc):
     thr = meanDiff*multiplierPc
     #jumps = []
     jumps = np.where(abs(data[1:]-data[:-1])>thr)[0]
-    #for i in xrange(data.shape[0]-1):
+    #for i in range(data.shape[0]-1):
     #    if abs(data[i]-data[i+1])>thr:
     #        jumps.append([i,data[i]])
     return list(jumps)
@@ -263,7 +263,7 @@ def findUnD(data,xAxis,thrMul,distPc,verify=True,rsqT=0.8):
     up = None
     down = None
     
-    for i in xrange(data.shape[0]-1):
+    for i in range(data.shape[0]-1):
         if data[i+1] <= thr and down == None:
             down = i+1 if data[i] >= thr else None
         elif data[i+1] > thr and down != None:
@@ -356,7 +356,7 @@ def pieceWiseSavGol(data,multiplierPc,sgfWinPc,sgfDeg,sgfDerDeg = 0, pieces = Fa
         else:
             deg = sgfDeg
         tempData = smartSgf(data[oldInd:j], sgfWinPc, deg, sgfDerDeg)
-        print tempData
+        print(tempData)
         if pieces:
             pwDataPieces.append(tempData)
         else:
@@ -390,7 +390,7 @@ def pwSgfPeaksFinder(z,f,multiplierPc,sgfWinPc,sgfDeg,maxLengthPc,filtered = Tru
     zPeaks = []
     baselines = []
     
-    for i in xrange(len(jumps)):
+    for i in range(len(jumps)):
         forceLev = f[jumps[i]+2]
         flatZone = np.where(pwFilt[i]<=forceLev)[0]
         if flatZone.shape[0] == 0:
@@ -401,7 +401,7 @@ def pwSgfPeaksFinder(z,f,multiplierPc,sgfWinPc,sgfDeg,maxLengthPc,filtered = Tru
             tempInd = 0
         peaksStarts.append(tempInd)
     oldInd = 0
-    for i in xrange(len(jumps)):
+    for i in range(len(jumps)):
         tempZ = z[(peaksStarts[i]+oldInd+1):(jumps[i]+1)]
         tempF = pwFilt[i][peaksStarts[i]:] if filtered else f[(peaksStarts[i]+oldInd):(jumps[i]+1)]
         oldInd = jumps[i]
@@ -417,4 +417,4 @@ def pwSgfPeaksFinder(z,f,multiplierPc,sgfWinPc,sgfDeg,maxLengthPc,filtered = Tru
 
 if __name__ == '__main__':
     
-    print 'Not for standalone use'
+    print('Not for standalone use')

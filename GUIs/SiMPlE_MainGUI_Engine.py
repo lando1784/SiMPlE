@@ -1,37 +1,39 @@
-from PyQt4 import QtCore, QtGui
-from scipy.signal._savitzky_golay import savgol_filter
-from copy import copy,deepcopy
-from numpy import uint16
-from cmath import rect
-from telnetlib import RCTE
-from argparse import Action
-
-
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    _fromUtf8 = lambda s: s
-
-import os as os
+import os
 import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
+
+CURRMOD = list(sys.modules.keys())
+try:
+    ENV = 'PyQt5'
+    CURRMOD.index(ENV)
+    from PyQt5.QtWidgets import QMainWindow,QFileDialog,QProgressDialog,QGraphicsScene,QMessageBox,QGraphicsPixmapItem
+    from PyQt5.QtWidgets import QApplication
+    from PyQt5.QtGui import QColor,QPixmap,QPen,QCursor
+    from PyQt5.QtCore import Qt,QCoreApplication,QRectF,QObject
+except:
+    ENV = 'PyQt4'
+    CURRMOD.index(ENV)
+    from PyQt4.QtGui import QColor,QMainWindow,QFileDialog,QApplication,QCursor,QProgressDialog,QGraphicsScene,QPen
+    from PyQt4.QtGui import QMessageBox,QPixmap,QGraphicsPixmapItem
+    from PyQt4.QtCore import Qt,QCoreApplication,QRectF,QObject,SIGNAL,QMetaObject
+
+from copy import deepcopy
+
+_fromUtf8 = lambda s: s
+
+from PIL import Image
+
 import pyqtgraph as pg
-import numpy as np
-#import Ui_qtView as qtView_face
-import Ui_SiMPlE_main as qtView_face
+import GUIs.SiMPlE_MainGUI as qtView_face
 from os import makedirs
 from os.path import split, join, splitext, exists
 from shutil import rmtree
 from time import strftime
-from cursor import cursor
-#import Image
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__),'..')))
-
-#from SiMPlE import experiment
-import experiment
-import convertR9module as r9
-from calc_utilities import *
-from peaks import peak,Peaks
+from libs import experiment
+from libs import convertR9module as r9
+from libs.calc_utilities import *
+from libs.cursor import cursor
 
 pg.setConfigOption('background', 'w')
 pg.setConfigOption('foreground', 'k')
@@ -48,15 +50,15 @@ cutMe = True
 
 line = pg.graphicsItems.InfiniteLine.InfiniteLine
 
-class curveWindow ( QtGui.QMainWindow ):
+class SiMPlE_main ( QMainWindow ):
     iter = 0
     prev = 0
-    cRosso = QtGui.QColor(255,0,0)
-    cVerde = QtGui.QColor(50,255,50)
-    cNero = QtGui.QColor(0,0,0)
+    cRosso = QColor(255,0,0)
+    cVerde = QColor(50,255,50)
+    cNero = QColor(0,0,0)
     
-    def __init__ ( self, parent = None ):
-        QtGui.QMainWindow.__init__( self, parent )
+    def __init__ ( self, parent = None, verbose = False):
+        QMainWindow.__init__( self, parent )
         self.setWindowTitle( 'qtView' )
         self.ui = qtView_face.Ui_facewindow()
         self.ui.setupUi( self )
@@ -117,17 +119,17 @@ class curveWindow ( QtGui.QMainWindow ):
 
     def addFiles(self, fnames = None):
         if fnames == None:
-            fnames = QtGui.QFileDialog.getOpenFileNames(self, 'Select files', './')
-        QtCore.QCoreApplication.processEvents()
+            fnames = QFileDialog.getOpenFileNames(self, 'Select files', './')
+        QCoreApplication.processEvents()
         pmax = len(fnames)
 
-        QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
-        progress = QtGui.QProgressDialog("Opening files...", "Cancel opening", 0, pmax);
+        QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+        progress = QProgressDialog("Opening files...", "Cancel opening", 0, pmax);
         i=0
         for fname in fnames:
             logString = 'Loading file {0}\n'.format(fname)
             self.simpleLogger(logString)
-            QtCore.QCoreApplication.processEvents()
+            QCoreApplication.processEvents()
             self.exp.addFiles([str(fname)])
             if self.exp[-1][0].f.all() == 0 or self.exp[-1][-1].f.all() == 0:
                     del self.exp[-1]
@@ -141,7 +143,7 @@ class curveWindow ( QtGui.QMainWindow ):
             if (progress.wasCanceled()):
                 break
         progress.setValue(pmax)
-        QtGui.QApplication.restoreOverrideCursor()
+        QApplication.restoreOverrideCursor()
         
         self.setStatus(2)
         if np.array(self.alignFlags).all():
@@ -153,14 +155,14 @@ class curveWindow ( QtGui.QMainWindow ):
 
     def addDirectory(self,dirname=None):
         if dirname == None:
-            dirname = QtGui.QFileDialog.getExistingDirectory(self, 'Select a directory', './')
+            dirname = QFileDialog.getExistingDirectory(self, 'Select a directory', './')
             if not os.path.isdir(dirname):
                 return
-        QtCore.QCoreApplication.processEvents()
+        QCoreApplication.processEvents()
         pmax = len(os.listdir(dirname))
 
-        QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
-        progress = QtGui.QProgressDialog("Opening files...", "Cancel opening", 0, pmax);
+        QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+        progress = QProgressDialog("Opening files...", "Cancel opening", 0, pmax);
         i=0
         loadedFiles = sorted(os.listdir(dirname))
         logString = 'Loading curves from {0}\n'.format(dirname)
@@ -169,7 +171,7 @@ class curveWindow ( QtGui.QMainWindow ):
             #if i % 100 == 0:
             if fnamealone[0]=='.':
                 continue
-            QtCore.QCoreApplication.processEvents()
+            QCoreApplication.processEvents()
             fname = os.path.join(str(dirname), fnamealone)
             try:
                 self.exp.addFiles([str(fname)])
@@ -181,14 +183,14 @@ class curveWindow ( QtGui.QMainWindow ):
                 self.badFlags.append(True)
                 self.ctPoints.append(None)
             except Exception as e:
-                print e.message
+                print(e.message)
                 
             progress.setValue(i)
             i=i+1
             if (progress.wasCanceled()):
                 break
         progress.setValue(pmax)
-        QtGui.QApplication.restoreOverrideCursor()
+        QApplication.restoreOverrideCursor()
         logString = 'Curves Loaded\n'
         self.simpleLogger(logString)
         
@@ -205,7 +207,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.curveNameCmbBox.addItem('Currently loaded curves:')
         for f in self.exp.basenames:
             self.ui.curveNameCmbBox.addItem(f)
-        scena = QtGui.QGraphicsScene()
+        scena = QGraphicsScene()
         width = self.ui.griglia.width()
         height = self.ui.griglia.height()
         N = len(self.exp)
@@ -227,8 +229,8 @@ class curveWindow ( QtGui.QMainWindow ):
             h = L-2
             w = L-2
             
-            rect = QtCore.QRectF(j*(L)+1, i*(L)+1, h, w)
-            idrect = scena.addRect(rect, pen = QtGui.QPen(self. cVerde,0) ,brush = self. cVerde )
+            rect = QRectF(j*(L)+1, i*(L)+1, h, w)
+            idrect = scena.addRect(rect, pen = QPen(self. cVerde,0) ,brush = self. cVerde )
             j+=1
             k+=1
             if j == Nx:
@@ -267,7 +269,7 @@ class curveWindow ( QtGui.QMainWindow ):
         it = self.ui.griglia.items()
         ind = 0
         lenIt = len(it)
-        for i in xrange(lenIt):
+        for i in range(lenIt):
             rct = it[-(i+1)].rect()
             if self.pointInRect(mPos, rct):
                 ind = i
@@ -359,7 +361,7 @@ class curveWindow ( QtGui.QMainWindow ):
     
     def batchConv(self):
         
-        dirIn = str(QtGui.QFileDialog.getExistingDirectory(self, 'Select a directory', './'))
+        dirIn = str(QFileDialog.getExistingDirectory(self, 'Select a directory', './'))
         DirIn = split(dirIn)
         dirOut = join(DirIn[0],'jpk_'+DirIn[1])
         r9.batchR9conversion(dirIn,dirOut)
@@ -460,7 +462,7 @@ class curveWindow ( QtGui.QMainWindow ):
             
             self.refillList(self.ui.slide1.value())
         except Exception as e:
-            print e.message
+            print(e.message)
     
         
     def showHidePeaks(self):
@@ -476,7 +478,7 @@ class curveWindow ( QtGui.QMainWindow ):
                 self.goToCurve(self.ui.slide1.value())
                 
         except Exception as e:
-            print e.message
+            print(e.message)
     
     
     def populatePeaksCmb(self):
@@ -524,7 +526,7 @@ class curveWindow ( QtGui.QMainWindow ):
             self.ui.grafo.plot(zpeaksA,derivpeaksA if self.ui.derivCkBox.isChecked() else peaksA,pen = None,symbolPen='r',symbolBrush='r',symbol='o',symbolSize = 5)
         
         except Exception as e:
-            print e.message
+            print(e.message)
                 
             
     def calcArea(self):
@@ -540,7 +542,7 @@ class curveWindow ( QtGui.QMainWindow ):
     def savePeaks(self):
         
         if self.sender() == self.ui.saveWholePeakBtn:
-            dirname = str(QtGui.QFileDialog.getExistingDirectory(self, 'Select a directory for the peaks', './'))
+            dirname = str(QFileDialog.getExistingDirectory(self, 'Select a directory for the peaks', './'))
             if dirname != '':
                 for c in self.exp:
                     if len(c[-1].peaks)>0:
@@ -565,7 +567,7 @@ class curveWindow ( QtGui.QMainWindow ):
         
             table = header+table
         
-            filename = QtGui.QFileDialog.getSaveFileName(self,'Choose the path for peaks stats')
+            filename = QFileDialog.getSaveFileName(self,'Choose the path for peaks stats')
         
             f = open(filename,'w')
             f.write(table)
@@ -575,7 +577,7 @@ class curveWindow ( QtGui.QMainWindow ):
         
         self.fitFlag = False
         self.goToCurve(self.ui.slide1.value())
-        for i in xrange(len(self.exp)):
+        for i in range(len(self.exp)):
             self.ctPoints[i] = None
         
     
@@ -589,7 +591,7 @@ class curveWindow ( QtGui.QMainWindow ):
             self.ui.grafo.plot(c[segInd].z,fit,pen='r')
             self.fitFlag = True
         except Exception as e:
-            print e.message
+            print(e.message)
             
     
     def align(self):
@@ -619,15 +621,15 @@ class curveWindow ( QtGui.QMainWindow ):
                 self.ui.slide1.setValue(self.ui.slide1.value())
                 self.ui.slide2.setValue(self.ui.slide1.value())
             except Exception as e:
-                print e.message
+                print(e.message)
         else:
             pmax = len(self.exp)
             logString = 'Aligning all curves...\n'
             self.simpleLogger(logString)
-            progress = QtGui.QProgressDialog("Aligning curves...", "Cancel aligning", 0, pmax);
+            progress = QProgressDialog("Aligning curves...", "Cancel aligning", 0, pmax);
             i=0
             for c in self.exp:
-                print c.basename
+                print(c.basename)
                 progress.setValue(i)
                 if (progress.wasCanceled()):
                     break
@@ -649,7 +651,7 @@ class curveWindow ( QtGui.QMainWindow ):
                         s.f = s.f[np.where(s.z>=contactPt[0])]-np.mean(fits[1])#contactPt[1]
                         s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
                 except Exception as e:
-                    print e.message
+                    print(e.message)
                 self.alignFlags[i] = True
                 del c[0]
                 i=i+1
@@ -667,10 +669,10 @@ class curveWindow ( QtGui.QMainWindow ):
     def reload(self):
         pmax = len(self.exp)
         self.bad = []
-        QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
+        QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
         logString = 'Reloading all the curves\n'
         self.simpleLogger(logString)
-        progress = QtGui.QProgressDialog("Reloading curves...", "Cancel reloading", 0, pmax);
+        progress = QProgressDialog("Reloading curves...", "Cancel reloading", 0, pmax);
         i=0
         tempExp = deepcopy(self.exp)
         self.exp = None
@@ -684,7 +686,7 @@ class curveWindow ( QtGui.QMainWindow ):
             progress.setValue(i)
             self.exp.addFiles([c.filename])
         progress.setValue(pmax)
-        QtGui.QApplication.restoreOverrideCursor()
+        QApplication.restoreOverrideCursor()
         tempExp = None
         self.fitFlag = False
         self.setStatus(2)
@@ -719,13 +721,13 @@ class curveWindow ( QtGui.QMainWindow ):
             basename = onlyFile+'_aligned'+ext
             filename = join(dir,basename)
             if exists(filename):
-                filename = str(QtGui.QFileDialog.getSaveFileName(self,'The name you chose already exists. Select another one or pick the same to overwrite',filename))
+                filename = str(QFileDialog.getSaveFileName(self,'The name you chose already exists. Select another one or pick the same to overwrite',filename))
             logString = 'Saving {0} aligned version in {1}\n'.format(split(filename)[1],split(filename)[0])
             self.simpleLogger(logString)
             cc.save(filename)
             cc = None
         else:
-            for i in xrange(len(self.exp)):
+            for i in range(len(self.exp)):
                 c = self.exp[i]
                 if not self.alignFlags[i] or len(c)<1:
                     continue
@@ -742,7 +744,7 @@ class curveWindow ( QtGui.QMainWindow ):
                 basename = onlyFile+'_aligned'+ext
                 filename = join(dir,basename)
                 if exists(filename):
-                    filename = str(QtGui.QFileDialog.getSaveFileName(self,'The name you chose already exists. Select another one or pick the same to overwrite',filename))
+                    filename = str(QFileDialog.getSaveFileName(self,'The name you chose already exists. Select another one or pick the same to overwrite',filename))
                 logString = 'Saving {0} aligned version in {1}\n'.format(split(filename)[1],split(filename)[0])
                 self.simpleLogger(logString)
                 cc.save(filename)
@@ -761,11 +763,11 @@ class curveWindow ( QtGui.QMainWindow ):
         
     def removeCurve(self):
         culprit = self.sender()
-        warningDial = QtGui.QMessageBox(self)
+        warningDial = QMessageBox(self)
         warningDial.setWindowTitle(culprit.text())
         warningDial.setText('Do you want to procede?')
-        warningDial.setStandardButtons(QtGui.QMessageBox.Yes|QtGui.QMessageBox.No)
-        warningDial.setDefaultButton(QtGui.QMessageBox.No)
+        warningDial.setStandardButtons(QMessageBox.Yes|QMessageBox.No)
+        warningDial.setDefaultButton(QMessageBox.No)
         answer = warningDial.exec_()
         if answer == 65536:
             return None
@@ -779,7 +781,7 @@ class curveWindow ( QtGui.QMainWindow ):
             del self.ctPoints[ind]
             try:
                 badInd = self.bad.index(ind)
-                for i in xrange(len(self.bad[badInd+1])):
+                for i in range(len(self.bad[badInd+1])):
                     self.bad[i] -= 1
                 del self.bad[badInd]
             except:
@@ -817,14 +819,14 @@ class curveWindow ( QtGui.QMainWindow ):
         alpha = 256.0/(len(self.exp)-len(self.bad))
         color = pg.mkColor(0,0,0,alpha)
         self.ui.grafo.clear()
-        for i in xrange(len(self.exp)):
+        for i in range(len(self.exp)):
             if self.alignFlags[i] and self.exp[i].relevant:
                 self.ui.grafo.plot(self.exp[i][-1].z,self.exp[i][-1].f,pen=None,symbol='o',symbolSize = 2,symbolPen = color, symbolBrush = color)
                 
                 
     def changeStatus(self):
         
-        print self.bad
+        print(self.bad)
         
         ind = self.ui.slide1.value()-1
         if self.alignFlags[ind]:
@@ -856,7 +858,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.globDir = ''
         self.ui.setPathBtn.setStyleSheet('background-color: none')
         self.cursors = []
-        for i in xrange(self.ui.cursCmbBox.count()):
+        for i in range(self.ui.cursCmbBox.count()):
             self.ui.cursCmbBox.removeItem(i)
             self.ui.cursCmpCmbBox.removeItem(i+1)
         self.ui.currCursXvalNumDbl.setValue(0.0)
@@ -868,7 +870,7 @@ class curveWindow ( QtGui.QMainWindow ):
     
     def setSavePath(self):
         
-        dirname = str(QtGui.QFileDialog.getExistingDirectory(self, 'Select a directory', './'))
+        dirname = str(QFileDialog.getExistingDirectory(self, 'Select a directory', './'))
         if dirname != '':
             logString = 'Global save path set at: {0}'.format(dirname)
             self.simpleLogger(logString)
@@ -893,7 +895,7 @@ class curveWindow ( QtGui.QMainWindow ):
         emptyF = np.array([])
         emptyZ = np.array([])
         
-        for i in xrange(len(goodF)):
+        for i in range(len(goodF)):
             emptyF = np.concatenate((emptyF,goodF[i][:shortestSize]))
             emptyZ = np.concatenate((emptyZ,goodZ[i][:shortestSize]))
         
@@ -901,8 +903,8 @@ class curveWindow ( QtGui.QMainWindow ):
         hist = histo[0]
         hist = ((hist - np.min(hist))/(np.max(hist)-np.min(hist))*255).astype(np.uint8)
         img = Image.fromarray(hist)
-        pix = QtGui.QPixmap(img.convert('RGBA').tostring('raw','RGBA'))
-        pixG = QtGui.QGraphicsPixmapItem(pix)
+        pix = QPixmap(img.convert('RGBA').tostring('raw','RGBA'))
+        pixG = QGraphicsPixmapItem(pix)
         self.ui.grafo.clear()
         self.ui.grafo.addItem(pixG)
         self.ui.grafo.update()
@@ -913,10 +915,10 @@ class curveWindow ( QtGui.QMainWindow ):
         curveInd = len(self.exp[self.ui.slide1.value()-1])-1
         lim = len(self.cursors)
         currInd = lim
-        for i in xrange(lim):
+        for i in range(lim):
             currName = self.cursColors[i][0]
             names = []
-            for c in xrange(self.ui.cursCmbBox.count()):
+            for c in range(self.ui.cursCmbBox.count()):
                 names.append(self.ui.cursCmbBox.itemText(c))
             if currName not in names:
                 currInd = i
@@ -926,7 +928,7 @@ class curveWindow ( QtGui.QMainWindow ):
         self.ui.cursCmpCmbBox.addItem(self.cursColors[currInd][0])
         
         self.ui.cursCmbBox.setCurrentIndex(currInd)
-        QtCore.QObject.connect(self.cursors[self.ui.cursCmbBox.currentIndex()], QtCore.SIGNAL(_fromUtf8("moved()")), self.updateCursNums)
+        QObject.connect(self.cursors[self.ui.cursCmbBox.currentIndex()], SIGNAL(_fromUtf8("moved()")), self.updateCursNums)
         if len(self.cursors) == 4:
             self.ui.addCursBtn.setEnabled(False)
         if not self.ui.removeCursBtn.isEnabled():
@@ -965,73 +967,67 @@ class curveWindow ( QtGui.QMainWindow ):
         
         res = len(self.exp[self.ui.slide1.value()-1][-1].peaks)
 
-        for i in xrange(lim):
+        for i in range(lim):
             curveInd = len(self.exp[self.ui.slide1.value()-1])-1
             currName = self.ui.cursCmbBox.itemText(i)
             for k in self.cursColors.keys():
                 if currName in self.cursColors[k]:
                     currInd = i
             self.cursors.append(cursor(self.ui.grafo.plotItem,curveInd,True,True,'+',self.cursColors[currInd][1]))
-            QtCore.QObject.connect(self.cursors[-1], QtCore.SIGNAL(_fromUtf8("moved()")), self.updateCursNums)
+            QObject.connect(self.cursors[-1], SIGNAL(_fromUtf8("moved()")), self.updateCursNums)
         
     
     def setConnections(self):
 
-        QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide2.setValue)
-        QtCore.QObject.connect(self.ui.slide2, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.slide1.setValue)
-        QtCore.QObject.connect(self.ui.slide2, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.curveNameCmbBox.setCurrentIndex)
-        QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.ui.curveNameCmbBox.setCurrentIndex)
-        QtCore.QObject.connect(self.ui.curveNameCmbBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.ui.slide1.setValue)
-        QtCore.QObject.connect(self.ui.curveNameCmbBox, QtCore.SIGNAL(_fromUtf8("currentIndexChanged(int)")), self.ui.slide2.setValue)
-        QtCore.QObject.connect(self.ui.slide1, QtCore.SIGNAL(_fromUtf8("valueChanged(int)")), self.goToCurve )
+        self.ui.slide1.valueChanged.connect(self.ui.slide2.setValue)
+        self.ui.slide2.valueChanged.connect(self.ui.slide1.setValue)
+        self.ui.slide2.valueChanged.connect(self.ui.curveNameCmbBox.setCurrentIndex)
+        self.ui.slide1.valueChanged.connect(self.ui.curveNameCmbBox.setCurrentIndex)
+        self.ui.curveNameCmbBox.currentIndexChanged.connect(self.ui.slide1.setValue)
+        self.ui.curveNameCmbBox.currentIndexChanged.connect(self.ui.slide2.setValue)
+        self.ui.slide1.valueChanged.connect(self.goToCurve)
 
-        QtCore.QObject.connect(self.ui.bAddDir, QtCore.SIGNAL(_fromUtf8("clicked()")), self.addDirectory)
-        QtCore.QObject.connect(self.ui.bAddFiles, QtCore.SIGNAL(_fromUtf8("clicked()")), self.addFiles)
-        
-        QtCore.QObject.connect(self.ui.convr9Btn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.batchConv)
-        
-        QtCore.QObject.connect(self.ui.updateKBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateK)
-        QtCore.QObject.connect(self.ui.updateAllKBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateK)
-        QtCore.QObject.connect(self.ui.updateNmVBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSens)
-        QtCore.QObject.connect(self.ui.updateAllNmVBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSens)
-        QtCore.QObject.connect(self.ui.updateSpeedBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSpeed)
-        QtCore.QObject.connect(self.ui.updateAllSpeedBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.updateSpeed)
-        QtCore.QObject.connect(self.ui.hist2dBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.show2Dhist)
-        
-        QtCore.QObject.connect(self.ui.autoFitBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.showFit)
-        QtCore.QObject.connect(self.ui.rejectBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.rejectAlign)
-        QtCore.QObject.connect(self.ui.alignBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.align)
-        QtCore.QObject.connect(self.ui.alignAllBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.align)
-        QtCore.QObject.connect(self.ui.reloadBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.reload)
-        QtCore.QObject.connect(self.ui.saveBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.saveAligned)
-        QtCore.QObject.connect(self.ui.saveAllBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.saveAligned)
-        QtCore.QObject.connect(self.ui.removeBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCurve)
-        QtCore.QObject.connect(self.ui.removeBOBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCurve)
-        QtCore.QObject.connect(self.ui.showPeakBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.showHidePeaks)
+        self.ui.bAddDir.clicked.connect(self.addDirectory)
+        self.ui.bAddFiles.clicked.connect(self.addFiles)
+
+        self.ui.convr9Btn.clicked.connect(self.batchConv)
+
+        self.ui.updateKBtn.clicked.connect(self.updateK)
+        self.ui.updateAllKBtn.clicked.connect(self.updateK)
+        self.ui.updateNmVBtn.clicked.connect(self.updateSens)
+        self.ui.updateAllNmVBtn.clicked.connect(self.updateSens)
+        self.ui.updateSpeedBtn.clicked.connect(self.updateSpeed)
+        self.ui.updateAllSpeedBtn.clicked.connect(self.updateSpeed)
+        self.ui.hist2dBtn.clicked.connect(self.show2Dhist)
+
+        self.ui.autoFitBtn.clicked.connect(self.showFit)
+        self.ui.rejectBtn.clicked.connect(self.rejectAlign)
+        self.ui.alignBtn.clicked.connect(self.align)
+        self.ui.alignAllBtn.clicked.connect(self.align)
+        self.ui.reloadBtn.clicked.connect(self.reload)
+        self.ui.saveBtn.clicked.connect(self.saveAligned)
+        self.ui.saveAllBtn.clicked.connect(self.saveAligned)
+        self.ui.removeBtn.clicked.connect(self.removeCurve)
+        self.ui.removeBOBtn.clicked.connect(self.removeCurve)
+        self.ui.showPeakBtn.clicked.connect(self.showHidePeaks)
         self.ui.findPeaksBtn.clicked.connect(self.findPeaks)
         self.ui.savePeaksBtn.clicked.connect(self.savePeaks)
         self.ui.savePeaksStatsBtn.clicked.connect(self.savePeaks)
         self.ui.saveWholePeakBtn.clicked.connect(self.savePeaks)
-        
-        QtCore.QObject.connect(self.ui.overlayBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.overlay)
-        QtCore.QObject.connect(self.ui.chgStatBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.changeStatus)
-        QtCore.QObject.connect(self.ui.closeExpBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.closeExp)
-        QtCore.QObject.connect(self.ui.setPathBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.setSavePath)
-        QtCore.QObject.connect(self.ui.addCursBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.addCursor)
-        QtCore.QObject.connect(self.ui.removeCursBtn, QtCore.SIGNAL(_fromUtf8("clicked()")), self.removeCursor)
-        
+
+        self.ui.overlayBtn.clicked.connect(self.overlay)
+        self.ui.chgStatBtn.clicked.connect(self.changeStatus)
+        self.ui.closeExpBtn.clicked.connect(self.closeExp)
+        self.ui.setPathBtn.clicked.connect(self.setSavePath)
+        self.ui.addCursBtn.clicked.connect(self.addCursor)
+        self.ui.removeCursBtn.clicked.connect(self.removeCursor)
         
         self.ui.peaksCmbBox.currentIndexChanged.connect(self.calcArea)
-        QtCore.QObject.connect(self.ui.derivCkBox, QtCore.SIGNAL(_fromUtf8("clicked()")), self.checked)
+        self.ui.derivCkBox.clicked.connect(self.checked)
         
-        QtCore.QMetaObject.connectSlotsByName(self)
+        #QMetaObject.connectSlotsByName(self)
 
 
 if __name__ == "__main__":
-    import sys
-    app = QtGui.QApplication(sys.argv)
-    app.setApplicationName( 'qtView' )
-    canale = curveWindow()
-    canale.show()
-    QtCore.QObject.connect( app, QtCore.SIGNAL( 'lastWindowClosed()' ), app, QtCore.SLOT( 'quit()' ) )
-    sys.exit(app.exec_())
+
+    print('Not for standalone use')

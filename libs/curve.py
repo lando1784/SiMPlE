@@ -1,9 +1,7 @@
-import mvobject
-import segment
+from libs import mvobject
+from libs import segment
 import logging
-import importlib
 import os
-import glob
 
 class curve(mvobject.mvobject):
     def __init__(self,  fname = None):
@@ -53,7 +51,7 @@ class curve(mvobject.mvobject):
             return False
 
         #search for the specific driver
-        import open_all as opa
+        import libs.open_all as opa
         op = opa.opener(fname)
         try:
             parameters,info,segments=op.getOpener(driver)
@@ -159,5 +157,5 @@ class curve(mvobject.mvobject):
             
     
 if __name__ == "__main__":
-    print 'not for direct use'
+    print('not for direct use')
         

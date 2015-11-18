@@ -1,5 +1,5 @@
 import numpy as np
-from fitLib import *
+from libs.fitLib import *
 import os
 from os import makedirs
 from os.path import split, join, splitext, exists, isfile
@@ -145,7 +145,7 @@ class peak(object):
         fileText += '#\n'
         fileText += '#Displacement [nm]\tForce [pN]\n'
         fileText += '#\n'
-        for i in xrange(len(self.z)):
+        for i in range(len(self.z)):
             fileText += str(self.z[i])+'\t'+str(self.f[i])+'\n'
         outputFile = open(filePath,'w')
         outputFile.write(fileText)
@@ -237,7 +237,7 @@ class Peaks(object):
         else:
             baselines = [None]*len(fpeaks)
         
-        for i in xrange(len(fpeaks)):
+        for i in range(len(fpeaks)):
             if zpeaks[i].shape[0]<=1:
                 continue
             self.peaks.append(peak(zpeaks[i],fpeaks[i],baselines[i],modelFun,id))
@@ -251,7 +251,7 @@ class Peaks(object):
         lengths = np.zeros(len(self.peaks))
         heights = np.zeros(len(self.peaks))
         
-        for i in xrange(areas.shape[0]):
+        for i in range(areas.shape[0]):
             areas[i] = self.peaks[i].getArea()
             heights[i] = self.peaks[i].getHeight()
             lengths[i] = self.peaks[i].getLength()
@@ -342,7 +342,7 @@ class Peaks(object):
         for l in pf.readlines():
             if l.find('#') != -1:
                 continue
-	    if l[0] == '\n':
+            if l[0] == '\n':
                 continue
             dataChunk = np.array([float(d) for d in l.split('\t')])
             data.append(dataChunk)

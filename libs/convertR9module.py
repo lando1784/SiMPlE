@@ -53,8 +53,8 @@ def tabulate2Darray(a,separator='\t'):
     
     tab = ''
     
-    for i in xrange(a.shape[0]):
-        for j in xrange(a.shape[1]):
+    for i in range(a.shape[0]):
+        for j in range(a.shape[1]):
             tab+=str(a[i,j])+(separator if j<a.shape[1]-1 else '\n')
             
     return tab
@@ -101,7 +101,7 @@ def chopR9file(filePath):
     ys = ys[::2]
     toNewton = k*nmV*1e-9
     curves = []
-    for i in xrange((columns-1)/2):
+    for i in range((columns-1)/2):
         tempApp = np.array([Z,Dapps[:,i]*toNewton])
         tempRec = np.array([Z[::-1],Drets[::-1,i]*toNewton])
         tempH1,tempH2 = headerWriter(k,nmV,xs[i],ys[i],speed)
@@ -133,7 +133,7 @@ def batchR9conversion(dirIn,dirOut=''):
                 w.close()
                 counter+=1
         except Exception as e:
-            print e.message
+            print(e.message)
 
 if __name__ == '__main__':
     batchR9conversion(dir,dir2)

@@ -1,4 +1,4 @@
-import ConfigParser
+import configparser
 import logging
 INIFILE = 'defaults.ini'
 class mvobject:
@@ -10,9 +10,9 @@ class mvobject:
         at startup, configure the object with defaults or file-read values
         NB: only values in the default dictionary are parsed
         """
-        c = ConfigParser.SafeConfigParser()
+        c = configparser.ConfigParser()
         try:
-            c.readfp(open(INIFILE))
+            c.read(open(INIFILE))
         except:
             pass
         for k,v in defaults.items():

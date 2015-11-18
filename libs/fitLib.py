@@ -1,5 +1,4 @@
-from scipy.optimize import leastsq,curve_fit
-from numpy.linalg import solve
+from scipy.optimize import curve_fit
 import numpy as np
 
 

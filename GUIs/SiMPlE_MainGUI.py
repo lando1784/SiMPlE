@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'd:\Software\GIT\SiMPlE\qt\SiMPlE_main.ui'
+# Form implementation generated from reading ui file 'GUIs\SiMPlE_MainGUI.ui'
 #
-# Created: Fri Aug 14 22:59:06 2015
+# Created: Wed Nov 18 17:14:27 2015
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!

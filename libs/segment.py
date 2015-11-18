@@ -1,6 +1,6 @@
 import numpy as np
-import mvobject
-from peaks import *
+from libs import mvobject
+from libs.peaks import *
 
 class segment(mvobject.mvobject):
     def __init__(self,x,y):   
@@ -53,4 +53,4 @@ class segment(mvobject.mvobject):
         
         
 if __name__ == "__main__":
-    print 'not for direct use'
+    print('not for direct use')

@@ -1,4 +1,4 @@
-import segment
+from libs import segment
 import logging
 import string
 
@@ -367,4 +367,4 @@ class nanoscopetxt(openWorker):
             
         return True
 if __name__ == "__main__":
-    print 'not for direct use'
+    print('not for direct use')

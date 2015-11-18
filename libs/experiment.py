@@ -1,7 +1,7 @@
 import os
 import logging
-import curve
-import mvobject
+from libs import curve
+from libs import mvobject
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -127,4 +127,4 @@ class experiment(mvobject.mvobject):
 
 
 if __name__ == "__main__":
-    print 'not for direct use'
+    print('not for direct use')

@@ -1,12 +1,20 @@
-from PyQt4 import QtCore, QtGui
+import sys
+
+CURRMOD = list(sys.modules.keys())
+try:
+    ENV = 'PyQt5'
+    CURRMOD.index(ENV)
+    from PyQt5.QtCore import QObject,pyqtSignal
+except:
+    ENV = 'PyQt4'
+    CURRMOD.index(ENV)
+    from PyQt4.QtCore import QObject,pyqtSignal
 import pyqtgraph as pg
-import numpy as np
 
 
-
-class cursor(QtCore.QObject):
+class cursor(QObject):
     
-    moved = QtCore.pyqtSignal()
+    moved = pyqtSignal(list,name='moved')
     
     def __init__(self,parent,curveIndex, xLine, yLine, symb, cPen):
         
@@ -67,7 +75,7 @@ class cursor(QtCore.QObject):
             newPoint[1] = self.refPlot.yData[approxInd]
             
         self.point.setData([newPoint[0]],[newPoint[1]])
-        self.moved.emit()
+        self.moved.emit(newPoint)
         
     
     def pos(self):

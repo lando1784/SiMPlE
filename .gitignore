@@ -213,3 +213,9 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+*.name
+.idea/misc.xml
+.idea/modules.xml
+*.iml
+.idea/vcs.xml
+.idea/workspace.xml

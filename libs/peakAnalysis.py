@@ -1,4 +1,4 @@
-from peaks import peak, Peaks
+from libs.peaks import peak, Peaks
 import numpy as np
 import scipy as sp
 
@@ -64,7 +64,7 @@ class peaksAnalyzer(object):
     def listIDs(self):
         i=0
         for id in self.analytes['id']:
-            print str(i) + ') ' + id
+            print(str(i) + ') ' + id)
             i+=1
             
     
