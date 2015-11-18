@@ -38,6 +38,8 @@ class curve(mvobject.mvobject):
         if index == 'down':
             index = 0
         return self.segments[index]
+    def __delitem__(self,index):
+        self.segments = self.segments[:index]+self.segments[-1:index:-1][::-1]
 
     def append(self,seg):
         if isinstance(seg,segment.segment):
@@ -85,22 +87,76 @@ class curve(mvobject.mvobject):
             out_file.write("# fzfd: 0\n")
         out_file.write("#\n")
         i=0
-        for p in self.pieces:
+        for p in self.segments:
             if i != 0:
                 out_file.write("\n")
             out_file.write("#\n")
             out_file.write("# segmentIndex: {0}\n".format(i))
             ts = 'extend'
-            if p.direction == 'B':
+            if p.direction == 'far':
                 ts = 'retract'
             out_file.write("# segment: {0}\n".format(ts))
             out_file.write("# columns: distance force\n")
             out_file.write("# speed: {0}\n".format(p.speed))
-            for i in range(len(p.x)):
-                out_file.write("{0} {1}\n".format(p.x[i]*1e-9, -1.0*p.y[i]*1e-12))
+            for i in range(len(p.z)):
+                out_file.write("{0} {1}\n".format(p.z[i]*1e-9, -1.0*p.f[i]*1e-12))
             i+=1
         out_file.close()
         return True
+    
+    def changeK(self,newK):
+        
+        for s in self.segments:
+            s.f /= s.k
+            s.f *= newK
+            s.k = newK
+        self.k = newK
+        
+    
+    def changeSens(self,newSens):
+        
+        for s in self.segments:
+            s.f /= self.sensitivity
+            s.f *= newSens
+        self.sensitivity = newSens
+        
+        
+    def changeSpeed(self,newSpeed):
+        
+        for s in self.segments:
+            s.speed = newSpeed
+    
+    
+    def getMarkedPeaks(self, segInd, peakFinder = None, peakModel = None, argsPF = [], kwArgsPF = {}):
+        
+        amount = self.segments[segInd].getPeaks(peakFinder, peakModel, argsPF, kwArgsPF,id = self.filename)
+        
+        return amount
+    
+    def getPeaksStats(self,single = False, eStr = False):
+        
+        stats = '' if eStr else []
+        
+        for s in self.segments:
+            if len(s.peaks)>=1:
+                if single:
+                    stats+=s.peaks.getSinglePeakStatsEntries(eStr,self.basename)
+                else:
+                    if eStr:
+                        stats+=s.peaks.getStatsFileEntry(eStr,self.basename)
+                    else:
+                        stats.append(s.peaks.getStatsFileEntry(eStr,self.basename))
+                
+        return stats
+    
+    
+    def anyPeaks(self):
+        
+        answer = 0
+        for s in self.segments:
+            answer += len(s.peaks)
+        return answer
+            
     
 if __name__ == "__main__":
     print 'not for direct use'

@@ -114,5 +114,17 @@ class experiment(mvobject.mvobject):
                 c.save(name)
 
 
+    def getPeaksStatsTable(self,single = False,eStr = False):
+        
+        statsTable = '' if eStr else []
+        
+        for c in self:
+            if not c.anyPeaks():
+                continue
+            statsTable+=c.getPeaksStats(single,eStr)
+            
+        return statsTable
+
+
 if __name__ == "__main__":
     print 'not for direct use'
