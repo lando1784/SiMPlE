@@ -118,7 +118,7 @@ class SiMPlE_main ( QMainWindow ):
 
 
     def addFiles(self, fnames = None):
-        if fnames == None:
+        if fnames == False or fnames is None:
             fnames = QFileDialog.getOpenFileNames(self, 'Select files', './')
         QCoreApplication.processEvents()
         pmax = len(fnames)
@@ -154,8 +154,9 @@ class SiMPlE_main ( QMainWindow ):
 
 
     def addDirectory(self,dirname=None):
-        if dirname == None:
-            dirname = QFileDialog.getExistingDirectory(self, 'Select a directory', './')
+        if dirname == False or dirname is None:
+            if ENV == 'PyQt4': dirname = QFileDialog.getExistingDirectory(self, 'Select a directory', './')
+            else: dirname = QFileDialog.getExistingDirectory(self, 'Select a directory', './')[0]
             if not os.path.isdir(dirname):
                 return
         QCoreApplication.processEvents()
@@ -584,7 +585,7 @@ class SiMPlE_main ( QMainWindow ):
     def plotFit(self,segInd):
         try:
             c = self.exp[self.ui.slide1.value()-1]
-            fits, ctPt,_ = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
+            fits, ctPt,_,_ = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
             if self.ctPoints[self.ui.slide1.value()-1] == None:
                 self.ctPoints[self.ui.slide1.value()-1] = ctPt
             fit = np.concatenate((fits[0],fits[1]))
@@ -592,7 +593,16 @@ class SiMPlE_main ( QMainWindow ):
             self.fitFlag = True
         except Exception as e:
             print(e.message)
-            
+
+
+    def recalcSensitivity(self):
+        try:
+            for c in self.exp:
+                _,_,_,fits = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
+                c.sensitivity = 1/(fits[0][0]/c.k)*100
+        except:
+            pass
+
     
     def align(self):
         culprit = self.sender()
@@ -602,7 +612,7 @@ class SiMPlE_main ( QMainWindow ):
             try:
                 logString = 'Aligning {0}\n'.format(self.exp[self.ui.slide1.value()-1].basename)
                 self.simpleLogger(logString)
-                fits,contactPt, valid= fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
+                fits,contactPt, valid,_= fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
                 if self.ctPoints[self.ui.slide1.value()-1] != None:
                     contactPt = self.ctPoints[self.ui.slide1.value()-1]
                     self.ctPoints[self.ui.slide1.value()-1] = None
@@ -637,7 +647,7 @@ class SiMPlE_main ( QMainWindow ):
                     i=i+1
                     continue
                 try:
-                    fits,contactPt,valid = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
+                    fits,contactPt,valid,_ = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
                     if self.ctPoints[i] != None:
                         contactPt = self.ctPoints[i]
                         self.ctPoints[i] = None
@@ -1024,6 +1034,8 @@ class SiMPlE_main ( QMainWindow ):
         
         self.ui.peaksCmbBox.currentIndexChanged.connect(self.calcArea)
         self.ui.derivCkBox.clicked.connect(self.checked)
+
+        self.ui.recalcSensBtn.clicked.connect(self.recalcSensitivity)
         
         #QMetaObject.connectSlotsByName(self)
 

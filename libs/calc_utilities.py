@@ -116,7 +116,7 @@ def movingComp(a,b,sym = '<',window = 10, oneOrdata = True):
         temp = eval('aClip'+sym+'bClip') if type(sym) is str else sym(aClip,bClip)
         filtered[i]=int(temp.all()) if oneOrdata else int(temp.all())*a[i] 
         
-    for i in range(hWin):
+    for i in range(int(hWin)):
         aClip = a[0:i+hWin]
         bClip = b[0:i+hWin] if bArray else b
         temp = eval('aClip'+sym+'bClip') if type(sym) is str else sym(aClip,bClip)
@@ -242,7 +242,7 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,thPc = 15,real
     freeB = almost(freeFit[0],0.0,thPc,1,-1)
     valid = contB and freeB
     
-    return allFit, ctPoint, valid
+    return allFit, ctPoint, valid, [contFit, freeFit]
       
    
 def findJumps(data,multiplierPc):

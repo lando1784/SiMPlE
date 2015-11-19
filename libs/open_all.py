@@ -17,7 +17,7 @@ class openWorker():
             return False
         fragments = line.split(':')
         name = fragments[0]
-        post = string.join(fragments[1:],':').strip()
+        post = ':'.join(fragments[1:]).strip()
         if post.find('"')==-1:
             val = post.split(' ')
         else:

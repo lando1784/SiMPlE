@@ -219,3 +219,4 @@ pip-log.txt
 *.iml
 .idea/vcs.xml
 .idea/workspace.xml
+.idea/encodings.xml
