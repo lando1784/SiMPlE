@@ -5,6 +5,8 @@ import operator
 from libs.fitLib import *
 
 
+MOMCOR = True
+
 def movingThing(data,window,thing,others = None):
     
     hWin = (window-window%2)/2
@@ -187,6 +189,7 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,thPc = 15,real
     force = seg.f
     displ = seg.z
     k = seg.k
+    if MOMCOR: k/=1000
     compWin = force.shape[0]/100*compWinPc
     compWin += int(compWin%2==0)
     sForce = smartSgf(force,sgfWinPc,sgfDeg)
@@ -237,9 +240,18 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,thPc = 15,real
     ctPoint = [realZ,realF] if realCntPt else [interPt,sForce[contGoodL[1]]]
     
     allFit = [contF,freeF]
-    
+
+    print('contM: {0}'.format(contFit[0]))
+    print('freeM: {0}'.format(freeFit[0]))
+
     contB = almost(contFit[0],k,thPc)
     freeB = almost(freeFit[0],0.0,thPc,1,-1)
+
+    print('K: {0}'.format(k))
+    print('contB: {0}'.format(contB))
+    print('freeB: {0}'.format(freeB))
+
+
     valid = contB and freeB
     
     return allFit, ctPoint, valid, [contFit, freeFit]

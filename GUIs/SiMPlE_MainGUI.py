@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'GUIs\SiMPlE_MainGUI.ui'
 #
-# Created: Thu Nov 19 17:53:10 2015
+# Created: Fri Dec 04 11:59:06 2015
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -141,7 +141,8 @@ class Ui_facewindow(object):
         self.gridLayout_2.addWidget(self.updateAllKBtn, 0, 3, 1, 1)
         self.kNumDbl = QtGui.QDoubleSpinBox(self.fromFileBox)
         self.kNumDbl.setEnabled(False)
-        self.kNumDbl.setMaximum(1000.0)
+        self.kNumDbl.setDecimals(4)
+        self.kNumDbl.setMaximum(1000000.0)
         self.kNumDbl.setObjectName(_fromUtf8("kNumDbl"))
         self.gridLayout_2.addWidget(self.kNumDbl, 0, 1, 1, 1)
         self.updateKBtn = QtGui.QPushButton(self.fromFileBox)
@@ -164,7 +165,7 @@ class Ui_facewindow(object):
         self.gridLayout_2.addWidget(self.updateNmVBtn, 1, 2, 1, 1)
         self.nmVNumDbl = QtGui.QDoubleSpinBox(self.fromFileBox)
         self.nmVNumDbl.setEnabled(False)
-        self.nmVNumDbl.setMaximum(1000.0)
+        self.nmVNumDbl.setMaximum(99999.0)
         self.nmVNumDbl.setObjectName(_fromUtf8("nmVNumDbl"))
         self.gridLayout_2.addWidget(self.nmVNumDbl, 1, 1, 1, 1)
         self.label_6 = QtGui.QLabel(self.fromFileBox)
@@ -172,7 +173,7 @@ class Ui_facewindow(object):
         self.gridLayout_2.addWidget(self.label_6, 3, 0, 1, 1)
         self.speedNumDbl = QtGui.QDoubleSpinBox(self.fromFileBox)
         self.speedNumDbl.setEnabled(False)
-        self.speedNumDbl.setMaximum(1000.0)
+        self.speedNumDbl.setMaximum(99999.0)
         self.speedNumDbl.setObjectName(_fromUtf8("speedNumDbl"))
         self.gridLayout_2.addWidget(self.speedNumDbl, 3, 1, 1, 1)
         self.updateAllSpeedBtn = QtGui.QPushButton(self.fromFileBox)

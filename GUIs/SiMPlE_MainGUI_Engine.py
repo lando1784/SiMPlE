@@ -48,6 +48,8 @@ sgfWinPcG = 40
 sgfDeg = 3
 cutMe = True
 
+MOMCOR = True
+
 line = pg.graphicsItems.InfiniteLine.InfiniteLine
 
 class SiMPlE_main ( QMainWindow ):
@@ -131,6 +133,9 @@ class SiMPlE_main ( QMainWindow ):
             self.simpleLogger(logString)
             QCoreApplication.processEvents()
             self.exp.addFiles([str(fname)])
+            if MOMCOR:
+                self.exp[-1].sensitivity/=1e9
+                self.exp[-1].k/=1000
             if self.exp[-1][0].f.all() == 0 or self.exp[-1][-1].f.all() == 0:
                     del self.exp[-1]
                     continue
@@ -598,8 +603,12 @@ class SiMPlE_main ( QMainWindow ):
     def recalcSensitivity(self):
         try:
             for c in self.exp:
+                print('Sensitivity before: {0}'.format(c.sensitivity))
+                print('K: {0}'.format(c.k))
                 _,_,_,fits = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
-                c.sensitivity = 1/(fits[0][0]/c.k)*100
+                print('Linear Fit: {0}'.format(fits[0]))
+                c.changeSens(c.k*c.sensitivity/fits[0][0])
+                print('Sensitivity after: {0}'.format(c.sensitivity))
         except:
             pass
 
