@@ -29,6 +29,7 @@ from os import makedirs
 from os.path import split, join, splitext, exists
 from shutil import rmtree
 from time import strftime
+import statistics as stat
 
 from libs import experiment
 from libs import convertR9module as r9
@@ -49,6 +50,7 @@ sgfDeg = 3
 cutMe = True
 
 MOMCOR = True
+MODE = True
 
 line = pg.graphicsItems.InfiniteLine.InfiniteLine
 
@@ -307,9 +309,6 @@ class SiMPlE_main ( QMainWindow ):
             self.sqSwitch(dove,True)
             self.prev = dove
             self.viewCurve(dove)
-            self.ui.kNumDbl.setValue(self.exp[dove-1].k/1000)
-            self.ui.nmVNumDbl.setValue(self.exp[dove-1].sensitivity)
-            self.ui.speedNumDbl.setValue(self.exp[dove-1][0].speed)
 
 
     def updateCurve(self):
@@ -351,6 +350,9 @@ class SiMPlE_main ( QMainWindow ):
             self.refreshCursors()
         if autorange:
             self.ui.grafo.autoRange()
+        self.ui.kNumDbl.setValue(self.exp[dove-1].k/1000)
+        self.ui.nmVNumDbl.setValue(self.exp[dove-1].sensitivity)
+        self.ui.speedNumDbl.setValue(self.exp[dove-1][0].speed)
     
     
     def checkCurve(self,dove):
@@ -601,16 +603,38 @@ class SiMPlE_main ( QMainWindow ):
 
 
     def recalcSensitivity(self):
+        sens = []
         try:
             for c in self.exp:
-                print('Sensitivity before: {0}'.format(c.sensitivity))
-                print('K: {0}'.format(c.k))
                 _,_,_,fits = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
-                print('Linear Fit: {0}'.format(fits[0]))
                 c.changeSens(c.k*c.sensitivity/fits[0][0])
-                print('Sensitivity after: {0}'.format(c.sensitivity))
-        except:
-            pass
+                sens.append(int(c.sensitivity))
+            if MODE:
+                try: modeSens = stat.mode(sens)
+                except Exception as e:
+                    es = str(e)
+                    esList = es.split(' ')
+                    valuesNum = int(esList[4])
+                    chunks = [sens[i:i+int(len(sens)/valuesNum)] for i in range(0, len(sens), int(len(sens)/valuesNum))]
+                    modes = []
+                    for k in chunks:
+                        print(k)
+                        try: modes.append(stat.mode(k))
+                        except: pass
+                    maxCounts = 0
+                    maxCounter = 0
+                    for m in modes:
+                        count = sens.count(m)
+                        if count>maxCounts:
+                            maxCounts = count
+                            maxCounter = m
+                    modeSens = maxCounter
+                for c in self.exp:
+                    c.changeSens(modeSens)
+            currentInd = self.ui.slide1.value()
+            self.viewCurve(currentInd)
+        except Exception as e:
+            print(e)
 
     
     def align(self):
@@ -648,7 +672,6 @@ class SiMPlE_main ( QMainWindow ):
             progress = QProgressDialog("Aligning curves...", "Cancel aligning", 0, pmax);
             i=0
             for c in self.exp:
-                print(c.basename)
                 progress.setValue(i)
                 if (progress.wasCanceled()):
                     break

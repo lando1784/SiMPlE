@@ -11,6 +11,8 @@ except:
     from PyQt4.QtCore import QObject,pyqtSignal
 import pyqtgraph as pg
 
+import numpy as np
+
 
 class cursor(QObject):
     

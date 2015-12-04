@@ -241,16 +241,8 @@ def fitCnNC(seg,sym = '>',sgfWinPc = 10,sgfDeg = 3,compWinPc = 10,thPc = 15,real
     
     allFit = [contF,freeF]
 
-    print('contM: {0}'.format(contFit[0]))
-    print('freeM: {0}'.format(freeFit[0]))
-
     contB = almost(contFit[0],k,thPc)
     freeB = almost(freeFit[0],0.0,thPc,1,-1)
-
-    print('K: {0}'.format(k))
-    print('contB: {0}'.format(contB))
-    print('freeB: {0}'.format(freeB))
-
 
     valid = contB and freeB
     
