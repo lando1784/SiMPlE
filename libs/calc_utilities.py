@@ -5,7 +5,7 @@ import operator
 from libs.fitLib import *
 
 
-MOMCOR = True
+MOMCOR = False
 
 def movingThing(data,window,thing,others = None):
     

@@ -49,7 +49,7 @@ sgfWinPcG = 40
 sgfDeg = 3
 cutMe = True
 
-MOMCOR = True
+MOMCOR = False
 MODE = True
 
 line = pg.graphicsItems.InfiniteLine.InfiniteLine

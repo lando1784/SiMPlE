@@ -2,6 +2,8 @@ from libs import segment
 import logging
 import string
 
+MOMCOR = True
+
 class openWorker():
 
     def __init__(self,fname):
@@ -114,7 +116,7 @@ class jpktxt(openWorker):
                             x = []
                             y = []
                         elif name == 'springConstant':
-                            self.parameters['k'] = 1000.0*float(val) #internally k is in pN/nm
+                            self.parameters['k'] = 1000.0*float(val) if not MOMCOR else float(val) #internally k is in pN/nm
                             k = self.parameters['k']
                         elif name=='segment':
                             direction = val
@@ -142,9 +144,9 @@ class jpktxt(openWorker):
                         elif name == 'fancyNames':
                             self.info['fancyNames'] = val
                         elif name == 'sensitivity':
-                            self.parameters['sensitivity'] = 1.0e9*float(val) #internally in nm/V
+                            self.parameters['sensitivity'] = 1.0e9*float(val) if not MOMCOR else float(val) #internally in nm/V
                         elif name == 'speed':
-                            speed = 1.0e9*float(val) #internally in nm/s 
+                            speed = 1.0e9*float(val) if not MOMCOR else float(val) #internally in nm/s
         except:
             #if logging.getDEBUG :
             #    logging.error('File cannot be interpreted as JPK FD curve')
