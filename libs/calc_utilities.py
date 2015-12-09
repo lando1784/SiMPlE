@@ -257,6 +257,9 @@ def findJumps(data,multiplierPc):
     #for i in range(data.shape[0]-1):
     #    if abs(data[i]-data[i+1])>thr:
     #        jumps.append([i,data[i]])
+
+    print(jumps)
+
     return list(jumps)
 
 
@@ -274,6 +277,7 @@ def findUnD(data,xAxis,thrMul,distPc,verify=True,rsqT=0.8):
             up = i+1
             if (xAxis[up]-xAxis[down]) >= dist:
                 if verify:
+                    #print('Arange({0}-{1}) len: {2}; Data[{1}:{0}]: {3}'.format(up,down,np.arange(up-down).shape[0],data[down:up].shape[0]))
                     fit = genericFit(np.arange(up-down),data[down:up],2)
                     go = fit['R^2']>=rsqT
                 else:
@@ -287,7 +291,8 @@ def findUnD(data,xAxis,thrMul,distPc,verify=True,rsqT=0.8):
 
 
 def polishedDerive(data,sgfWinPcF,sgfWinPcG,sgfDeg,cut = False):
-    
+
+    print('Data pre deriv len: {0}'.format(data.shape[0]))
     fg = smartSgf(data,sgfWinPcF,sgfDeg)
     fg = np.gradient(fg)
     fgross = smartSgf(data,sgfWinPcG,sgfDeg)
@@ -335,8 +340,23 @@ def peakFinder(z,f,sgfWinPcF,sgfWinPcG,sgfDeg,cut,thrMul,distPc,verify,rsqT):
 
 
 def smartSgf(data,sgfWinPc,sgfDeg,sgfDerDeg = 0):
-    
-    sgfWin = data.shape[0]*sgfWinPc/100 + 1 - (data.shape[0]*sgfWinPc/100)%2
+
+    #print('Sgfdata len: {0}'.format(data.shape[0]))
+    #print('SgfWinPc: {0}'.format(sgfWinPc))
+    #print('sgfDeg: {0}'.format(sgfDeg))
+
+    sgfDeg = int(sgfDeg)
+
+    sgfWin = int(data.shape[0]*sgfWinPc/100 + 1 - (data.shape[0]*sgfWinPc/100)%2)
+    if sgfWin < sgfDeg:
+        sgfWin += 2
+        sgfDeg = sgfWin -2
+        if sgfWin >= data.shape[0]:
+            sgfWin -= 2
+            sgfDeg = 1
+        if sgfWin <= 1: return data
+
+    #print('Deg = {0}; Win = {1}'.format(sgfDeg,sgfWin))
     filtered = sgf(data,sgfWin,sgfDeg, deriv = sgfDerDeg)
     
     return filtered
@@ -360,7 +380,7 @@ def pieceWiseSavGol(data,multiplierPc,sgfWinPc,sgfDeg,sgfDerDeg = 0, pieces = Fa
         else:
             deg = sgfDeg
         tempData = smartSgf(data[oldInd:j], sgfWinPc, deg, sgfDerDeg)
-        print(tempData)
+        #print(tempData)
         if pieces:
             pwDataPieces.append(tempData)
         else:
@@ -395,7 +415,7 @@ def pwSgfPeaksFinder(z,f,multiplierPc,sgfWinPc,sgfDeg,maxLengthPc,filtered = Tru
     baselines = []
     
     for i in range(len(jumps)):
-        forceLev = f[jumps[i]+2]
+        forceLev = f[jumps[i]+1]
         flatZone = np.where(pwFilt[i]<=forceLev)[0]
         if flatZone.shape[0] == 0:
             tempInd = 0

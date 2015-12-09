@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'GUIs\SiMPlE_MainGUI.ui'
 #
-# Created: Fri Dec 04 11:59:06 2015
+# Created: Wed Dec 09 10:50:53 2015
 #      by: PyQt4 UI code generator 4.9.6
 #
 # WARNING! All changes made in this file will be lost!
@@ -200,6 +200,7 @@ class Ui_facewindow(object):
         self.formLayout.setWidget(0, QtGui.QFormLayout.LabelRole, self.label_7)
         self.slopePcNum = QtGui.QSpinBox(self.fitNpeakBox)
         self.slopePcNum.setEnabled(False)
+        self.slopePcNum.setKeyboardTracking(False)
         self.slopePcNum.setMinimum(1)
         self.slopePcNum.setMaximum(100)
         self.slopePcNum.setProperty("value", 15)
@@ -210,6 +211,7 @@ class Ui_facewindow(object):
         self.formLayout.setWidget(1, QtGui.QFormLayout.LabelRole, self.label_8)
         self.peakThrsNumDbl = QtGui.QDoubleSpinBox(self.fitNpeakBox)
         self.peakThrsNumDbl.setEnabled(False)
+        self.peakThrsNumDbl.setKeyboardTracking(False)
         self.peakThrsNumDbl.setDecimals(4)
         self.peakThrsNumDbl.setProperty("value", 0.01)
         self.peakThrsNumDbl.setObjectName(_fromUtf8("peakThrsNumDbl"))
@@ -219,6 +221,7 @@ class Ui_facewindow(object):
         self.formLayout.setWidget(2, QtGui.QFormLayout.LabelRole, self.label_10)
         self.peakLenPcNumDbl = QtGui.QDoubleSpinBox(self.fitNpeakBox)
         self.peakLenPcNumDbl.setEnabled(False)
+        self.peakLenPcNumDbl.setKeyboardTracking(False)
         self.peakLenPcNumDbl.setProperty("value", 0.5)
         self.peakLenPcNumDbl.setObjectName(_fromUtf8("peakLenPcNumDbl"))
         self.formLayout.setWidget(2, QtGui.QFormLayout.FieldRole, self.peakLenPcNumDbl)
@@ -227,6 +230,7 @@ class Ui_facewindow(object):
         self.formLayout.setWidget(3, QtGui.QFormLayout.LabelRole, self.label_9)
         self.rsqLimNumDbl = QtGui.QDoubleSpinBox(self.fitNpeakBox)
         self.rsqLimNumDbl.setEnabled(False)
+        self.rsqLimNumDbl.setKeyboardTracking(False)
         self.rsqLimNumDbl.setDecimals(2)
         self.rsqLimNumDbl.setMaximum(1.0)
         self.rsqLimNumDbl.setSingleStep(0.01)

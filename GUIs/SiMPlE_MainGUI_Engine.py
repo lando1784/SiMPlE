@@ -43,14 +43,19 @@ htmlpre = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/T
 htmlpost = '</span></p></body></html>'
 
 compWinPc = 5
-sgfWinPc = 2.5
+sgfWinPc = 5
 sgfWinPcF = 8
 sgfWinPcG = 40
 sgfDeg = 3
 cutMe = True
 
 MOMCOR = False
-MODE = True
+MODE = False
+
+# Minimum values for peaks parameters for both methods
+
+NORM = [0.01,0.5,0.3]
+JUMP = [0.1,0.75,]
 
 line = pg.graphicsItems.InfiniteLine.InfiniteLine
 
@@ -323,6 +328,8 @@ class SiMPlE_main ( QMainWindow ):
         dove -= 1
         self.ui.grafo.clear()
         for p in self.exp[dove][0:]:
+            if p.speed == 0:
+                continue
             if not self.ui.derivCkBox.isChecked():
                 f = p.f
                 z = p.z
