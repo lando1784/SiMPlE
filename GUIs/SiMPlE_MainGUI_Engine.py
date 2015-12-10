@@ -359,7 +359,7 @@ class SiMPlE_main ( QMainWindow ):
             self.ui.grafo.autoRange()
         self.ui.kNumDbl.setValue(self.exp[dove-1].k/1000)
         self.ui.nmVNumDbl.setValue(self.exp[dove-1].sensitivity)
-        self.ui.speedNumDbl.setValue(self.exp[dove-1][0].speed)
+        self.ui.speedNumDbl.setValue(self.exp[dove-1][-1].speed)
     
     
     def checkCurve(self,dove):
@@ -626,9 +626,9 @@ class SiMPlE_main ( QMainWindow ):
                     c.changeSens(c.k*c.sensitivity/fits[0][0])
                     sens.append(int(c.sensitivity))
                 except Exception as e:
-                    logString = 'Curve {0} failed sensitivity recalculation\n'.format(c.filename)
+                    #logString = 'Curve {0} failed sensitivity recalculation\n'.format(c.filename)
                     #print(logString)
-                    self.simpleLogger(logString)
+                    #self.simpleLogger(logString)
                     c.relevant = False
                 i+=1
             if MODE:
@@ -674,6 +674,7 @@ class SiMPlE_main ( QMainWindow ):
                     self.ctPoints[self.ui.slide1.value()-1] = None
                     
                 for s in self.exp[self.ui.slide1.value()-1][1:]:
+                    if s.speed == 0.0: continue
                     s.f = s.f[np.where(s.z>=contactPt[0])]-np.mean(fits[1])#contactPt[1]
                     s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
                 self.exp[self.ui.slide1.value()-1].relevant = valid
