@@ -81,7 +81,11 @@ class experiment(mvobject.mvobject):
             return False
         for fname in fnames:
             if os.path.isfile(fname):
-                self.append(fname)
+                try:
+                    self.append(fname)
+                except Exception as e:
+                    print(e)
+                    continue
 
     def addDirectory(self,dirname=None):
         if dirname == None:
@@ -99,7 +103,11 @@ class experiment(mvobject.mvobject):
                 logging.debug( "{0}% {1}/{2}".format(100*i/pmax,i,pmax))
             fname = os.path.join(str(dirname), fnamealone)
             if os.path.isfile(fname):
-                self.append(fname)
+                try:
+                    self.append(fname)
+                except Exception as e:
+                    print(e)
+                    continue
             i+=1
 
     def saveCurves(self, dirname = None):

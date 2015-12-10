@@ -612,10 +612,25 @@ class SiMPlE_main ( QMainWindow ):
     def recalcSensitivity(self):
         sens = []
         try:
+            pmax = len(self.exp)
+            logString = 'Recalculating all curves\' sensitivities...\n'
+            self.simpleLogger(logString)
+            progress = QProgressDialog("Recalculating sensitivities...", "Cancel recalc", 0, pmax);
+            i=0
             for c in self.exp:
-                _,_,_,fits = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
-                c.changeSens(c.k*c.sensitivity/fits[0][0])
-                sens.append(int(c.sensitivity))
+                progress.setValue(i)
+                if (progress.wasCanceled()):
+                    break
+                try:
+                    _,_,_,fits = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
+                    c.changeSens(c.k*c.sensitivity/fits[0][0])
+                    sens.append(int(c.sensitivity))
+                except Exception as e:
+                    logString = 'Curve {0} failed sensitivity recalculation\n'.format(c.filename)
+                    #print(logString)
+                    self.simpleLogger(logString)
+                    c.relevant = False
+                i+=1
             if MODE:
                 try: modeSens = stat.mode(sens)
                 except Exception as e:
@@ -639,7 +654,8 @@ class SiMPlE_main ( QMainWindow ):
                 for c in self.exp:
                     c.changeSens(modeSens)
             currentInd = self.ui.slide1.value()
-            self.viewCurve(currentInd)
+            #self.viewCurve(currentInd)
+            self.refillList()
         except Exception as e:
             print(e)
 

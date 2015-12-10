@@ -258,8 +258,6 @@ def findJumps(data,multiplierPc):
     #    if abs(data[i]-data[i+1])>thr:
     #        jumps.append([i,data[i]])
 
-    print(jumps)
-
     return list(jumps)
 
 
@@ -292,7 +290,6 @@ def findUnD(data,xAxis,thrMul,distPc,verify=True,rsqT=0.8):
 
 def polishedDerive(data,sgfWinPcF,sgfWinPcG,sgfDeg,cut = False):
 
-    print('Data pre deriv len: {0}'.format(data.shape[0]))
     fg = smartSgf(data,sgfWinPcF,sgfDeg)
     fg = np.gradient(fg)
     fgross = smartSgf(data,sgfWinPcG,sgfDeg)
@@ -346,14 +343,15 @@ def smartSgf(data,sgfWinPc,sgfDeg,sgfDerDeg = 0):
     #print('sgfDeg: {0}'.format(sgfDeg))
 
     sgfDeg = int(sgfDeg)
-
     sgfWin = int(data.shape[0]*sgfWinPc/100 + 1 - (data.shape[0]*sgfWinPc/100)%2)
+    if sgfWin%2 == 0: sgfWin += 1
     if sgfWin <= sgfDeg:
         sgfWin += 2
         if sgfWin%2 == 0: sgfWin += 1
         sgfDeg = sgfWin -2
         if sgfWin >= data.shape[0]:
             sgfWin -= 2
+            if sgfWin%2 == 0: sgfWin += 1
             sgfDeg = 1
         if sgfWin <= 1: return data
 
