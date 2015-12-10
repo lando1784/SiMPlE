@@ -196,7 +196,7 @@ class SiMPlE_main ( QMainWindow ):
                 self.badFlags.append(True)
                 self.ctPoints.append(None)
             except Exception as e:
-                print(e.message)
+                print(e)
                 
             progress.setValue(i)
             i=i+1
@@ -477,7 +477,7 @@ class SiMPlE_main ( QMainWindow ):
             
             self.refillList(self.ui.slide1.value())
         except Exception as e:
-            print(e.message)
+            print(e)
     
         
     def showHidePeaks(self):
@@ -493,7 +493,7 @@ class SiMPlE_main ( QMainWindow ):
                 self.goToCurve(self.ui.slide1.value())
                 
         except Exception as e:
-            print(e.message)
+            print(e)
     
     
     def populatePeaksCmb(self):
@@ -541,7 +541,7 @@ class SiMPlE_main ( QMainWindow ):
             self.ui.grafo.plot(zpeaksA,derivpeaksA if self.ui.derivCkBox.isChecked() else peaksA,pen = None,symbolPen='r',symbolBrush='r',symbol='o',symbolSize = 5)
         
         except Exception as e:
-            print(e.message)
+            print(e)
                 
             
     def calcArea(self):
@@ -606,7 +606,7 @@ class SiMPlE_main ( QMainWindow ):
             self.ui.grafo.plot(c[segInd].z,fit,pen='r')
             self.fitFlag = True
         except Exception as e:
-            print(e.message)
+            print(e)
 
 
     def recalcSensitivity(self):
@@ -671,7 +671,7 @@ class SiMPlE_main ( QMainWindow ):
                 self.ui.slide1.setValue(self.ui.slide1.value())
                 self.ui.slide2.setValue(self.ui.slide1.value())
             except Exception as e:
-                print(e.message)
+                print(e)
         else:
             pmax = len(self.exp)
             logString = 'Aligning all curves...\n'
@@ -700,7 +700,7 @@ class SiMPlE_main ( QMainWindow ):
                         s.f = s.f[np.where(s.z>=contactPt[0])]-np.mean(fits[1])#contactPt[1]
                         s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
                 except Exception as e:
-                    print(e.message)
+                    print(e)
                 self.alignFlags[i] = True
                 del c[0]
                 i=i+1
@@ -1024,7 +1024,13 @@ class SiMPlE_main ( QMainWindow ):
                     currInd = i
             self.cursors.append(cursor(self.ui.grafo.plotItem,curveInd,True,True,'+',self.cursColors[currInd][1]))
             QObject.connect(self.cursors[-1], SIGNAL(_fromUtf8("moved()")), self.updateCursNums)
-        
+
+
+    def changePeakEnv(self):
+
+        self.ui.label_8.setText('Jump amplitude/(average delta F)' if self.ui.jumpCkBox.isChecked() else 'Peak threshold')
+        self.ui.rsqLimNumDbl.setEnabled(not self.ui.jumpCkBox.isChecked())
+
     
     def setConnections(self):
 
@@ -1073,6 +1079,7 @@ class SiMPlE_main ( QMainWindow ):
         
         self.ui.peaksCmbBox.currentIndexChanged.connect(self.calcArea)
         self.ui.derivCkBox.clicked.connect(self.checked)
+        self.ui.jumpCkBox.clicked.connect(self.changePeakEnv)
 
         self.ui.recalcSensBtn.clicked.connect(self.recalcSensitivity)
         

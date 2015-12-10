@@ -348,8 +348,9 @@ def smartSgf(data,sgfWinPc,sgfDeg,sgfDerDeg = 0):
     sgfDeg = int(sgfDeg)
 
     sgfWin = int(data.shape[0]*sgfWinPc/100 + 1 - (data.shape[0]*sgfWinPc/100)%2)
-    if sgfWin < sgfDeg:
+    if sgfWin <= sgfDeg:
         sgfWin += 2
+        if sgfWin%2 == 0: sgfWin += 1
         sgfDeg = sgfWin -2
         if sgfWin >= data.shape[0]:
             sgfWin -= 2
