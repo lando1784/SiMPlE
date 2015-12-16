@@ -40,7 +40,7 @@
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="6,3">
+     <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,3">
       <item>
        <widget class="QTabWidget" name="functionsTabs">
         <property name="enabled">
@@ -205,13 +205,30 @@
              <string>From File</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_2">
-             <item row="0" column="3">
-              <widget class="QPushButton" name="updateAllKBtn">
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_5">
+               <property name="text">
+                <string>Sensitivity [nm/V]</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="nmVNumDbl">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="maximum">
+                <double>99999.000000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2">
+              <widget class="QPushButton" name="updateNmVBtn">
                <property name="enabled">
                 <bool>false</bool>
                </property>
                <property name="text">
-                <string>UPDATE ALL</string>
+                <string>UPDATE</string>
                </property>
               </widget>
              </item>
@@ -228,30 +245,6 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="2">
-              <widget class="QPushButton" name="updateKBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>UPDATE</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="label_5">
-               <property name="text">
-                <string>Sensitivity [nm/V]</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="label_4">
-               <property name="text">
-                <string>k [N/nm]</string>
-               </property>
-              </widget>
-             </item>
              <item row="1" column="3">
               <widget class="QPushButton" name="updateAllNmVBtn">
                <property name="enabled">
@@ -262,8 +255,25 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="2">
-              <widget class="QPushButton" name="updateNmVBtn">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>k [N/nm]</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="3">
+              <widget class="QPushButton" name="recalcSensBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>RECALC</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QPushButton" name="updateKBtn">
                <property name="enabled">
                 <bool>false</bool>
                </property>
@@ -272,13 +282,23 @@
                </property>
               </widget>
              </item>
-             <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="nmVNumDbl">
+             <item row="0" column="3">
+              <widget class="QPushButton" name="updateAllKBtn">
                <property name="enabled">
                 <bool>false</bool>
                </property>
-               <property name="maximum">
-                <double>99999.000000000000000</double>
+               <property name="text">
+                <string>UPDATE ALL</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="3">
+              <widget class="QPushButton" name="updateAllSpeedBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>UPDATE ALL</string>
                </property>
               </widget>
              </item>
@@ -299,16 +319,6 @@
                </property>
               </widget>
              </item>
-             <item row="3" column="3">
-              <widget class="QPushButton" name="updateAllSpeedBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>UPDATE ALL</string>
-               </property>
-              </widget>
-             </item>
              <item row="3" column="2">
               <widget class="QPushButton" name="updateSpeedBtn">
                <property name="enabled">
@@ -319,26 +329,16 @@
                </property>
               </widget>
              </item>
-             <item row="2" column="3">
-              <widget class="QPushButton" name="recalcSensBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>RECALC</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </item>
           <item>
-           <widget class="QGroupBox" name="fitNpeakBox">
+           <widget class="QGroupBox" name="fitNfiltBox">
             <property name="enabled">
              <bool>false</bool>
             </property>
             <property name="title">
-             <string>Fitting and Peak finding</string>
+             <string>Fitting and Filtering</string>
             </property>
             <layout class="QFormLayout" name="formLayout">
              <property name="fieldGrowthPolicy">
@@ -371,74 +371,87 @@
               </widget>
              </item>
              <item row="1" column="0">
-              <widget class="QLabel" name="label_8">
+              <widget class="QLabel" name="label_11">
                <property name="text">
-                <string>Peak threshold</string>
+                <string>Fine SG window %</string>
                </property>
               </widget>
              </item>
              <item row="1" column="1">
-              <widget class="QDoubleSpinBox" name="peakThrsNumDbl">
+              <widget class="QSpinBox" name="fineSgWinPcNum">
                <property name="enabled">
                 <bool>false</bool>
                </property>
                <property name="keyboardTracking">
                 <bool>false</bool>
                </property>
-               <property name="decimals">
-                <number>4</number>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
                </property>
                <property name="value">
-                <double>0.010000000000000</double>
+                <number>15</number>
                </property>
               </widget>
              </item>
              <item row="2" column="0">
-              <widget class="QLabel" name="label_10">
+              <widget class="QLabel" name="label_12">
                <property name="text">
-                <string>Peak Length %</string>
+                <string>Gross SG window %</string>
                </property>
               </widget>
              </item>
              <item row="2" column="1">
-              <widget class="QDoubleSpinBox" name="peakLenPcNumDbl">
+              <widget class="QSpinBox" name="grossSgWinPcNum">
                <property name="enabled">
                 <bool>false</bool>
                </property>
                <property name="keyboardTracking">
                 <bool>false</bool>
                </property>
+               <property name="minimum">
+                <number>1</number>
+               </property>
+               <property name="maximum">
+                <number>100</number>
+               </property>
                <property name="value">
-                <double>0.500000000000000</double>
+                <number>15</number>
                </property>
               </widget>
              </item>
              <item row="3" column="0">
-              <widget class="QLabel" name="label_9">
+              <widget class="QLabel" name="label_13">
                <property name="text">
-                <string>Peak shape R^2 lim</string>
+                <string>SG degree</string>
                </property>
               </widget>
              </item>
              <item row="3" column="1">
-              <widget class="QDoubleSpinBox" name="rsqLimNumDbl">
+              <widget class="QSpinBox" name="sgDegreeNum">
                <property name="enabled">
                 <bool>false</bool>
                </property>
                <property name="keyboardTracking">
                 <bool>false</bool>
                </property>
-               <property name="decimals">
-                <number>2</number>
+               <property name="minimum">
+                <number>1</number>
                </property>
                <property name="maximum">
-                <double>1.000000000000000</double>
-               </property>
-               <property name="singleStep">
-                <double>0.010000000000000</double>
+                <number>100</number>
                </property>
                <property name="value">
-                <double>0.800000000000000</double>
+                <number>15</number>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QCheckBox" name="cutEdgeCkBox">
+               <property name="text">
+                <string>Cut edges</string>
                </property>
               </widget>
              </item>
@@ -451,7 +464,7 @@
          <attribute name="title">
           <string>Plot Options</string>
          </attribute>
-         <layout class="QGridLayout" name="gridLayout_5">
+         <layout class="QGridLayout" name="gridLayout_5" columnstretch="1,1,3,1">
           <item row="0" column="2" rowspan="2">
            <widget class="QGroupBox" name="cursorsBox">
             <property name="enabled">
@@ -587,48 +600,6 @@
             </layout>
            </widget>
           </item>
-          <item row="0" column="0" rowspan="2">
-           <widget class="QGroupBox" name="alignBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="title">
-             <string>Alignment</string>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout_8">
-             <item>
-              <widget class="QPushButton" name="autoFitBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Show Fit</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="rejectBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Remove Fit</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QPushButton" name="alignAllBtn">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="text">
-                <string>Align</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QGroupBox" name="plotModBox">
             <property name="enabled">
@@ -671,6 +642,61 @@
             </layout>
            </widget>
           </item>
+          <item row="0" column="0" rowspan="2">
+           <widget class="QGroupBox" name="alignBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="title">
+             <string>Alignment</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_8">
+             <item>
+              <widget class="QPushButton" name="autoFitBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Show Fit</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="rejectBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Remove Fit</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="alignAllBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Align</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
          </layout>
         </widget>
         <widget class="QWidget" name="peaksTab">
@@ -680,62 +706,159 @@
          <attribute name="title">
           <string>Peaks</string>
          </attribute>
-         <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,2,4,3,6,1">
-          <item row="0" column="2" rowspan="3">
+         <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="3,2,3,2,1">
+          <item>
+           <widget class="QGroupBox" name="peakParamsBox">
+            <property name="title">
+             <string>Parameters</string>
+            </property>
+            <layout class="QFormLayout" name="formLayout_2">
+             <property name="fieldGrowthPolicy">
+              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+             </property>
+             <item row="0" column="0">
+              <widget class="QLabel" name="label_8">
+               <property name="text">
+                <string>Peak threshold</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="peakThrsNumDbl">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="keyboardTracking">
+                <bool>false</bool>
+               </property>
+               <property name="decimals">
+                <number>4</number>
+               </property>
+               <property name="value">
+                <double>0.010000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_10">
+               <property name="text">
+                <string>Peak Length %</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="peakLenPcNumDbl">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="keyboardTracking">
+                <bool>false</bool>
+               </property>
+               <property name="value">
+                <double>0.500000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_9">
+               <property name="text">
+                <string>Peak shape R^2 lim</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QDoubleSpinBox" name="rsqLimNumDbl">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="keyboardTracking">
+                <bool>false</bool>
+               </property>
+               <property name="decimals">
+                <number>2</number>
+               </property>
+               <property name="maximum">
+                <double>1.000000000000000</double>
+               </property>
+               <property name="singleStep">
+                <double>0.010000000000000</double>
+               </property>
+               <property name="value">
+                <double>0.800000000000000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QCheckBox" name="jumpCkBox">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Jump Mode</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="findNcheckBox">
+            <property name="title">
+             <string>Find and check</string>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_9" stretch="1,12,12">
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_7">
+               <item>
+                <widget class="QPushButton" name="findPeaksBtn">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>Find Peaks</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QSpinBox" name="peaksNum">
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                 <property name="buttonSymbols">
+                  <enum>QAbstractSpinBox::NoButtons</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <widget class="QPushButton" name="showPeakBtn">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="text">
+                <string>Show Peaks</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QComboBox" name="peaksCmbBox">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
            <widget class="QTextEdit" name="peakDataTxt">
             <property name="readOnly">
              <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QPushButton" name="showPeakBtn">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Show Peaks</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="peaksCmbBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QSpinBox" name="peaksNum">
-            <property name="readOnly">
-             <bool>true</bool>
-            </property>
-            <property name="buttonSymbols">
-             <enum>QAbstractSpinBox::NoButtons</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QCheckBox" name="jumpCkBox">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Jump Mode</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="findPeaksBtn">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Find Peaks</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3" rowspan="3">
+          <item>
            <widget class="QGroupBox" name="savePeaksBox">
             <property name="title">
              <string>Save</string>
@@ -774,34 +897,8 @@
             </layout>
            </widget>
           </item>
-          <item row="0" column="4" colspan="2">
+          <item>
            <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="1" column="4" colspan="2">
-           <spacer name="horizontalSpacer_4">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="2" column="4" colspan="2">
-           <spacer name="horizontalSpacer_5">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
@@ -828,8 +925,8 @@
           </property>
           <property name="geometry">
            <rect>
-            <x>310</x>
-            <y>50</y>
+            <x>420</x>
+            <y>60</y>
             <width>75</width>
             <height>23</height>
            </rect>

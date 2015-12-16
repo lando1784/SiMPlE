@@ -43,7 +43,6 @@ htmlpre = '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/T
 htmlpost = '</span></p></body></html>'
 
 compWinPc = 5
-sgfWinPc = 5
 sgfWinPcF = 8
 sgfWinPcG = 40
 sgfDeg = 3
@@ -92,17 +91,26 @@ class SiMPlE_main ( QMainWindow ):
         
         self.statusDict = {1:[[self.ui.bAddDir,self.ui.bAddFiles,self.ui.convr9Btn],
                               [self.ui.reloadBtn,self.ui.saveBox,self.ui.removeBox,self.ui.fromFileBox,
-                               self.ui.fitNpeakBox,self.ui.alignBox,self.ui.plotModBox,self.ui.cursorsBox,
+                               self.ui.fitNfiltBox,self.ui.alignBox,self.ui.plotModBox,self.ui.cursorsBox,
                                self.ui.peaksTab]],
                            2:[[self.ui.removeBox,self.ui.removeBtn,self.ui.reloadBtn,self.ui.closeExpBtn,
-                               self.ui.fromFileBox,self.ui.fitNpeakBox,self.ui.alignBox,self.ui.plotModBox,
+                               self.ui.fromFileBox,self.ui.fitNfiltBox,self.ui.alignBox,self.ui.plotModBox,
                                self.ui.cursorsBox],
                               [self.ui.removeBOBtn,self.ui.saveBox,self.ui.peaksTab,self.ui.chgStatBtn]],
-                           3:[[self.ui.removeBOBtn,self.ui.saveBox,self.ui.peaksTab,self.ui.chgStatBtn,self.ui.findPeaksBtn],
+                           3:[[self.ui.removeBOBtn,self.ui.saveBox,self.ui.peaksTab,self.ui.chgStatBtn,self.ui.findPeaksBtn,self.ui.peakParamsBox],
                               [self.ui.showPeakBtn,self.ui.peaksCmbBox,self.ui.alignBox,self.ui.savePeaksBox]],
                            4:[[self.ui.showPeakBtn,self.ui.peaksCmbBox,self.ui.savePeaksBox,self.ui.removeBOBtn],
                               []]}
-        
+
+        self.ui.grossSgWinPcNum.setValue(sgfWinPcG)
+        self.ui.fineSgWinPcNum.setValue(sgfWinPcF)
+        self.ui.sgDegreeNum.setValue(sgfDeg)
+        self.ui.cutEdgeCkBox.setChecked(cutMe)
+        self.cutMe = cutMe
+        self.sgfWinPcF = sgfWinPcF
+        self.sgfWinPcG = sgfWinPcG
+        self.sgfDeg = sgfDeg
+
         logString = 'Welcome!\n'
         self.simpleLogger(logString)
         self.setStatus(1)
@@ -337,15 +345,15 @@ class SiMPlE_main ( QMainWindow ):
                 #sf = smartSgf(p.f,4,sgfDeg)
                 if self.ui.jumpCkBox.isChecked():
                     peakThrPc = self.ui.peakThrsNumDbl.value()
-                    derP,_ = pieceWiseSavGol(p.f,peakThrPc,sgfWinPcF,sgfDeg,0,pieces = True)
+                    derP,_ = pieceWiseSavGol(p.f,peakThrPc,self.sgfWinPcF,self.sgfDeg,0,pieces = True)
                     f = np.array([])
                     for d in derP:
                         f = np.concatenate((f,np.gradient(d)))
                     z = p.z
                 else:
-                    f,start,end = polishedDerive(p.f,sgfWinPcF,sgfWinPcG,sgfDeg,cutMe)
-                    f = f[start:end]
-                    z = p.z[start:end]
+                    f,start,end = polishedDerive(p.f,self.sgfWinPcF,self.sgfWinPcG,self.sgfDeg,self.cutMe)
+                    f = f[int(start):int(end)]
+                    z = p.z[int(start):int(end)]
             if p == self.exp[dove][-1]:
                 self.ui.grafo.plot(z,f,pen='b')
             else:
@@ -455,9 +463,9 @@ class SiMPlE_main ( QMainWindow ):
             i = 0
             for c in self.exp:
                 if self.ui.jumpCkBox.isChecked():
-                    res = c.getMarkedPeaks(-1,pwSgfPeaksFinder, peakModel = 2, argsPF = [peakThrPc,sgfWinPcG,sgfDeg,distPcT,True])
+                    res = c.getMarkedPeaks(-1,pwSgfPeaksFinder, peakModel = 2, argsPF = [peakThrPc,self.sgfWinPcG,self.sgfDeg,distPcT,True])
                 else:
-                    res = c.getMarkedPeaks(-1,peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
+                    res = c.getMarkedPeaks(-1,peakFinder, peakModel = 2, argsPF = [sgfWinPcF,self.sgfWinPcG,self.sgfDeg,self.cutMe,peakThrPc,distPcT,True,rsqLim])
                 if res<1:
                     c.relevant = False
                     self.bad.append(i)
@@ -516,12 +524,12 @@ class SiMPlE_main ( QMainWindow ):
             distPcT = self.ui.peakLenPcNumDbl.value()
             rsqLim = self.ui.rsqLimNumDbl.value()
             if self.ui.jumpCkBox.isChecked():
-                derP,_ = pieceWiseSavGol(self.exp[self.ui.slide1.value()-1][-1].f,peakThrPc,sgfWinPcF,sgfDeg,0,pieces = True)
+                derP,_ = pieceWiseSavGol(self.exp[self.ui.slide1.value()-1][-1].f,peakThrPc,self.sgfWinPcF,self.sgfDeg,0,pieces = True)
                 der = np.array([])
                 for d in derP:
                     der = np.concatenate((der,np.gradient(d)))
             else:
-                der,start,end = polishedDerive(self.exp[self.ui.slide1.value()-1][-1].f, sgfWinPcF, sgfWinPcG, sgfDeg, False)
+                der,start,end = polishedDerive(self.exp[self.ui.slide1.value()-1][-1].f,self.sgfWinPcF,self.sgfWinPcG,self.sgfDeg, False)
             
             if self.exp[self.ui.slide1.value()-1][-1].peaks == []:
                 return None
@@ -572,7 +580,7 @@ class SiMPlE_main ( QMainWindow ):
         
             for c in self.exp:
                 if len(c[-1].peaks) < 1:
-                    c[-1].getPeaks(peakFinder, peakModel = 2, argsPF = [sgfWinPcF,sgfWinPcG,sgfDeg,cutMe,peakThrPc,distPcT,True,rsqLim])
+                    c[-1].getPeaks(peakFinder, peakModel = 2, argsPF = [sgfWinPcF,self.sgfWinPcG,self.sgfDeg,self.cutMe,peakThrPc,distPcT,True,rsqLim])
         
             single = self.sender() == self.ui.savePeaksBtn
         
@@ -591,6 +599,8 @@ class SiMPlE_main ( QMainWindow ):
     def rejectAlign(self):
         
         self.fitFlag = False
+        self.ui.rejectBtn.setEnabled(False)
+        self.ui.autoFitBtn.setEnabled(True)
         self.goToCurve(self.ui.slide1.value())
         for i in range(len(self.exp)):
             self.ctPoints[i] = None
@@ -599,7 +609,7 @@ class SiMPlE_main ( QMainWindow ):
     def plotFit(self,segInd):
         try:
             c = self.exp[self.ui.slide1.value()-1]
-            fits, ctPt,_,_ = fitCnNC(c[segInd],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
+            fits, ctPt,_,_ = fitCnNC(c[segInd],'>',self.sgfWinPcF,self.sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
             if self.ctPoints[self.ui.slide1.value()-1] == None:
                 self.ctPoints[self.ui.slide1.value()-1] = ctPt
             fit = np.concatenate((fits[0],fits[1]))
@@ -622,7 +632,7 @@ class SiMPlE_main ( QMainWindow ):
                 if (progress.wasCanceled()):
                     break
                 try:
-                    _,_,_,fits = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
+                    _,_,_,fits = fitCnNC(c[-1],'>',self.sgfWinPcF,self.sgfDeg,compWinPc, thPc = self.ui.slopePcNum.value())
                     c.changeSens(c.k*c.sensitivity/fits[0][0])
                     sens.append(int(c.sensitivity))
                 except Exception as e:
@@ -640,7 +650,6 @@ class SiMPlE_main ( QMainWindow ):
                     chunks = [sens[i:i+int(len(sens)/valuesNum)] for i in range(0, len(sens), int(len(sens)/valuesNum))]
                     modes = []
                     for k in chunks:
-                        print(k)
                         try: modes.append(stat.mode(k))
                         except: pass
                     maxCounts = 0
@@ -659,7 +668,21 @@ class SiMPlE_main ( QMainWindow ):
         except Exception as e:
             print(e)
 
-    
+
+    def sgfAdjust(self):
+
+        self.sgfWinPcG = self.ui.grossSgWinPcNum.value()
+        self.sgfWinPcF = self.ui.fineSgWinPcNum.value()
+        self.sgfDeg = self.ui.sgDegreeNum.value()
+        self.cutMe = self.ui.cutEdgeCkBox.isChecked()
+
+        if self.ui.derivCkBox.isChecked() and not self.peaksOnPlot:
+            self.goToCurve(self.ui.slide1.value())
+        elif self.ui.derivCkBox.isChecked() and self.peaksOnPlot:
+            self.findPeaks()
+            self.goToCurve(self.ui.slide1.value())
+
+
     def align(self):
         culprit = self.sender()
         self.fitFlag = False
@@ -668,7 +691,7 @@ class SiMPlE_main ( QMainWindow ):
             try:
                 logString = 'Aligning {0}\n'.format(self.exp[self.ui.slide1.value()-1].basename)
                 self.simpleLogger(logString)
-                fits,contactPt, valid,_= fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
+                fits,contactPt, valid,_= fitCnNC(self.exp[self.ui.slide1.value()-1][-1],'>',self.sgfWinPcF,self.sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
                 if self.ctPoints[self.ui.slide1.value()-1] != None:
                     contactPt = self.ctPoints[self.ui.slide1.value()-1]
                     self.ctPoints[self.ui.slide1.value()-1] = None
@@ -703,7 +726,7 @@ class SiMPlE_main ( QMainWindow ):
                     i=i+1
                     continue
                 try:
-                    fits,contactPt,valid,_ = fitCnNC(c[-1],'>',sgfWinPc,sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
+                    fits,contactPt,valid,_ = fitCnNC(c[-1],'>',self.sgfWinPcF,self.sgfDeg,compWinPc,thPc = self.ui.slopePcNum.value())
                     if self.ctPoints[i] != None:
                         contactPt = self.ctPoints[i]
                         self.ctPoints[i] = None
@@ -714,8 +737,11 @@ class SiMPlE_main ( QMainWindow ):
                         self.badFlags[i] = False
                         
                     for s in c[2:]:
-                        s.f = s.f[np.where(s.z>=contactPt[0])]-np.mean(fits[1])#contactPt[1]
-                        s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
+                        start = np.where(s.z>=contactPt[0])[0][0]
+                        #s.f = s.f[np.where(s.z>=contactPt[0])]-np.mean(fits[1])#contactPt[1]
+                        #s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
+                        s.f = s.f[(start-60):]-np.mean(fits[1])#contactPt[1]
+                        s.z = s.z[(start-60):]-contactPt[0]
                 except Exception as e:
                     print(e)
                 self.alignFlags[i] = True
@@ -893,8 +919,6 @@ class SiMPlE_main ( QMainWindow ):
                 
     def changeStatus(self):
         
-        print(self.bad)
-        
         ind = self.ui.slide1.value()-1
         if self.alignFlags[ind]:
             self.exp[ind].relevant = not self.exp[ind].relevant
@@ -980,7 +1004,6 @@ class SiMPlE_main ( QMainWindow ):
     def addCursor(self):
         
         curveInd = len(self.exp[self.ui.slide1.value()-1])-1
-        print(curveInd)
         lim = len(self.cursors)
         currInd = lim
         for i in range(lim):
@@ -1101,6 +1124,11 @@ class SiMPlE_main ( QMainWindow ):
         self.ui.jumpCkBox.clicked.connect(self.changePeakEnv)
 
         self.ui.recalcSensBtn.clicked.connect(self.recalcSensitivity)
+
+        self.ui.grossSgWinPcNum.valueChanged.connect(self.sgfAdjust)
+        self.ui.fineSgWinPcNum.valueChanged.connect(self.sgfAdjust)
+        self.ui.sgDegreeNum.valueChanged.connect(self.sgfAdjust)
+        self.ui.cutEdgeCkBox.clicked.connect(self.sgfAdjust)
         
         #QMetaObject.connectSlotsByName(self)
 
