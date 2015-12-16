@@ -713,12 +713,13 @@ class SiMPlE_main ( QMainWindow ):
                         self.bad.sort()
                         self.badFlags[i] = False
                         
-                    for s in c[1:]:
+                    for s in c[2:]:
                         s.f = s.f[np.where(s.z>=contactPt[0])]-np.mean(fits[1])#contactPt[1]
                         s.z = s.z[np.where(s.z>=contactPt[0])]-contactPt[0]
                 except Exception as e:
                     print(e)
                 self.alignFlags[i] = True
+                del c[0]
                 del c[0]
                 i=i+1
             progress.setValue(pmax)
@@ -979,6 +980,7 @@ class SiMPlE_main ( QMainWindow ):
     def addCursor(self):
         
         curveInd = len(self.exp[self.ui.slide1.value()-1])-1
+        print(curveInd)
         lim = len(self.cursors)
         currInd = lim
         for i in range(lim):
